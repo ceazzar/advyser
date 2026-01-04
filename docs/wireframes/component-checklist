@@ -1,0 +1,462 @@
+```md
+# Advyser V1 — Component Checklist (shadcn-style)
+Goal: enumerate UI components needed per screen so you can build quickly and consistently.
+
+Assumptions:
+- Web app (Next.js) + responsive design
+- shadcn/ui primitives + minimal custom components
+- Shared design tokens: spacing, typography, badges
+
+---
+
+## Shared UI Kit (build once)
+
+### Layout
+- AppShell
+  - PublicHeader
+  - ConsumerHeader
+  - AdvisorHeader
+  - AdminHeader
+  - Footer
+- PageContainer (max width + responsive padding)
+- TwoColumnLayout (left rail + main content)
+- TabsLayout (tabbed sections)
+
+### Inputs
+- TextInput
+- TextArea
+- Select
+- MultiSelect (tag picker)
+- RadioGroup (Online/In-person/Either)
+- Checkbox
+- ToggleSwitch
+- DatePicker (optional V1)
+- FileUploader (drag/drop + progress)
+- OTPInput (phone verification)
+
+### Display
+- Card
+- Avatar
+- Badge (Verified, Licence Verified, Fast Responder, New)
+- Chip/Tag
+- Tooltip
+- Alert (info/warn/error)
+- Skeleton (loading)
+- EmptyState (icon + copy + CTA)
+- ProgressStepper (status timeline)
+- Table (admin, dashboard lists)
+- Pagination / InfiniteScroll
+
+### Actions
+- Button (primary/secondary/destructive)
+- DropdownMenu (sort, status)
+- Dialog/Modal (confirmations, filters on mobile)
+- Drawer/Sheet (mobile filters)
+- Toast (success/failure)
+
+### Messaging
+- ConversationThread
+- MessageBubble (sender/receiver)
+- MessageComposer (textarea + attachments + templates dropdown)
+- AttachmentList (with preview icons)
+
+### Admin
+- AdminDetailPanel (split view)
+- EvidenceViewer (file list + preview link)
+- RegisterLinkList (quick links)
+
+---
+
+# Screen-by-Screen Components
+
+## Screen 1 — Home
+**Sections**
+- HeroSection
+- SearchModule
+- CategoryTiles
+- TrustRow
+
+**Components**
+- PublicHeader, Footer
+- HeroSection:
+  - H1, Paragraph
+- SearchModule:
+  - Select (Advisor Type)
+  - LocationAutocompleteInput (suburb/postcode)
+  - Select (Radius)
+  - Button (Search)
+  - HelperText
+- CategoryTiles:
+  - CardGrid (4)
+  - CategoryCard (icon, label, CTA)
+- TrustRow:
+  - IconTextRow items (3)
+
+**States**
+- Location search loading (spinner)
+- Invalid location (Alert)
+
+---
+
+## Screen 2 — Search Results
+**Sections**
+- ResultsHeader (summary + sort)
+- FiltersPanel (desktop) / FiltersDrawer (mobile)
+- ResultsList
+- Pagination
+
+**Components**
+- PublicHeader, Footer
+- ResultsHeader:
+  - Breadcrumb
+  - ResultsSummaryText
+  - SortDropdown (DropdownMenu + Select)
+- FiltersPanel:
+  - FilterGroup components:
+    - AdvisorTypeMultiSelect
+    - ServiceModePills (RadioGroup)
+    - SpecialtyMultiSelect
+    - FeeModelMultiSelect
+    - ToggleSwitch (Verified only)
+    - ToggleSwitch (Taking new clients)
+    - ToggleSwitch (Openings in 7 days)
+    - LanguageMultiSelect
+  - ClearFiltersButton
+- FiltersDrawer (mobile):
+  - Drawer/Sheet
+  - ApplyFiltersButton
+- ResultsList:
+  - ListingCard (reusable)
+- ListingCard:
+  - Avatar
+  - Title (Name/Business)
+  - BadgesRow
+  - MetaLine (type + location + distance)
+  - TagRow (specialties)
+  - PriceLine
+  - Snippet
+  - CTA Button "View profile"
+  - Secondary Button "Request intro"
+  - ExplainabilityLine (Tooltip optional)
+- Skeleton list
+- EmptyState
+
+**States**
+- Loading results (Skeleton)
+- No results (EmptyState + clear)
+- Partial data (price unknown → show "Pricing not listed")
+
+---
+
+## Screen 3 — Advisor Profile
+**Sections**
+- ProfileHero
+- ProfileTabs: Overview | Services & Pricing | Credentials | Reviews
+- Sticky CTA (mobile)
+
+**Components**
+- PublicHeader, Footer
+- ProfileHero:
+  - Avatar/Logo
+  - Name/Business
+  - BadgesRow
+  - Meta (type, location, modes)
+  - Primary CTA Button (Request intro)
+  - Secondary CTA (Message) gated by login
+  - DisclaimerAlert (AU boundary)
+- Tabs:
+  - Tabs component
+- OverviewTab:
+  - Card sections: Who I help, What we do, Specialties (TagRow), Areas (list)
+- ServicesTab:
+  - ServiceOfferingCard list:
+    - Title
+    - PriceText
+    - IncludedList (bullets)
+- CredentialsTab:
+  - CredentialsTable:
+    - Type, Number, State, Verified badge, Verified date tooltip
+- ReviewsTab:
+  - RatingSummary (stars + count)
+  - ReviewCard list
+  - Tooltip "Verified engagements only"
+- Inactive listing alert
+
+**States**
+- Unclaimed listing: show "Claim this business" CTA (links to Screen 7)
+- Missing reviews: EmptyState "No reviews yet"
+
+---
+
+## Screen 4 — Request Intro
+**Sections**
+- Form: Needs help | Situation | Logistics | Consent
+- Success panel
+
+**Components**
+- PublicHeader, Footer
+- FormCard
+- Select (Primary goal)
+- MultiSelect (Specialties)
+- TextArea (Situation)
+- RadioGroup (Meeting mode)
+- LocationInput (prefilled)
+- Select (Timeline)
+- Select (Budget range optional)
+- FileUploader (optional docs)
+- Checkbox (Consent)
+- Buttons: Send request, Save draft (optional)
+- InlineValidationMessages
+- SuccessAlert (Request sent)
+- CTA: Go to My Requests
+
+**States**
+- Not logged in → intercept with Modal: "Create account to send request"
+- File upload error → Toast + inline message
+
+---
+
+## Screen 5 — Sign up / Login
+**Sections**
+- AuthCard with tabs
+
+**Components**
+- PublicHeader, Footer
+- AuthCard
+- Tabs (Sign up / Login)
+- TextInput (Email)
+- PasswordInput
+- PhoneInput (optional)
+- Checkbox (Terms)
+- Button submit
+- Link "Forgot password"
+- EmailVerificationNotice (alert)
+
+**States**
+- Incorrect login → Alert
+- Rate-limited → Alert "Try again later"
+
+---
+
+## Screen 6 — Consumer Dashboard (My Requests)
+**Sections**
+- Tabs: My Requests | Messages | Settings
+- RequestsList
+- RequestDetail view (subpage)
+
+**Components**
+- ConsumerHeader
+- Tabs
+- RequestsTable (or Cards on mobile)
+  - columns: Advisor/Business, Type, StatusChip, LastUpdated, CTA View
+- EmptyState
+- RequestDetail:
+  - SummaryCard (what user submitted)
+  - StatusTimeline (ProgressStepper)
+  - ConversationThread
+  - MessageComposer
+  - AttachmentList
+
+**States**
+- New message indicator badge
+- Archived request hidden by default (toggle "Show archived")
+
+---
+
+## Screen 7 — Claim Business / Join
+**Sections**
+- BusinessSearch + ClaimFlow wizard
+
+**Components**
+- PublicHeader or AdvisorHeader (depending on entry)
+- Stepper/Wizard (3–4 steps)
+- BusinessSearchInput (typeahead)
+- Button "My business isn’t listed" (Create business modal)
+- ClaimForm:
+  - TextInput (Full name)
+  - Select (Role: Owner/Staff)
+  - TextInput (Work email)
+  - PhoneInput + OTP flow:
+    - Button "Send code"
+    - OTPInput
+- ProofOfControlSelector (RadioGroup):
+  - Phone OTP to business phone
+  - Email domain verify
+  - Website code verify
+- CredentialsSection (conditional by advisor type):
+  - Select (Advisor Type)
+  - TextInput(s) for licence numbers
+  - FileUploader (evidence)
+- Submit button
+- StatusPanel:
+  - Pending / Needs more info / Approved / Denied
+
+**States**
+- Business not found → "Create listing" flow
+- OTP failed → inline error
+- Pending review → disable edits or allow “update claim” based on policy
+
+---
+
+## Screen 8 — Advisor Dashboard (Lead Inbox)
+**Sections**
+- KPI strip
+- Lead pipeline (filter/status)
+- Lead list
+
+**Components**
+- AdvisorHeader
+- KPIStatCards (New, Response time, Acceptance rate)
+- StatusFilterPills (New/Contacted/Booked/Converted/Declined/Closed)
+- LeadsTable/Cards:
+  - ClientLabel
+  - GoalTag
+  - Location
+  - Submitted date
+  - StatusChip
+  - Last message
+  - CTA Open
+- Row quick actions:
+  - Accept (Button)
+  - Decline (Button destructive)
+  - Request more info (Dropdown templates)
+- EmptyState with tips + CTA "Complete profile"
+
+**States**
+- Accept/decline confirmation Dialog
+- Decline requires reason Modal
+
+---
+
+## Screen 9 — Lead Detail (Advisor)
+**Sections**
+- Top action bar
+- Two-column: Client brief | Messages
+- Internal notes panel
+- (Optional) Copilot entry point
+
+**Components**
+- AdvisorHeader
+- TopActionBar:
+  - StatusDropdown
+  - Buttons: Accept / Decline / Mark booked / Archive
+- ClientBriefCard:
+  - Goal
+  - Situation text
+  - Logistics chips
+  - DocumentsList
+  - MissingInfoChecklist (manual V1)
+- ConversationThread
+- MessageComposer:
+  - TemplatesDropdown (Request docs, Next steps, Booking)
+  - File attach
+- NotesTimeline:
+  - NoteCard list
+  - AddNote composer
+- CreateClientWorkspaceBanner:
+  - "Accepting creates a client workspace and enables Copilot."
+- BookingMiniPanel (optional):
+  - Proposed time slots or link out
+
+**States**
+- Lead not accepted yet → show “Accept to enable Copilot”
+- Attachment preview fails → graceful fallback
+
+---
+
+## Screen 10 — Admin Console
+**Sections**
+- Tabs: Claims | Credentials | Reviews | Listings | Reports
+- Table list + DetailPanel split view
+
+**Components**
+- AdminHeader
+- Tabs
+- AdminTable (filter + search)
+- DetailPanel (split view)
+- ClaimDetail:
+  - BusinessSnapshotCard
+  - ABNVerificationCard
+  - ClaimantIdentityCard
+  - EvidenceViewer (files)
+  - RegisterLinkList
+  - Actions: Approve / Needs more info / Deny
+  - DenyReasonSelect + LockoutToggle
+- CredentialsQueue:
+  - CredentialRow + quick verify actions
+- ReviewsQueue:
+  - ReviewCard + Approve/Reject/Hide buttons
+- ReportsQueue:
+  - ReportCard + actions (warn/suspend/request info)
+
+**States**
+- Bulk actions (optional)
+- Audit trail viewer (later)
+
+---
+
+# Reusable Custom Components (build early)
+
+## 1) LocationAutocompleteInput
+- Data: AU suburb/postcode dataset
+- Output: {suburb, postcode, state, lat, lng}
+- Supports "Online only" mode
+
+## 2) ListingCard (search + related sections)
+- Accepts:
+  - name, business
+  - badges[]
+  - specialties[]
+  - distance_km?
+  - price_text?
+  - explainability_reason?
+
+## 3) VerificationBadge + Tooltip
+- Variants:
+  - Basic Verified
+  - Licence Verified
+- Tooltip content:
+  - "Verified on YYYY-MM-DD"
+  - "Source: Register/Documentation"
+
+## 4) StatusTimeline (Lead)
+- Stages:
+  - Submitted → Accepted → Booked → Completed
+- Works for consumer and advisor views
+
+## 5) FileUploader + AttachmentList
+- File types: pdf/docx/jpg/png/txt
+- Show: filename, size, upload status
+- Preview link
+
+## 6) TemplatesDropdown (Messaging)
+- Templates scoped by advisor type:
+  - Request more info
+  - Document checklist
+  - Next steps
+  - Booking prompt
+
+---
+
+# Minimum Design Copy Set (AU-safe)
+
+## Site-wide disclaimer (footer)
+"Advyser connects you with financial and property professionals. Information on this site is general and not personal advice."
+
+## Request Intro consent
+"I understand Advyser connects me with an advisor and does not provide personal advice."
+
+## Advisor dashboard banner (Copilot)
+"Copilot creates drafts for your review. You remain responsible for advice and client communications."
+
+---
+
+# Done-Definition Checklist (UI)
+- All forms have validation + error copy
+- All list pages have loading + empty states
+- All destructive actions confirm (decline, archive, deny claim)
+- All verification info has tooltip showing verified date/source
+- Mobile filter drawer works on Search Results
+```
+
+If you want the next artifact, I can generate **(A)** a routes + permissions map or **(B)** a “component-to-data binding” map (which API fields feed each component). Pick **A or B**.

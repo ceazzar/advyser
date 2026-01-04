@@ -1,0 +1,494 @@
+Below is a **wireframe pack in Markdown** for the **10 core screens**. It’s written like a build spec: **layout + components + fields + default copy + error states + AU-safe disclaimers**.
+
+You can paste this into `product/wireframes_v1.md`.
+
+---
+
+```md
+# Advyser V1 Wireframe Pack (AU) — 10 Core Screens
+Scope: AU marketplace for financial + property-related advisors.
+Principles: consumer browsing is low-friction; advisor value comes from leads + dashboard; AI is supply-side, advisor-only.
+
+---
+
+## Global UI Patterns
+
+### Header (Public)
+- Logo (left)
+- Nav: Find an Advisor | For Advisors | About | Login
+- CTA button: "Find an Advisor"
+
+### Header (Logged-in Consumer)
+- Nav: Search | My Requests | Messages
+- Profile dropdown
+
+### Header (Logged-in Advisor)
+- Nav: Leads | Messages | Clients | Copilot | Profile
+- CTA: "Create Copilot Run" (optional quick action)
+
+### Footer (All Public Pages)
+- Disclaimer (AU-safe):
+  - "Advyser connects Australians with financial and property professionals. Information on this site is general and not personal advice. Consider your circumstances and speak with a licensed professional."
+- Links: Privacy | Terms | Contact | Report a listing
+
+### Badges
+- Verified (Basic)
+- Licence Verified
+- Fast Responder
+- Taking New Clients
+
+### Status Chips (Leads)
+- New
+- Contacted
+- Booked
+- Converted
+- Declined
+- Closed
+
+---
+
+# Screen 1 — Home (Marketplace Landing)
+
+## Goal
+Help users find advisors quickly by type + location.
+
+## Layout (Desktop)
+[Header]
+Hero:
+- H1: "Find the right financial or property advisor in Australia"
+- Subtext: "Search verified professionals. Send a request. Book when you're ready."
+Search Module:
+- Field: Advisor Type (dropdown)
+- Field: Location (suburb/postcode)
+- Field: Radius (dropdown, default 25km)
+- Button: "Search"
+Secondary:
+- Category tiles (4):
+  - Financial Advisers
+  - Mortgage Brokers
+  - Buyer’s Agents
+  - Property Advisors
+Trust row:
+- "Verified businesses"
+- "Secure messaging"
+- "No-cost to browse"
+[Footer]
+
+## Fields
+- Advisor Type (required)
+- Location (required)
+- Radius (optional)
+
+## Microcopy
+- Location placeholder: "e.g., 3000, Sydney, Parramatta"
+- Helper text: "Online advisors can work Australia-wide."
+
+## Error States
+- Missing location → "Enter a suburb or postcode."
+- Invalid location → "We couldn't find that location. Try a nearby suburb or postcode."
+
+---
+
+# Screen 2 — Search Results
+
+## Goal
+Let users filter and compare advisors; default sort is "Recommended".
+
+## Layout
+[Header]
+Top bar:
+- Breadcrumb: Home > Search
+- Summary line: "Mortgage Brokers near Richmond VIC (25km) — 42 results"
+Left rail (filters) / mobile filter drawer:
+Results list (cards) + pagination/infinite scroll
+
+### Filter panel (V1)
+- Advisor Type (multi-select)
+- Service Mode:
+  - Toggle pills: Online / In-person
+- Specialty (multi-select)
+- Fee Model (multi-select):
+  - Hourly / Fixed / Ongoing / % / Not listed
+- Verified only (toggle)
+- Taking new clients (toggle)
+- Availability (toggle): "Openings in next 7 days" (optional if you have data)
+- Language (multi-select)
+
+### Sort dropdown
+- Recommended (default)
+- Nearest (if in-person)
+- Highest rated
+- Soonest availability
+
+## Result Card (each listing)
+Left: avatar/logo
+Main:
+- Name / Business
+- Badges: Verified/Licence Verified/Fast Responder
+- Type: "Mortgage Broker"
+- Location: "Richmond VIC" + distance if in-person
+- Top specialties (max 3)
+- Price indicator: "From $X" or "Pricing not listed"
+- Snippet: 1–2 lines from headline/bio
+Right:
+- CTA: "View profile"
+- Secondary: "Request intro"
+
+## Explainability (small text)
+- "Recommended because: Verified + specialises in first home buyers"
+(Use 1 reason max.)
+
+## Empty state
+- "No results match your filters."
+- CTA: "Clear filters" | "Expand radius"
+
+---
+
+# Screen 3 — Advisor Profile (Listing Page)
+
+## Goal
+Build trust + convert to Request Intro.
+
+## Layout
+[Header]
+Hero section:
+- Name / Business
+- Type (e.g., Financial Adviser)
+- Badges row
+- Location + service mode
+- Primary CTA: "Request intro"
+- Secondary CTA: "Message" (only after login)
+Tabs:
+- Overview | Services & Pricing | Credentials | Reviews
+
+### Overview tab
+- "Who I help" (bullets)
+- "What we do" (short paragraphs)
+- Specialties (tags)
+- Service areas (map snippet / list)
+- Meeting modes (online/in-person)
+- Languages
+
+### Services & Pricing tab
+- Service offering cards (e.g., "Initial consult", "Ongoing service")
+- Pricing text (freeform)
+- What’s included (bullets)
+
+### Credentials tab
+- "Licence / Registration"
+- Rows:
+  - Type, Number, State, Verified status, Verified date
+- Microcopy:
+  - "Verified on YYYY-MM-DD. Source: Register / Documentation."
+
+### Reviews tab
+- Rating summary
+- Review list (verified engagements only)
+- "How reviews work" tooltip:
+  - "Reviews are only from users who contacted an advisor through Advyser."
+
+## AU-safe disclaimer block (on page)
+- "Advyser does not provide financial or property advice. Always consider your circumstances and consult a licensed professional."
+
+## Error states
+- Listing inactive → show: "This listing is currently unavailable."
+
+---
+
+# Screen 4 — Request Intro (Lead Form)
+
+## Goal
+Collect a clean client brief without giving advice.
+
+## Layout
+[Header]
+Title: "Request an introduction"
+Subtext: "Answer a few questions so the advisor can respond with next steps."
+
+Form sections:
+
+### A) What you need help with
+- Dropdown: Primary goal (required)
+  - Examples by type:
+    - Financial: "Retirement planning", "Investment planning", "Debt reduction"
+    - Mortgage: "First home loan", "Refinance", "Investment loan"
+    - Buyer’s agent: "Find & negotiate a property", "Auction bidding"
+- Multi-select: Specialties (optional)
+
+### B) Your situation (free text)
+- Textarea (required): "Describe your situation and what you want to achieve"
+- Helper: "Avoid sharing sensitive IDs like TFN. You can share documents later if needed."
+
+### C) Logistics
+- Preferred meeting mode: Online / In-person / Either
+- Location (auto-filled from search; editable)
+- Timeline (dropdown): "ASAP / 1–3 months / 3–6 months / Flexible"
+- Budget range (optional, ranges only)
+- Upload documents (optional)
+  - Allowed: pdf/docx/jpg/png
+  - Microcopy: "Only upload documents you’re comfortable sharing."
+
+### D) Consent
+- Checkbox (required):
+  - "I understand Advyser connects me with an advisor and does not provide personal advice."
+
+Buttons:
+- Primary: "Send request"
+- Secondary: "Save draft" (optional)
+
+## Validation
+- Must have goal + situation + consent
+- Errors:
+  - "Please describe your situation."
+  - "You must accept the consent to continue."
+
+## Success screen (inline after submit)
+- "Request sent"
+- Next steps:
+  - "The advisor will reply here in Messages."
+  - CTA: "Go to My Requests"
+
+---
+
+# Screen 5 — Sign up / Login
+
+## Goal
+Fast authentication with minimal friction.
+
+## Layout
+[Header]
+Card:
+Tabs: Sign up | Login
+
+### Sign up
+- Email (required)
+- Password (required)
+- Phone (optional but recommended)
+- Checkbox: Terms + Privacy
+Button: "Create account"
+
+### Login
+- Email
+- Password
+- Button: "Login"
+- Link: "Forgot password"
+
+## Copy
+- "We’ll only use your details to manage your requests and messages."
+
+## Errors
+- Invalid credentials → "Email or password incorrect."
+- Unverified email → "Check your email to verify your account."
+
+---
+
+# Screen 6 — Consumer Dashboard (My Requests)
+
+## Goal
+Consumer sees all requests, statuses, and messages.
+
+## Layout
+[Header logged-in consumer]
+Tabs: My Requests | Messages | Settings
+
+### My Requests list
+Table/cards:
+- Advisor/Business name
+- Type
+- Status chip
+- Last updated
+- CTA: "View" opens request detail
+
+Empty state:
+- "No requests yet."
+- CTA: "Search advisors"
+
+### Request detail view (subpage/modal)
+- Summary of the request (what user submitted)
+- Status timeline
+- Messages panel
+- Attachments
+- CTA: "Send message"
+
+---
+
+# Screen 7 — Claim Business / Join (Advisor)
+
+## Goal
+Let a real advisor claim an existing listing or create a new one.
+
+## Layout
+[Header public or advisor]
+Title: "Claim your business on Advyser"
+Options:
+- Search business name field (typeahead)
+- OR "My business isn’t listed" → create business flow (simple)
+
+### Claim form
+Section 1: Your details
+- Full name
+- Role (Owner/Principal, Staff)
+- Work email
+- Phone (OTP verification)
+
+Section 2: Business verification
+Pick ONE proof-of-control:
+- OTP to business phone (if matches listing)
+- Verify email domain (send link)
+- Website verification code (copy/paste snippet)
+
+Section 3: Credentials (guided by advisor type)
+- Advisor Type (required)
+- Licence/registration number(s) (optional for initial claim; required for Licence Verified badge)
+- Upload evidence (optional)
+
+Submit button: "Submit claim"
+
+## States
+- Pending review: "We’re reviewing your claim. We’ll email you when it’s approved."
+- Needs more info: show requested items checklist
+- Denied: "Your claim wasn’t approved" + contact support
+
+---
+
+# Screen 8 — Advisor Dashboard (Lead Inbox)
+
+## Goal
+Advisors manage inbound requests and convert them to clients.
+
+## Layout
+[Header logged-in advisor]
+Left: Lead pipeline list (columns or status filter)
+Top stats (optional): New leads, Response time, Acceptance rate
+
+### Lead list
+Rows show:
+- Client label (e.g., "Lead #1023" or name if provided)
+- Goal tag
+- Location
+- Submitted date
+- Status chip
+- Last message time
+- CTA: "Open"
+
+### Quick actions on row
+- Accept
+- Decline
+- Request more info (sends templated message)
+
+Empty state:
+- "No leads yet."
+- Tips: "Complete your profile to rank higher."
+
+---
+
+# Screen 9 — Lead Detail (Advisor)
+
+## Goal
+Advisor sees the client brief, messages, docs, and can progress status.
+
+## Layout
+[Header]
+Top bar:
+- Client label + lead id
+- Status dropdown
+- Buttons: Accept | Decline | Mark booked | Archive
+
+Main columns:
+Left (Client Brief)
+- Goal
+- Situation (user text)
+- Logistics (mode, timeline, location)
+- Uploaded docs list
+- "Missing info checklist" (manual in V1; Copilot later)
+
+Right (Messages)
+- Conversation thread
+- Composer (text + attachments)
+- Templates dropdown:
+  - "Request documents"
+  - "Next steps"
+  - "Booking link"
+
+Bottom (Internal Notes)
+- Notes timeline
+- "Add note" input
+
+## Copy
+- Accept action: "Accepting creates a client workspace and enables Copilot."
+- Decline action: require reason (internal only):
+  - "Out of scope / Not taking new clients / Location / Other"
+
+---
+
+# Screen 10 — Admin Console (Claims + Moderation)
+
+## Goal
+Operate trust & safety: verify claims, credentials, reviews.
+
+## Layout
+[Admin header]
+Tabs:
+- Claim requests
+- Credentials
+- Reviews
+- Listings
+- Reports
+
+### Claim Requests table
+Columns:
+- Business
+- Claimant user
+- Proof-of-control method
+- Status
+- Submitted date
+Row opens detail panel:
+
+#### Claim detail panel
+Left:
+- Business profile snapshot
+- ABN details (if available)
+- Listing info
+Right:
+- Claimant details (email/phone verified)
+- Evidence files
+- Links to registers (manual verification shortcuts)
+Actions:
+- Approve (assign owner)
+- Needs more info (checklist + message)
+- Deny (reason + lockout toggle)
+
+### Reviews moderation
+- Review text + lead reference
+- Approve / Reject / Hide
+
+### Reports queue
+- Listing report type
+- Evidence
+- Actions: warn, suspend listing, request more info
+
+---
+
+## Copy Library (Reusable)
+
+### "AI / Advice boundary" (public)
+- "Advyser connects you with professionals. We do not provide financial or property advice."
+
+### "Verified" tooltip
+- "Verified means we’ve confirmed business ownership and/or credentials. Verified on {date}."
+
+### Lead decline message (advisor → consumer template)
+- "Thanks for your request. Unfortunately we’re unable to assist at this time. You may wish to contact another advisor in your area."
+
+### Request more info template
+- "To understand your situation, could you please share: {checklist}. Once received, we can confirm next steps."
+```
+
+---
+
+## If you want, I can turn this into two additional build artifacts
+
+1. **Component checklist** (what UI components you need per screen, shadcn-style)
+2. **Routes + permissions map** (exact URL routes and which roles can access them)
+
+Pick: **1 or 2**.

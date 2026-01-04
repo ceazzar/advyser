@@ -1,0 +1,291 @@
+## The product in one sentence
+
+**Advyser is a two-sided marketplace for finding and engaging advisors, plus an advisor operating system that upgrades how advisors run sessions and manage clients—using AI as internal decision-support, not client-facing advice.**
+
+
+I’ll keep this practical: **flows → components → roadmap → where AI goes**.
+
+---
+
+## Non-negotiable AU guardrails (so you don’t trip AFSL)
+
+**Consumer-facing AI must not provide financial product advice** (recommendations/opinions intended to influence decisions), and “personal advice” is especially sensitive. The Corporations Act definition is explicit about “recommendation or opinion intended to influence” decisions. ([AustLII][1])
+ASIC also distinguishes **personal vs general advice** and ties obligations to it. ([ASIC][2])
+
+So your platform posture is:
+
+* **Marketplace = directory + lead routing + booking + messaging**
+* **Demand-side AI (light) = intake, clarification, education, question-building**
+* **Supply-side AI (heavy) = advisor workflow support (notes, tasks, compliance wording checks, doc summarisation, memory)**
+
+This keeps the “advice” act firmly on the advisor.
+
+---
+
+# 1) The end-to-end product, from both sides
+
+## A) Consumer journey (marketplace basics)
+
+1. **Home**
+
+   * “Find a financial advisor / mortgage broker / buyer’s agent / property strategist” (your categories)
+   * Location-first (state/suburb/postcode)
+   * Clear disclaimers: “We connect you to advisors; information is general.”
+
+2. **Search & filters**
+
+   * Location radius + state
+   * Specialty: retirement, SMSF, debt, first home, portfolio lending, buyer’s agent, etc.
+   * Service type: one-off consult / ongoing / project-based
+   * Meeting mode: online / in-person
+   * Price range / fee model (hourly / fixed / % / retainer)
+   * Languages, availability, “works with” (first-home buyers, HNW, investors)
+
+3. **Advisor profile**
+
+   * Services & pricing
+   * Credentials (AFSL / rep #, credit licence if relevant, real estate licence if relevant)
+   * “What I help with” + “Who I don’t work with”
+   * Proof: reviews, case-style summaries (careful: no implied outcomes), FAQs
+   * CTA: **Request intro / Book / Message**
+
+4. **Signup (optional for browsing; required for contacting)**
+
+   * Email/phone verification
+   * Intake consent + privacy
+
+5. **Lead creation**
+
+   * Simple form + optional AI intake assistant (light, safe)
+   * Outputs a **Client Brief** sent to advisor (not advice back to user)
+
+6. **Booking + messaging**
+
+   * Calendar integration (later)
+   * In-platform messaging + attachments
+
+7. **Post-session**
+
+   * User can rate the experience (not “investment performance”)
+   * Follow-up reminders (non-advice)
+
+### Demand-side AI (light, safe)
+
+* “Help me explain my situation”
+* “What questions should I ask a financial advisor/buyer’s agent?”
+* “Summarise what I’m trying to achieve”
+* “Turn my notes into a brief”
+
+**Never:** “What should I invest in / which suburb should I buy in / what’s best?”
+If asked, AI redirects to: “Here are questions to ask your advisor.”
+
+---
+
+## B) Advisor journey (claim → listing → dashboard)
+
+1. **Discover / claim**
+
+   * Advisor searches their business name
+   * “Claim this profile”
+   * Verification options:
+
+     * Email domain match
+     * Phone OTP to listed number
+     * Upload evidence (licence/registration docs)
+     * Manual review fallback
+
+2. **Advisor onboarding**
+
+   * Profile completion wizard
+   * Pick categories + services
+   * Set availability + lead preferences
+   * Connect calendar (optional)
+   * Choose plan (free listing vs paid)
+
+3. **Advisor dashboard (MVP)**
+
+   * Leads inbox
+   * Messaging
+   * Bookings
+   * Client list (basic CRM-lite)
+   * Notes & file storage (per client)
+   * Profile & settings
+
+4. **Advyser Copilot (where you go hard)**
+
+   * Starts as **post-session** support (lowest friction, safest)
+   * Expands into **workflow intelligence**
+   * Eventually into **live session companion** (optional)
+
+---
+
+## C) Admin journey (you’ll need this early)
+
+* Approve/deny claims
+* Handle disputes (“this is my business”)
+* Moderate reviews
+* Fraud prevention (fake advisors)
+* Content moderation (profiles, messages)
+* Audit logs
+
+---
+
+# 2) Core components you need (marketplace first)
+
+## Public website
+
+* Home, search, category pages, advisor profiles
+* SEO structure (suburb + category pages become growth engine)
+
+## Marketplace backend
+
+* Listings database
+* Search index + ranking (location + relevance + quality signals)
+* Lead routing (requests, bookings)
+* Messaging service
+* Reviews & moderation
+
+## Identity & verification
+
+* Role-based auth: consumer / advisor / staff
+* Claim verification pipeline
+* “Verified” badges (only when checks pass)
+
+## Advisor dashboard
+
+* Profile editor
+* Lead pipeline (New → Contacted → Booked → Converted → Archived)
+* Basic client records
+* Document upload per client
+* Settings + subscription/billing
+
+---
+
+# 3) Where the advanced capabilities fit (Copilot map)
+
+### Copilot Phase 1: Post-session autopilot (high value, low risk)
+
+**Inputs:** meeting notes, transcript upload, emails, docs
+**Outputs (advisor-only):**
+
+* Structured file note
+* Action items + follow-up email draft (advisor sends)
+* “Open questions” list for next session
+* Compliance wording flags (e.g., statements that sound like recommendations)
+
+### Copilot Phase 2: Client workspace intelligence
+
+* Ongoing “client brief” that stays updated
+* Timeline of interactions
+* “What changed since last time?”
+* “What’s pending?”
+
+### Copilot Phase 3: Live session companion (opt-in)
+
+* Real-time topic capture
+* Prompts: “You haven’t confirmed X constraint yet”
+* No recommendations—only prompts + recall + documentation assist
+
+### Copilot Phase 4: Practice-level intelligence (moat)
+
+* “What questions do my best clients ask?”
+* “Which services convert best?”
+* “Where do leads drop off?”
+* Template library (advisor’s own templates)
+
+---
+
+# 4) AU-specific: Financial + property advisor types (how to model it)
+
+You’ll likely support multiple “advisor archetypes” with different compliance needs:
+
+* **Financial advisers / planners** (AFSL ecosystem)
+* **Mortgage brokers / credit advisers** (credit licensing regime—separate)
+* **Buyer’s agents** (state-based real estate licensing; varies by state) ([REBAA][3])
+* **Property professionals** (careful wording: “property investment advice” can drift into regulated territory depending on what’s said)
+
+Product implication:
+**Build your advisor schema to be multi-regime:**
+
+* advisor_type
+* licence_type(s)
+* licence_number(s)
+* state(s) serviced
+* verification_status per licence
+
+And keep your copy neutral:
+
+* “Connect with a professional”
+* “Get help understanding options”
+* “Prepare for your appointment”
+
+---
+
+# 5) MVP roadmap (what you build first, in order)
+
+## Phase 0 — Foundations (week 1–2 equivalent scope)
+
+* Auth + roles
+* Advisor listing model
+* Claim flow (manual review is fine initially)
+* Admin console (minimum viable)
+
+## Phase 1 — Marketplace MVP
+
+* Home + search + profile pages
+* Contact request / lead form
+* Basic messaging
+* Advisor dashboard: leads inbox + profile editor
+
+## Phase 2 — Trust layer
+
+* Verification badges
+* Reviews (post-engagement only)
+* Reporting & moderation
+
+## Phase 3 — Copilot v1 (supply-side “wow”)
+
+* Upload transcript/notes → generate:
+
+  * structured notes
+  * action plan
+  * follow-up draft
+* Store outputs in client workspace
+* Advisor controls + audit trail
+
+## Phase 4 — Copilot v2 (workflow)
+
+* Template library
+* “Next session prep”
+* Document summarisation (SOA inputs, checklists—advisor-owned)
+
+## Phase 5 — Light demand-side AI
+
+* Intake assistant → generates “Client Brief”
+* Strict guardrails + refusal patterns
+
+---
+
+# 6) The “clear line” that protects you (implementation detail)
+
+**Two separate AI modes:**
+
+### Consumer AI mode (restricted)
+
+* Only question generation, education, summarisation of user text
+* Hard blocks on “recommendation / opinion intended to influence decisions” language ([AustLII][1])
+
+### Advisor AI mode (expanded but internal)
+
+* Drafting, summarising, checking, recalling
+* Still avoid “you should recommend X product/suburb”
+* Always framed as: “consider asking / consider reviewing / draft for your approval”
+
+---
+
+# 7) What we should dive into next (pick one)
+
+1. **Marketplace data model + screens** (exact pages + DB objects)
+2. **Search & ranking** (filters + relevance + quality + availability ranking)
+3. **Advisor claim + verification** (AU licences, manual/auto checks, anti-fraud)
+4. **Copilot v1 spec** (inputs/outputs, UX in dashboard, guardrails, storage)

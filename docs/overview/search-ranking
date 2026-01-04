@@ -1,0 +1,271 @@
+Awesome — this is one of the highest-leverage pieces of the whole marketplace. If you get search + ranking right, you win trust, conversion, and retention.
+
+Below is a **build-ready** search & ranking design for an AU marketplace of **financial + property advisors**, with clear **V1 → V2** progression.
+
+---
+
+## 1) Search UX and filters (what users see)
+
+### Core search inputs
+
+* **Location**: suburb / postcode / state + radius (e.g., 5–50km)
+* **Advisor type**: Financial Adviser / Mortgage Broker / Buyer’s Agent / Property Adviser
+* **Problem / goal** (optional free-text): “first home”, “SMSF”, “investment property”, “refinance”, etc.
+
+### Filters (V1 set)
+
+**Must-have**
+
+* Service mode: Online / In-person
+* Specialty (multi-select)
+* Fee model: Hourly / Fixed / Ongoing / % / Unknown
+* Verified only (toggle)
+* Availability: “Has openings in next 7 days” (toggle)
+
+**Nice-to-have**
+
+* Languages
+* Works with: First home buyers / Investors / HNW / Self-employed
+* Minimum budget / loan size (if advisors choose to disclose)
+
+### Sort options (keep simple)
+
+* Recommended (default)
+* Nearest (if in-person)
+* Highest rated
+* Soonest availability
+* Lowest price (careful: many will be “unknown”)
+
+---
+
+## 2) Retrieval vs ranking (the architecture)
+
+Think of it as two steps:
+
+### Step A — Candidate retrieval (fast)
+
+Return ~200 candidates max that match hard constraints:
+
+* Advisor type
+* Service mode
+* Location coverage (radius/polygon OR online)
+* Active listing
+
+Then retrieve by:
+
+* **Keyword match** on name, business, specialties, services (BM25)
+* Optional: **semantic match** on profile text + specialties (embeddings) in V2
+
+### Step B — Scoring & ordering (smart)
+
+Compute a score per candidate using:
+
+* **Relevance** (fit)
+* **Quality** (trust + performance)
+* **Availability** (time-to-book / responsiveness)
+* **Distance** (only if in-person)
+
+---
+
+## 3) V1 Ranking Formula (simple, transparent, works)
+
+Use a weighted score:
+
+**OverallScore = 0.45 * Relevance + 0.35 * Quality + 0.20 * Availability**
+Then apply small adjustments (distance + exploration).
+
+### A) Relevance score (0–1)
+
+Inputs:
+
+* Specialty match rate
+* Query text match
+* “Works with” match (if user chose)
+* Service mode match (hard filter, but can still score)
+
+Example:
+
+* `specialty_overlap = |user_specialties ∩ listing_specialties| / |user_specialties|`
+* `text_match = normalized_BM25(query, listing_text)`
+* `works_with_match = binary or fraction`
+
+**Relevance = 0.55*specialty_overlap + 0.35*text_match + 0.10*works_with_match**
+
+**V1 tip:** If user doesn’t type a query, drop `text_match` and lean on specialties + category.
+
+---
+
+### B) Quality score (0–1)
+
+This is your “trust and professionalism” score. Make it robust to low-review profiles.
+
+**Quality =**
+
+* **Verification** (big early signal)
+* **Profile completeness** (reduces garbage)
+* **Engagement performance** (response time, lead acceptance)
+* **Reviews** (but Bayesian-smoothed)
+
+Suggested components:
+
+* `verification_level`: unverified=0, pending=0.2, verified=1
+* `completeness`: % of required fields filled
+* `response_score`: based on median first response time (messages)
+* `accept_rate`: accepted leads / total leads (capped)
+* `review_score`: Bayesian adjusted rating
+
+**Quality = 0.30*verification + 0.20*completeness + 0.25*response_score + 0.15*accept_rate + 0.10*review_score**
+
+#### Bayesian rating (prevents 1 review = #1)
+
+Let:
+
+* global_avg = average rating across marketplace (e.g., 4.6)
+* m = prior strength (e.g., 10 reviews)
+* R = listing rating
+* v = review count
+
+**bayes_rating = (m*global_avg + v*R) / (m+v)**
+Normalize to 0–1.
+
+---
+
+### C) Availability score (0–1)
+
+You want to promote advisors who can actually take clients *now*, without punishing those who haven’t connected calendars yet.
+
+Inputs:
+
+* `time_to_first_slot_days` (if booking enabled)
+* `capacity_status` (advisor can toggle “taking new clients”)
+* `recent_responsiveness` (if no calendar)
+
+**Availability (if booking/calendar exists):**
+
+* `slot_score = exp(-time_to_first_slot_days / 7)`  (fast decay after a week)
+
+**Availability (if no calendar):**
+
+* `slot_score = 0.5` (neutral)
+* and rely more on response_score from Quality
+
+Also add a hard filter:
+
+* If advisor says “not taking new clients” → exclude or demote heavily.
+
+---
+
+### D) Distance adjustment (only for in-person)
+
+You can either:
+
+* Use distance as a filter only, OR
+* Use a mild boost inside the radius
+
+Example:
+
+* `distance_km` within radius
+* `distance_boost = 1 - (distance_km / radius_km) * 0.15`  (max 15% swing)
+
+Keep it gentle. Relevance/quality should dominate.
+
+---
+
+### E) Exploration (prevents incumbents from permanent lock-in)
+
+For the bottom 10–20% of results, insert a small % of:
+
+* New verified advisors with high completeness
+* Advisors with strong response time but low reviews
+
+This keeps supply happy and improves marketplace liquidity.
+
+---
+
+## 4) Hard constraints and edge cases (important)
+
+### Location coverage model (AU)
+
+Each listing has:
+
+* `service_mode`: online/in-person/both
+* `service_areas`:
+
+  * list of postcodes, or
+  * suburb + radius, or
+  * polygons later
+
+Matching rules:
+
+* If user chooses **online** → ignore distance, use AU-wide or state constraints if advisor sets.
+* If **in-person** → must intersect service area.
+
+### “Unknown price / unknown availability”
+
+Never bury advisors just because they didn’t fill optional fields.
+
+* Treat unknown as **neutral** (not zero)
+* Quality comes from verification/completeness/response, not price.
+
+### Avoid gaming
+
+* Don’t let keyword stuffing dominate: cap text_match influence.
+* Require verified engagement for reviews.
+* Track message spam / lead farming and penalize.
+
+---
+
+## 5) V1 Implementation (fastest stack)
+
+### Data you need to capture from day 1
+
+* Listing specialties/services
+* Verification status
+* Profile completeness score
+* Message response time
+* Lead acceptance rate
+* “Taking new clients” toggle
+* Booking slot (optional, can be “unknown”)
+
+### Candidate retrieval options
+
+* **Fastest**: Postgres + trigram/FTS + basic filters
+* **Better**: Meilisearch / Typesense (filters + BM25 are easy)
+* **Later**: Elastic + embeddings or pgvector hybrid
+
+For V1, I’d do: **Meilisearch/Typesense** for search + Postgres as source of truth.
+
+---
+
+## 6) V2 Ranking (where it gets nasty-good)
+
+Once you have data, upgrade relevance:
+
+* Add embeddings for “goal text” → match to advisor profiles/services
+* Learn-to-rank (LTR) model using conversions:
+
+  * lead submitted
+  * advisor replied
+  * booking confirmed
+  * review left
+
+Add personalization signals (optional):
+
+* user prefers online/in-person
+* user’s stage: first home vs investor
+* urgency
+
+But keep it interpretable: advisors will ask “why am I ranked lower?”
+
+---
+
+## 7) What “Recommended” should mean (explainable)
+
+On each result card you can show one reason:
+
+* “Verified + fast to respond”
+* “Specialises in first home buyers”
+* “Openings this week”
+* “Highly rated (verified reviews)”
+
+This increases trust and reduces “black box” suspicion.
