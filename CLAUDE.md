@@ -46,7 +46,7 @@ Then coordinate execution, starting parallel tasks together.
 - `database/schema.sql` - PostgreSQL schema
 - `plans/BUILD_PLAN.md` - Development roadmap
 
-**Design System:** Locked. Primary: Teal (#14B8A6). Font: DM Sans. Radius: 6px.
+**Design System:** Locked. Primary: Neutral Gray (#0A0A0A). Font: DM Sans. Radius: 6px.
 
 ---
 
@@ -186,4 +186,6 @@ Mobile (< 1024px):
 │ 2026-02-01 │ Added documentation format rules  │ Enforce ASCII box tables for visual docs    │
 ├────────────┼───────────────────────────────────┼─────────────────────────────────────────────┤
 │ 2026-02-02 │ Migrated frontend/ → site/        │ Cleaned up orphaned dirs, updated all refs  │
+├────────────┼───────────────────────────────────┼─────────────────────────────────────────────┤
+│ 2026-02-02 │ Fixed design system docs          │ Updated Primary color to Gray (was Teal)    │
 └────────────┴───────────────────────────────────┴─────────────────────────────────────────────┘

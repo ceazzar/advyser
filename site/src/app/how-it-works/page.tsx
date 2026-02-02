@@ -176,7 +176,7 @@ export default function HowItWorksPage() {
 
       {/* 3-Step Process */}
       <section className="py-24 lg:py-32">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               How it works
@@ -241,7 +241,7 @@ export default function HowItWorksPage() {
 
       {/* Benefits Section */}
       <section className="py-24 lg:py-32 bg-muted/30">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Why use Advyser?
@@ -275,7 +275,7 @@ export default function HowItWorksPage() {
 
       {/* Testimonials */}
       <section className="py-24 lg:py-32">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               What our users say

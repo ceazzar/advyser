@@ -1,10 +1,13 @@
-import { Metadata } from "next"
+"use client"
+
+import * as React from "react"
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { StickyMobileCTA, AdvisorMiniCard } from "@/components/composite"
 import {
   BadgeCheck,
   Star,
@@ -17,6 +20,7 @@ import {
   Award,
   Briefcase,
   GraduationCap,
+  ExternalLink,
 } from "lucide-react"
 
 // Mock advisor data
@@ -106,6 +110,98 @@ Prior to founding her practice, Sarah spent 8 years at Morgan Stanley where she 
     { name: "Chartered Financial Analyst (CFA)", year: "2012" },
     { name: "Chartered Financial Consultant (ChFC)", year: "2014" },
   ],
+  // Third-party review platform data (placeholders)
+  thirdPartyReviews: [
+    {
+      platform: "Trustpilot",
+      rating: 4.8,
+      reviewCount: 23,
+      url: "https://www.trustpilot.com/review/example-advisor",
+    },
+    {
+      platform: "Google",
+      rating: 4.7,
+      reviewCount: 45,
+      url: "https://www.google.com/maps/place/example-advisor",
+    },
+  ],
+}
+
+// Mock similar advisors data - matched by specialties and location
+const mockSimilarAdvisors = [
+  {
+    id: "2",
+    slug: "james-wilson-cfp",
+    name: "James Wilson",
+    avatar: "/avatars/james-wilson.jpg",
+    rating: 4.8,
+    reviewCount: 89,
+    location: "Sydney, NSW",
+    primarySpecialty: "Retirement Planning",
+    specialties: ["Retirement Planning", "Superannuation Optimization", "Investment Management"],
+    matchReason: "Same location, shares 3 specialties",
+  },
+  {
+    id: "3",
+    slug: "emily-chen-cfa",
+    name: "Emily Chen",
+    avatar: "/avatars/emily-chen.jpg",
+    rating: 4.9,
+    reviewCount: 156,
+    location: "Melbourne, VIC",
+    primarySpecialty: "Investment Management",
+    specialties: ["Investment Management", "Wealth Management", "Tax Planning"],
+    matchReason: "Highly rated, shares 3 specialties",
+  },
+  {
+    id: "4",
+    slug: "david-nguyen-cfp",
+    name: "David Nguyen",
+    avatar: "/avatars/david-nguyen.jpg",
+    rating: 4.7,
+    reviewCount: 64,
+    location: "Sydney, NSW",
+    primarySpecialty: "Tax Planning",
+    specialties: ["Tax Planning", "Estate Planning", "Retirement Planning"],
+    matchReason: "Same location, tax planning expert",
+  },
+  {
+    id: "5",
+    slug: "lisa-thompson-chfc",
+    name: "Lisa Thompson",
+    avatar: "/avatars/lisa-thompson.jpg",
+    rating: 4.8,
+    reviewCount: 112,
+    location: "Brisbane, QLD",
+    primarySpecialty: "Estate Planning",
+    specialties: ["Estate Planning", "Wealth Management", "Insurance Planning"],
+    matchReason: "Shares 3 specialties",
+  },
+]
+
+/**
+ * Get similar advisors based on matching criteria
+ * In production, this would call an API with actual matching logic
+ */
+function getSimilarAdvisors(
+  currentAdvisor: typeof mockAdvisor,
+  allAdvisors: typeof mockSimilarAdvisors
+) {
+  // Filter out current advisor and sort by match criteria
+  return allAdvisors
+    .filter((a) => a.id !== currentAdvisor.id)
+    .map((advisor) => {
+      // Calculate match score based on shared specialties and location
+      const sharedSpecialties = advisor.specialties.filter((s) =>
+        currentAdvisor.specialties.includes(s)
+      ).length
+      const sameLocation = advisor.location === currentAdvisor.location
+      const matchScore = sharedSpecialties * 2 + (sameLocation ? 3 : 0) + advisor.rating
+
+      return { ...advisor, matchScore }
+    })
+    .sort((a, b) => b.matchScore - a.matchScore)
+    .slice(0, 4) // Return top 4 matches
 }
 
 function StarRating({ rating, size = "default" }: { rating: number; size?: "default" | "lg" }) {
@@ -194,15 +290,80 @@ function ReviewCard({
   )
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: `${mockAdvisor.name}, ${mockAdvisor.credentials} | Advyser`,
-    description: `View the profile of ${mockAdvisor.name}, a verified financial advisor specializing in ${mockAdvisor.specialties.slice(0, 3).join(", ")}. ${mockAdvisor.yearsExperience}+ years of experience.`,
+function ThirdPartyReviewCard({
+  platform,
+  rating,
+  reviewCount,
+  url,
+}: {
+  platform: string
+  rating: number
+  reviewCount: number
+  url: string
+}) {
+  // Platform-specific styling
+  const platformStyles: Record<string, { bg: string; text: string; border: string }> = {
+    Trustpilot: {
+      bg: "bg-emerald-50",
+      text: "text-emerald-700",
+      border: "border-emerald-200",
+    },
+    Google: {
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+      border: "border-blue-200",
+    },
   }
+
+  const style = platformStyles[platform] || {
+    bg: "bg-muted/50",
+    text: "text-muted-foreground",
+    border: "border-border",
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex items-center gap-4 px-4 py-3 rounded-lg border ${style.border} ${style.bg} hover:shadow-sm transition-shadow group`}
+    >
+      {/* Platform Logo Placeholder */}
+      <div className={`flex items-center justify-center px-3 py-1.5 rounded-md bg-white border ${style.border}`}>
+        <span className={`text-sm font-semibold ${style.text}`}>{platform}</span>
+      </div>
+
+      {/* Rating Info */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <Star className="size-4 fill-amber-400 text-amber-400" />
+          <span className="font-semibold text-foreground">{rating.toFixed(1)}</span>
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+        </span>
+      </div>
+
+      {/* Link indicator */}
+      <span className="ml-auto flex items-center gap-1 text-sm text-muted-foreground group-hover:text-primary transition-colors">
+        Read reviews
+        <ExternalLink className="size-3.5" />
+      </span>
+    </a>
+  )
 }
 
 export default function AdvisorProfilePage() {
   const advisor = mockAdvisor
+  const mainCtaRef = React.useRef<HTMLButtonElement>(null)
+
+  // Get similar advisors based on matching criteria
+  const similarAdvisors = getSimilarAdvisors(advisor, mockSimilarAdvisors)
+
+  const handleRequestIntro = () => {
+    // TODO: Implement request intro modal/flow
+    console.log("Request intro clicked for:", advisor.name)
+  }
 
   return (
     <PublicLayout>
@@ -277,7 +438,12 @@ export default function AdvisorProfilePage() {
                 <Card className="sticky top-24">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-foreground mb-4">Connect with {advisor.name.split(" ")[0]}</h3>
-                    <Button className="w-full" size="lg">
+                    <Button
+                      ref={mainCtaRef}
+                      className="w-full"
+                      size="lg"
+                      onClick={handleRequestIntro}
+                    >
                       <Calendar className="size-5 mr-2" />
                       Request Introduction
                     </Button>
@@ -428,6 +594,76 @@ export default function AdvisorProfilePage() {
                     ))}
                   </div>
                 </div>
+
+                {/* Third-Party Reviews Section */}
+                {advisor.thirdPartyReviews && advisor.thirdPartyReviews.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-3">Also reviewed on</h3>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      {advisor.thirdPartyReviews.map((review) => (
+                        <ThirdPartyReviewCard
+                          key={review.platform}
+                          platform={review.platform}
+                          rating={review.rating}
+                          reviewCount={review.reviewCount}
+                          url={review.url}
+                        />
+                      ))}
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Reviews collected from third-party platforms. Ratings may differ from Advyser reviews.
+                    </p>
+                  </div>
+                )}
+
+                {/* Similar Advisors Section */}
+                {similarAdvisors.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground mb-4">More Like This</h2>
+                    <p className="text-muted-foreground mb-6">
+                      Advisors with similar specialties who might be a good fit for you
+                    </p>
+
+                    {/* Mobile: Horizontal scrollable list */}
+                    <div className="lg:hidden -mx-4 px-4">
+                      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+                        {similarAdvisors.map((similar) => (
+                          <div key={similar.id} className="snap-start shrink-0 w-[280px]">
+                            <AdvisorMiniCard
+                              id={similar.id}
+                              slug={similar.slug}
+                              name={similar.name}
+                              avatar={similar.avatar}
+                              rating={similar.rating}
+                              reviewCount={similar.reviewCount}
+                              location={similar.location}
+                              primarySpecialty={similar.primarySpecialty}
+                              matchReason={similar.matchReason}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Desktop: Grid layout */}
+                    <div className="hidden lg:grid lg:grid-cols-2 gap-4">
+                      {similarAdvisors.map((similar) => (
+                        <AdvisorMiniCard
+                          key={similar.id}
+                          id={similar.id}
+                          slug={similar.slug}
+                          name={similar.name}
+                          avatar={similar.avatar}
+                          rating={similar.rating}
+                          reviewCount={similar.reviewCount}
+                          location={similar.location}
+                          primarySpecialty={similar.primarySpecialty}
+                          matchReason={similar.matchReason}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Empty column for layout balance on desktop (sidebar is sticky in header) */}
@@ -436,6 +672,15 @@ export default function AdvisorProfilePage() {
           </div>
         </section>
       </div>
+
+      {/* Sticky Mobile CTA - appears when main CTA scrolls out of view */}
+      <StickyMobileCTA
+        advisorName={advisor.name}
+        advisorImage={advisor.avatar}
+        onRequestIntro={handleRequestIntro}
+        ctaText="Request Intro"
+        targetRef={mainCtaRef}
+      />
     </PublicLayout>
   )
 }

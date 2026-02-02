@@ -82,7 +82,7 @@ export default function PressPage() {
 
       {/* Stats */}
       <section className="py-12 bg-muted/30">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">

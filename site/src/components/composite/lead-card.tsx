@@ -4,6 +4,12 @@ import * as React from "react"
 import { Calendar, Eye, MessageSquare } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+
+/**
+ * Icon Optical Sizing:
+ * - Calendar inline with date text: size-3.5 (14px) - smaller context
+ * - Eye, MessageSquare in buttons: size-4 (16px) standard button icons
+ */
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {

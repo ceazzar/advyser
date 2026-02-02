@@ -192,27 +192,37 @@ export function getPostLoginRedirect(role: UserRole, requestedRedirect?: string)
 
   // Validate and use requested redirect if safe
   if (requestedRedirect) {
-    // Security: Only allow relative paths starting with single slash
-    // Reject absolute URLs, protocol-relative URLs, and path traversal
-    const isSafeRelativePath =
-      requestedRedirect.startsWith("/") &&
-      !requestedRedirect.startsWith("//") &&
-      !requestedRedirect.includes("..") &&
-      !requestedRedirect.includes("\\")
+    try {
+      // Decode URL to catch encoded bypasses like %2F%2F
+      const decodedRedirect = decodeURIComponent(requestedRedirect)
 
-    if (!isSafeRelativePath) {
+      // Security: Only allow relative paths starting with single slash
+      // Reject absolute URLs, protocol-relative URLs, and path traversal
+      const isSafeRelativePath =
+        decodedRedirect.startsWith("/") &&
+        !decodedRedirect.startsWith("//") &&
+        !decodedRedirect.includes("..") &&
+        !decodedRedirect.includes("\\") &&
+        !decodedRedirect.includes("\n") &&
+        !decodedRedirect.includes("\r")
+
+      if (!isSafeRelativePath) {
+        return defaultRoutes[role]
+      }
+
+      // Check if redirect is valid for this role
+      const rolePathPrefixes: Record<UserRole, string[]> = {
+        consumer: ["/dashboard"],
+        advisor: ["/advisor"],
+        admin: ["/admin", "/dashboard", "/advisor"],
+      }
+      const validPrefixes = rolePathPrefixes[role]
+      if (validPrefixes.some((prefix) => decodedRedirect.startsWith(prefix))) {
+        return decodedRedirect
+      }
+    } catch {
+      // Invalid URL encoding, use default
       return defaultRoutes[role]
-    }
-
-    // Check if redirect is valid for this role
-    const rolePathPrefixes: Record<UserRole, string[]> = {
-      consumer: ["/dashboard"],
-      advisor: ["/advisor"],
-      admin: ["/admin", "/dashboard", "/advisor"],
-    }
-    const validPrefixes = rolePathPrefixes[role]
-    if (validPrefixes.some((prefix) => requestedRedirect.startsWith(prefix))) {
-      return requestedRedirect
     }
   }
 

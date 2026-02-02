@@ -1,1 +1,13 @@
-x
+# Development artifacts
+.playwright-mcp/
+.DS_Store
+*.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db

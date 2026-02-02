@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { FormProgress } from "@/components/ui/form-progress"
 
 // Multi-step form state
 interface FormData {
@@ -237,20 +238,14 @@ export default function RequestIntroPage() {
               <ArrowLeft className="size-4" />
               Back to Home
             </Link>
-            <span className="text-sm text-muted-foreground">Step {currentStep} of 3</span>
           </div>
 
-          {/* Progress Bar */}
-          <div className="flex gap-2">
-            {[1, 2, 3].map((step) => (
-              <div
-                key={step}
-                className={`h-2 flex-1 rounded-full transition-colors ${
-                  step <= currentStep ? "bg-primary" : "bg-border"
-                }`}
-              />
-            ))}
-          </div>
+          {/* Progress Indicator */}
+          <FormProgress
+            currentStep={currentStep}
+            totalSteps={3}
+            labels={["Your Needs", "About You", "Situation"]}
+          />
         </div>
       </div>
 

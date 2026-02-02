@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
-  Upload,
   Building2,
   User,
   Mail,
@@ -15,7 +14,6 @@ import {
   FileText,
   Shield,
   AlertCircle,
-  Loader2,
 } from "lucide-react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
@@ -26,9 +24,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { FileUpload } from "@/components/ui/file-upload"
-import { Progress } from "@/components/ui/progress"
+import { FormProgress } from "@/components/ui/form-progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { cn } from "@/lib/utils"
 
 // Mock advisor data (would come from API)
 const mockAdvisorData = {
@@ -74,51 +71,6 @@ interface FormErrors {
   acceptTerms?: string
   acceptPrivacy?: string
   confirmAccuracy?: string
-}
-
-function StepIndicator({ currentStep }: { currentStep: number }) {
-  return (
-    <nav aria-label="Progress" className="mb-8">
-      <ol className="flex items-center justify-center gap-2 md:gap-4">
-        {steps.map((step, index) => (
-          <li key={step.id} className="flex items-center">
-            <div
-              className={cn(
-                "flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium transition-colors md:px-4",
-                currentStep === step.id
-                  ? "bg-primary text-primary-foreground"
-                  : currentStep > step.id
-                    ? "bg-primary/20 text-primary"
-                    : "bg-muted text-muted-foreground"
-              )}
-            >
-              <span
-                className={cn(
-                  "flex size-6 items-center justify-center rounded-full text-xs",
-                  currentStep > step.id ? "bg-primary text-primary-foreground" : ""
-                )}
-              >
-                {currentStep > step.id ? (
-                  <Check className="size-4" />
-                ) : (
-                  step.id
-                )}
-              </span>
-              <span className="hidden md:inline">{step.name}</span>
-            </div>
-            {index < steps.length - 1 && (
-              <div
-                className={cn(
-                  "mx-2 h-0.5 w-8 md:w-12",
-                  currentStep > step.id ? "bg-primary" : "bg-border"
-                )}
-              />
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  )
 }
 
 export default function ClaimFormPage() {
@@ -255,14 +207,13 @@ export default function ClaimFormPage() {
           </p>
         </div>
 
-        {/* Progress Bar */}
+        {/* Progress Indicator */}
         <div className="mx-auto mt-6 max-w-md">
-          <Progress value={(currentStep / 3) * 100} className="h-2" />
-        </div>
-
-        {/* Step Indicator */}
-        <div className="mt-6">
-          <StepIndicator currentStep={currentStep} />
+          <FormProgress
+            currentStep={currentStep}
+            totalSteps={3}
+            labels={steps.map((s) => s.name)}
+          />
         </div>
 
         {/* Form Card */}

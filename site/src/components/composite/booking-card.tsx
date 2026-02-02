@@ -5,6 +5,12 @@ import { format } from "date-fns"
 import { Video, Phone, MapPin, Clock, Calendar } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+
+/**
+ * Icon Optical Sizing:
+ * - Stroke icons inline with text: size-[18px] for optical parity with filled icons
+ * - Small inline icons (meeting type): size-3.5 (14px) for compact display
+ */
 import { Card, CardContent } from "@/components/ui/card"
 import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -111,14 +117,14 @@ function BookingCard({
           </Badge>
         </div>
 
-        {/* Date, Time, Duration */}
+        {/* Date, Time, Duration - stroke icons use 18px for optical parity */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
-            <Calendar className="size-4" />
+            <Calendar className="size-[18px]" />
             <span>{format(dateTime, "EEEE, MMM d, yyyy")}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Clock className="size-4" />
+            <Clock className="size-[18px]" />
             <span>{format(dateTime, "h:mm a")}</span>
           </div>
           <div className="text-muted-foreground/70">

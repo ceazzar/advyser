@@ -212,25 +212,25 @@ export default function DesignSystemPage() {
           {/* 0.1 Colors */}
           <Section id="0.1" title="Colors">
             <p className="text-sm text-muted-foreground mb-6">
-              Teal primary palette with gray neutral scale for a professional
-              financial advisory look.
+              Neutral gray primary palette for a sophisticated, professional
+              financial advisory look. Inspired by Basel Supercluster.
             </p>
 
             <div className="space-y-8">
               {/* Primary Colors */}
               <div>
-                <h4 className="text-sm font-medium mb-3">Primary (Teal)</h4>
+                <h4 className="text-sm font-medium mb-3">Primary (Neutral)</h4>
                 <div className="flex flex-wrap gap-3">
-                  <ColorSwatch color="bg-primary" name="Primary" hex="#14B8A6" />
+                  <ColorSwatch color="bg-primary" name="Primary" hex="#0A0A0A" />
                   <ColorSwatch
-                    color="bg-primary/90"
-                    name="Primary/90"
-                    hex="90%"
+                    color="bg-gray-800"
+                    name="Hover"
+                    hex="#262626"
                   />
                   <ColorSwatch
-                    color="bg-primary/80"
-                    name="Primary/80"
-                    hex="80%"
+                    color="bg-gray-700"
+                    name="Active"
+                    hex="#404040"
                   />
                   <ColorSwatch
                     color="bg-primary/50"
@@ -252,20 +252,20 @@ export default function DesignSystemPage() {
 
               {/* Neutral Colors */}
               <div>
-                <h4 className="text-sm font-medium mb-3">Neutral (Gray)</h4>
+                <h4 className="text-sm font-medium mb-3">Neutral (Gray Scale)</h4>
                 <div className="flex flex-wrap gap-3">
                   <ColorSwatch
                     color="bg-foreground"
                     name="Foreground"
-                    hex="#111827"
+                    hex="#171717"
                   />
                   <ColorSwatch
                     color="bg-muted-foreground"
                     name="Muted FG"
-                    hex="#6B7280"
+                    hex="#737373"
                   />
-                  <ColorSwatch color="bg-muted" name="Muted" hex="#F3F4F6" />
-                  <ColorSwatch color="bg-border" name="Border" hex="#E5E7EB" />
+                  <ColorSwatch color="bg-muted" name="Muted" hex="#F5F5F5" />
+                  <ColorSwatch color="bg-border" name="Border" hex="#E5E5E5" />
                   <ColorSwatch
                     color="bg-background"
                     name="Background"
@@ -474,7 +474,7 @@ export default function DesignSystemPage() {
           <Section id="0.5" title="Button">
             <p className="text-sm text-muted-foreground mb-6">
               All button variants with loading states. Primary action uses solid
-              teal.
+              neutral gray.
             </p>
 
             <div className="space-y-8">
@@ -748,7 +748,7 @@ export default function DesignSystemPage() {
           {/* 0.9 Checkbox */}
           <Section id="0.9" title="Checkbox">
             <p className="text-sm text-muted-foreground mb-6">
-              Single and multiple selection with teal check indicator.
+              Single and multiple selection with neutral check indicator.
             </p>
 
             <div className="space-y-6">
@@ -896,7 +896,7 @@ export default function DesignSystemPage() {
           {/* 0.11 Toggle Switch */}
           <Section id="0.11" title="Toggle switch">
             <p className="text-sm text-muted-foreground mb-6">
-              On/off toggle with teal active state.
+              On/off toggle with neutral active state.
             </p>
 
             <div className="space-y-8">

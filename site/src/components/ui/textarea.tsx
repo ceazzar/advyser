@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -31,8 +33,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             "bg-input border border-transparent",
             "text-foreground placeholder:text-muted-foreground",
             "transition-all duration-200 outline-none resize-y",
-            // Focus state - Teal ring
-            "focus:border-primary focus:ring-2 focus:ring-primary/20",
+            // Focus state - Visible ring (40% opacity for dark primary)
+            "focus:border-primary focus:ring-2 focus:ring-primary/40",
             // Error state
             error && "border-destructive focus:border-destructive focus:ring-destructive/20",
             // Disabled state

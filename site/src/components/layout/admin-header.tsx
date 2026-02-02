@@ -1,8 +1,22 @@
 "use client"
 
+/**
+ * @deprecated Use DashboardHeaderSlim instead.
+ * This component will be removed in a future version.
+ * Migration: Replace <AdminHeader /> with <DashboardHeaderSlim portalType="admin" />
+ */
+
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+
+// Deprecation warning
+if (typeof window !== "undefined") {
+  console.warn(
+    "[Deprecated] AdminHeader is deprecated. Use DashboardHeaderSlim instead.\n" +
+    "Migration: Replace <AdminHeader /> with <DashboardHeaderSlim portalType=\"admin\" />"
+  )
+}
 import {
   LayoutDashboard,
   FileCheck,

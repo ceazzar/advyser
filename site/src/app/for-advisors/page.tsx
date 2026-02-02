@@ -228,7 +228,7 @@ export default function ForAdvisorsPage() {
     <PublicLayout>
       {/* Hero Section */}
       <section className="bg-white py-20 lg:py-28">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Content */}
             <div>
@@ -300,7 +300,7 @@ export default function ForAdvisorsPage() {
 
       {/* Benefits Section */}
       <section className="py-24 lg:py-32">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Why advisors choose Advyser
@@ -332,7 +332,7 @@ export default function ForAdvisorsPage() {
 
       {/* Features Section */}
       <section className="py-24 lg:py-32 bg-muted/30">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Content */}
             <div>
@@ -402,7 +402,7 @@ export default function ForAdvisorsPage() {
 
       {/* Testimonials */}
       <section className="py-24 lg:py-32">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Trusted by leading advisors
@@ -439,7 +439,7 @@ export default function ForAdvisorsPage() {
 
       {/* Pricing Section */}
       <section id="pricing" className="py-24 lg:py-32 bg-muted/30">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
               Simple, transparent pricing

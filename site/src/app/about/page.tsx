@@ -107,7 +107,7 @@ export default function AboutPage() {
 
       {/* Values */}
       <section className="py-16 lg:py-24">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">Our Values</h2>
             <p className="text-lg text-muted-foreground">
@@ -137,7 +137,7 @@ export default function AboutPage() {
 
       {/* Stats */}
       <section className="py-16 lg:py-24 bg-primary/5">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
@@ -151,7 +151,7 @@ export default function AboutPage() {
 
       {/* Team */}
       <section className="py-16 lg:py-24">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">Our Team</h2>
             <p className="text-lg text-muted-foreground">

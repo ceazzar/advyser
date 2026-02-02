@@ -1,27 +1,35 @@
 "use client"
 
 import * as React from "react"
-import { TrendingDown, Calculator, Info } from "lucide-react"
+import { TrendingUp, Calculator, Sparkles } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+
+/**
+ * Icon Optical Sizing:
+ * - Calculator in header circle: size-5 (20px) - contained in 40px circle
+ * - TrendingUp inline with text: size-[18px] for optical parity
+ * - Sparkles decorative: size-5 (20px)
+ */
+import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
+import { Button } from "@/components/ui/button"
 
 export interface SavingsCalculatorProps {
-  /** Minimum portfolio size in dollars */
-  minPortfolio?: number
-  /** Maximum portfolio size in dollars */
-  maxPortfolio?: number
-  /** Default portfolio size in dollars */
-  defaultPortfolio?: number
-  /** Minimum advisory fee percentage */
-  minFee?: number
-  /** Maximum advisory fee percentage */
-  maxFee?: number
-  /** Default advisory fee percentage */
-  defaultFee?: number
-  /** Target fee percentage (what good advice could achieve) */
-  targetFee?: number
+  /** Minimum portfolio/income amount in dollars */
+  minAmount?: number
+  /** Maximum portfolio/income amount in dollars */
+  maxAmount?: number
+  /** Default portfolio/income amount in dollars */
+  defaultAmount?: number
+  /** Savings rate lower bound (percentage of portfolio that good advice saves) */
+  savingsRateLow?: number
+  /** Savings rate upper bound (percentage of portfolio that good advice saves) */
+  savingsRateHigh?: number
+  /** Call-to-action text */
+  ctaText?: string
+  /** CTA click handler */
+  onCTAClick?: () => void
   /** Additional CSS classes */
   className?: string
 }
@@ -39,10 +47,16 @@ function formatCurrency(amount: number): string {
 }
 
 /**
- * Formats a number as a percentage
+ * Formats a number with K/M suffix for compact display
  */
-function formatPercentage(value: number): string {
-  return `${value.toFixed(1)}%`
+function formatCompact(amount: number): string {
+  if (amount >= 1000000) {
+    return `$${(amount / 1000000).toFixed(1)}M`
+  }
+  if (amount >= 1000) {
+    return `$${Math.round(amount / 1000)}K`
+  }
+  return formatCurrency(amount)
 }
 
 /**
@@ -54,6 +68,12 @@ function useAnimatedNumber(value: number, duration: number = 300): number {
   const animationRef = React.useRef<number | null>(null)
 
   React.useEffect(() => {
+    // Cancel any existing animation BEFORE starting a new one
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current)
+      animationRef.current = null
+    }
+
     const startValue = previousValue.current
     const endValue = value
     const startTime = performance.now()
@@ -72,6 +92,7 @@ function useAnimatedNumber(value: number, duration: number = 300): number {
         animationRef.current = requestAnimationFrame(animate)
       } else {
         previousValue.current = endValue
+        animationRef.current = null
       }
     }
 
@@ -80,6 +101,7 @@ function useAnimatedNumber(value: number, duration: number = 300): number {
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
+        animationRef.current = null
       }
     }
   }, [value, duration])
@@ -88,203 +110,192 @@ function useAnimatedNumber(value: number, duration: number = 300): number {
 }
 
 /**
- * Slider input with label and value display
+ * Hook for debounced value (used for ARIA announcements)
  */
-interface SliderInputProps {
-  label: string
-  value: number
-  min: number
-  max: number
-  step: number
-  formatValue: (value: number) => string
-  onChange: (value: number) => void
-  tooltip?: string
-}
+function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = React.useState(value)
 
-function SliderInput({
-  label,
-  value,
-  min,
-  max,
-  step,
-  formatValue,
-  onChange,
-  tooltip,
-}: SliderInputProps) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-foreground">{label}</label>
-          {tooltip && (
-            <div className="group relative">
-              <Info className="size-4 text-muted-foreground cursor-help" />
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-popover border border-border rounded-md shadow-md text-xs text-popover-foreground max-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                {tooltip}
-              </div>
-            </div>
-          )}
-        </div>
-        <span className="text-sm font-semibold text-primary tabular-nums">
-          {formatValue(value)}
-        </span>
-      </div>
-      <Slider
-        value={[value]}
-        min={min}
-        max={max}
-        step={step}
-        onValueChange={([newValue]) => onChange(newValue)}
-        className="w-full"
-      />
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{formatValue(min)}</span>
-        <span>{formatValue(max)}</span>
-      </div>
-    </div>
-  )
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [value, delay])
+
+  return debouncedValue
 }
 
 /**
- * Savings result display with animated value
- */
-interface SavingsResultProps {
-  annualSavings: number
-  currentFees: number
-  projectedFees: number
-  feeDifference: number
-}
-
-function SavingsResult({
-  annualSavings,
-  currentFees,
-  projectedFees,
-  feeDifference,
-}: SavingsResultProps) {
-  const animatedSavings = useAnimatedNumber(annualSavings)
-  const animatedCurrentFees = useAnimatedNumber(currentFees)
-  const animatedProjectedFees = useAnimatedNumber(projectedFees)
-
-  return (
-    <div className="space-y-4">
-      {/* Primary savings highlight */}
-      <div className="p-6 bg-primary/5 border border-primary/20 rounded-md text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <TrendingDown className="size-5 text-primary" />
-          <span className="text-sm font-medium text-muted-foreground">
-            Potential Annual Savings
-          </span>
-        </div>
-        <div className="text-4xl font-bold text-primary tabular-nums">
-          {formatCurrency(animatedSavings)}
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          By reducing your advisory fees by {formatPercentage(feeDifference)}
-        </p>
-      </div>
-
-      {/* Fee comparison breakdown */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-4 bg-muted/50 rounded-md">
-          <span className="text-xs text-muted-foreground block mb-1">
-            Current Annual Fees
-          </span>
-          <span className="text-lg font-semibold text-foreground tabular-nums">
-            {formatCurrency(animatedCurrentFees)}
-          </span>
-        </div>
-        <div className="p-4 bg-muted/50 rounded-md">
-          <span className="text-xs text-muted-foreground block mb-1">
-            With Better Advice
-          </span>
-          <span className="text-lg font-semibold text-foreground tabular-nums">
-            {formatCurrency(animatedProjectedFees)}
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * Interactive calculator showing potential annual savings from good financial advice.
- * Features slider inputs for portfolio size and current advisory fees,
- * with animated number transitions and mobile-responsive design.
+ * Wise-style interactive savings calculator showing potential annual savings
+ * from quality financial advice. Features a slider for portfolio/income amount
+ * with animated savings range display ($7K-$14K based on portfolio size).
  */
 function SavingsCalculator({
-  minPortfolio = 50000,
-  maxPortfolio = 2000000,
-  defaultPortfolio = 500000,
-  minFee = 0.5,
-  maxFee = 2.5,
-  defaultFee = 1.5,
-  targetFee = 0.75,
+  minAmount = 100000,
+  maxAmount = 2000000,
+  defaultAmount = 500000,
+  savingsRateLow = 0.014, // 1.4% savings from good advice
+  savingsRateHigh = 0.028, // 2.8% savings from good advice
+  ctaText = "Find an Advisor",
+  onCTAClick,
   className,
 }: SavingsCalculatorProps) {
-  const [portfolioSize, setPortfolioSize] = React.useState(defaultPortfolio)
-  const [currentFee, setCurrentFee] = React.useState(defaultFee)
+  const [portfolioAmount, setPortfolioAmount] = React.useState(defaultAmount)
 
-  // Calculate savings based on fee reduction
-  const currentFees = (portfolioSize * currentFee) / 100
-  const projectedFees = (portfolioSize * targetFee) / 100
-  const annualSavings = Math.max(0, currentFees - projectedFees)
-  const feeDifference = Math.max(0, currentFee - targetFee)
+  // Calculate savings range based on portfolio
+  const savingsLow = Math.round(portfolioAmount * savingsRateLow)
+  const savingsHigh = Math.round(portfolioAmount * savingsRateHigh)
+
+  // Animated values for smooth transitions
+  const animatedSavingsLow = useAnimatedNumber(savingsLow)
+  const animatedSavingsHigh = useAnimatedNumber(savingsHigh)
+
+  // Debounced values for ARIA announcements (prevents spam during slider drag)
+  const debouncedSavingsLow = useDebouncedValue(savingsLow, 500)
+  const debouncedSavingsHigh = useDebouncedValue(savingsHigh, 500)
+
+  // Calculate slider position percentage for gradient
+  const sliderPosition = ((portfolioAmount - minAmount) / (maxAmount - minAmount)) * 100
 
   return (
-    <Card className={cn("w-full max-w-lg", className)}>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary">
-            <Calculator className="size-5" />
+    <Card className={cn("w-full max-w-xl overflow-hidden", className)}>
+      <CardContent className="p-0">
+        {/* Header Section */}
+        <div className="p-6 pb-4 bg-gradient-to-br from-primary/5 to-primary/10">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center justify-center size-10 rounded-full bg-primary/15 text-primary">
+              <Calculator className="size-5" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">
+              See your potential savings
+            </h3>
           </div>
-          <div>
-            <CardTitle className="text-xl">See how much you could save</CardTitle>
-            <CardDescription>
-              Calculate your potential savings with the right financial advice
-            </CardDescription>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Quality financial advice can save you thousands each year through
+            better investment strategies, tax efficiency, and fee optimization.
+          </p>
+        </div>
+
+        {/* Calculator Section */}
+        <div className="p-6 space-y-6">
+          {/* Portfolio Input */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-foreground">
+                Your portfolio value
+              </label>
+              <span className="text-lg font-bold text-primary tabular-nums">
+                {formatCurrency(portfolioAmount)}
+              </span>
+            </div>
+
+            <Slider
+              value={[portfolioAmount]}
+              min={minAmount}
+              max={maxAmount}
+              step={25000}
+              onValueChange={([value]) => setPortfolioAmount(value)}
+              className="w-full"
+              aria-label="Portfolio value"
+            />
+
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{formatCompact(minAmount)}</span>
+              <span>{formatCompact(maxAmount)}</span>
+            </div>
+          </div>
+
+          {/* Savings Result - Highlighted */}
+          <div
+            className="relative p-6 rounded-md overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg,
+                hsl(var(--primary) / 0.08) 0%,
+                hsl(var(--primary) / 0.15) 100%)`
+            }}
+          >
+            {/* Decorative sparkle */}
+            <Sparkles className="absolute top-4 right-4 size-5 text-primary/30" />
+
+            <div className="relative">
+              {/* TrendingUp stroke icon uses 18px for optical parity */}
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="size-[18px] text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Potential annual savings
+                </span>
+              </div>
+
+              <div className="flex items-baseline gap-1">
+                <span className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">
+                  {formatCurrency(animatedSavingsLow)}
+                </span>
+                <span className="text-xl sm:text-2xl font-medium text-muted-foreground mx-1">
+                  to
+                </span>
+                <span className="text-3xl sm:text-4xl font-bold text-primary tabular-nums">
+                  {formatCurrency(animatedSavingsHigh)}
+                </span>
+              </div>
+
+              <p className="mt-3 text-sm text-muted-foreground">
+                Based on a {formatCurrency(portfolioAmount)} portfolio, quality advice
+                could save you <span className="font-medium text-foreground">
+                {formatCurrency(savingsLow)}-{formatCurrency(savingsHigh)}
+                </span> annually.
+              </p>
+            </div>
+          </div>
+
+          {/* CTA Button - Secondary to avoid competing with Hero/How It Works primary CTAs */}
+          {onCTAClick && (
+            <Button
+              onClick={onCTAClick}
+              variant="outline"
+              className="w-full rounded-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              size="lg"
+            >
+              {ctaText}
+            </Button>
+          )}
+
+          {/* Trust Indicators */}
+          <div className="flex items-center justify-center gap-4 pt-2">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="size-1.5 rounded-full bg-green-500" />
+              <span>Free to use</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="size-1.5 rounded-full bg-green-500" />
+              <span>No obligation</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="size-1.5 rounded-full bg-green-500" />
+              <span>ASIC licensed</span>
+            </div>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-6">
-        {/* Portfolio Size Slider */}
-        <SliderInput
-          label="Your portfolio size"
-          value={portfolioSize}
-          min={minPortfolio}
-          max={maxPortfolio}
-          step={10000}
-          formatValue={formatCurrency}
-          onChange={setPortfolioSize}
-          tooltip="Include investments, super, and managed funds"
-        />
-
-        {/* Advisory Fee Slider */}
-        <SliderInput
-          label="Current advisory fees"
-          value={currentFee}
-          min={minFee}
-          max={maxFee}
-          step={0.1}
-          formatValue={formatPercentage}
-          onChange={setCurrentFee}
-          tooltip="The percentage you currently pay your advisor annually"
-        />
-
-        {/* Results Display */}
-        <SavingsResult
-          annualSavings={annualSavings}
-          currentFees={currentFees}
-          projectedFees={projectedFees}
-          feeDifference={feeDifference}
-        />
+        {/* Visually hidden ARIA live region for screen reader announcements */}
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          Potential annual savings: {formatCurrency(debouncedSavingsLow)} to {formatCurrency(debouncedSavingsHigh)}
+        </div>
 
         {/* Disclaimer */}
-        <p className="text-xs text-muted-foreground text-center leading-relaxed">
-          Calculations assume a target fee of {formatPercentage(targetFee)} p.a.
-          Actual savings will vary based on individual circumstances and advisor selection.
-          This is for illustrative purposes only and does not constitute financial advice.
-        </p>
+        <div className="px-6 py-4 bg-muted/30 border-t border-border">
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            Savings estimates are illustrative only, based on industry research showing
+            quality advice can add 1.4%-2.8% p.a. in value. Individual results vary.
+            This does not constitute financial advice.
+          </p>
+        </div>
       </CardContent>
     </Card>
   )

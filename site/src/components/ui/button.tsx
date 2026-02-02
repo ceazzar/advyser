@@ -6,13 +6,13 @@ import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all active:scale-[0.98] active:transition-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
-        // Primary: Solid teal (your selection)
+        // Primary: Solid neutral (gray-950) with multi-layer shadow for depth
         default:
-          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80",
+          "bg-primary text-primary-foreground shadow-[0_1px_2px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] hover:bg-gray-800 hover:shadow-[0_2px_4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.1)] active:bg-gray-700 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]",
         // Secondary: Soft teal
         secondary:
           "bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25",
@@ -29,7 +29,7 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-11 min-h-11 px-4 py-2 rounded-md",
+        default: "h-11 min-h-11 px-5 py-2.5 rounded-md",
         xs: "h-11 min-h-11 px-2 text-xs rounded-md",
         sm: "h-11 min-h-11 px-3 text-xs rounded-md",
         lg: "h-12 min-h-12 px-6 text-base rounded-md",
@@ -79,8 +79,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading && <Loader2 className="size-4 animate-spin" />}
-        {children}
+        {loading && (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <Loader2 className="size-4 animate-spin" />
+          </span>
+        )}
+        <span className={cn("inline-flex items-center gap-2", loading && "invisible")}>
+          {children}
+        </span>
       </Comp>
     )
   }

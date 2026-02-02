@@ -71,11 +71,11 @@ const pageViewsData = [
 ]
 
 const categoryDistributionData = [
-  { name: "Financial Planning", value: 487, fill: "#14B8A6" },
-  { name: "Wealth Management", value: 312, fill: "#0EA5E9" },
-  { name: "Tax Planning", value: 224, fill: "#8B5CF6" },
-  { name: "Retirement Planning", value: 156, fill: "#F59E0B" },
-  { name: "Estate Planning", value: 189, fill: "#EF4444" },
+  { name: "Financial Planning", value: 487, fill: "var(--chart-1)" },
+  { name: "Wealth Management", value: 312, fill: "var(--chart-2)" },
+  { name: "Tax Planning", value: 224, fill: "var(--chart-3)" },
+  { name: "Retirement Planning", value: 156, fill: "var(--chart-4)" },
+  { name: "Estate Planning", value: 189, fill: "var(--chart-5)" },
   { name: "Other", value: 298, fill: "#6B7280" },
 ]
 
@@ -112,48 +112,48 @@ const locationData = [
   { state: "Other", advisors: 155, consumers: 4200 },
 ]
 
-// Chart configurations
+// Chart configurations - using CSS variables for theme support
 const userGrowthConfig: ChartConfig = {
   consumers: {
     label: "Consumers",
-    color: "#14B8A6",
+    color: "var(--chart-1)",
   },
   advisors: {
     label: "Advisors",
-    color: "#0EA5E9",
+    color: "var(--chart-2)",
   },
 }
 
 const pageViewsConfig: ChartConfig = {
   views: {
     label: "Page Views",
-    color: "#14B8A6",
+    color: "var(--chart-1)",
   },
   searches: {
     label: "Searches",
-    color: "#8B5CF6",
+    color: "var(--chart-3)",
   },
 }
 
 const reviewsConfig: ChartConfig = {
   reviews: {
     label: "Reviews",
-    color: "#14B8A6",
+    color: "var(--chart-1)",
   },
   avgRating: {
     label: "Avg Rating",
-    color: "#F59E0B",
+    color: "var(--chart-4)",
   },
 }
 
 const locationConfig: ChartConfig = {
   advisors: {
     label: "Advisors",
-    color: "#14B8A6",
+    color: "var(--chart-1)",
   },
   consumers: {
     label: "Consumers",
-    color: "#0EA5E9",
+    color: "var(--chart-2)",
   },
 }
 
@@ -305,16 +305,16 @@ export default function AnalyticsPage() {
                       type="monotone"
                       dataKey="consumers"
                       stackId="1"
-                      stroke="#14B8A6"
-                      fill="#14B8A6"
+                      stroke="var(--chart-1)"
+                      fill="var(--chart-1)"
                       fillOpacity={0.6}
                     />
                     <Area
                       type="monotone"
                       dataKey="advisors"
                       stackId="1"
-                      stroke="#0EA5E9"
-                      fill="#0EA5E9"
+                      stroke="var(--chart-2)"
+                      fill="var(--chart-2)"
                       fillOpacity={0.6}
                     />
                   </AreaChart>
@@ -371,8 +371,8 @@ export default function AnalyticsPage() {
                     <YAxis className="text-xs" />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="views" fill="#14B8A6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="searches" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="views" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="searches" fill="var(--chart-3)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>
@@ -403,9 +403,9 @@ export default function AnalyticsPage() {
                       yAxisId="left"
                       type="monotone"
                       dataKey="reviews"
-                      stroke="#14B8A6"
+                      stroke="var(--chart-1)"
                       strokeWidth={2}
-                      dot={{ fill: "#14B8A6" }}
+                      dot={{ fill: "var(--chart-1)" }}
                     />
                     <Line
                       yAxisId="right"
@@ -487,14 +487,14 @@ export default function AnalyticsPage() {
                     <Line
                       type="monotone"
                       dataKey="consumers"
-                      stroke="#14B8A6"
+                      stroke="var(--chart-1)"
                       strokeWidth={2}
-                      dot={{ fill: "#14B8A6" }}
+                      dot={{ fill: "var(--chart-1)" }}
                     />
                     <Line
                       type="monotone"
                       dataKey="advisors"
-                      stroke="#0EA5E9"
+                      stroke="var(--chart-2)"
                       strokeWidth={2}
                       dot={{ fill: "#0EA5E9" }}
                     />
@@ -516,7 +516,7 @@ export default function AnalyticsPage() {
                     <YAxis type="category" dataKey="state" className="text-xs" width={50} />
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <ChartLegend content={<ChartLegendContent />} />
-                    <Bar dataKey="advisors" fill="#14B8A6" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="advisors" fill="var(--chart-1)" radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>
@@ -615,15 +615,15 @@ export default function AnalyticsPage() {
                     <Area
                       type="monotone"
                       dataKey="views"
-                      stroke="#14B8A6"
-                      fill="#14B8A6"
+                      stroke="var(--chart-1)"
+                      fill="var(--chart-1)"
                       fillOpacity={0.3}
                     />
                     <Area
                       type="monotone"
                       dataKey="searches"
-                      stroke="#8B5CF6"
-                      fill="#8B5CF6"
+                      stroke="var(--chart-3)"
+                      fill="var(--chart-3)"
                       fillOpacity={0.3}
                     />
                   </AreaChart>
@@ -643,7 +643,7 @@ export default function AnalyticsPage() {
                     <XAxis dataKey="month" className="text-xs" />
                     <YAxis className="text-xs" />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="reviews" fill="#14B8A6" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="reviews" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ChartContainer>
               </CardContent>

@@ -12,7 +12,7 @@ const badgeVariants = cva(
         pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
         active: "bg-green-100 text-green-800 border-green-200",
         inactive: "bg-gray-100 text-gray-600 border-gray-200",
-        verified: "bg-teal-100 text-teal-800 border-teal-200",
+        verified: "bg-emerald-50 text-emerald-700 border-emerald-200",  /* softer green, differentiated from active */
       },
       userRole: {
         admin: "bg-purple-100 text-purple-800 border-purple-200",

@@ -10,7 +10,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="skeleton"
-      className={cn("bg-muted animate-pulse rounded-md", className)}
+      className={cn("bg-muted animate-shimmer rounded-md", className)}
       {...props}
     />
   )
@@ -32,7 +32,7 @@ function SkeletonText({
     return (
       <div
         data-slot="skeleton-text"
-        className={cn("bg-muted animate-pulse rounded-md h-4 w-full", className)}
+        className={cn("bg-muted animate-shimmer rounded-md h-4 w-full", className)}
         {...props}
       />
     )
@@ -44,7 +44,7 @@ function SkeletonText({
         <div
           key={index}
           className={cn(
-            "bg-muted animate-pulse rounded-md h-4",
+            "bg-muted animate-shimmer rounded-md h-4",
             index === lines - 1 ? "w-3/4" : "w-full"
           )}
         />
@@ -70,7 +70,7 @@ function SkeletonAvatar({
       data-slot="skeleton-avatar"
       data-size={size}
       className={cn(
-        "bg-muted animate-pulse rounded-full shrink-0",
+        "bg-muted animate-shimmer rounded-full shrink-0",
         "data-[size=sm]:size-6 data-[size=default]:size-8 data-[size=lg]:size-10",
         className
       )}
@@ -98,7 +98,7 @@ function SkeletonCard({
     <div
       data-slot="skeleton-card"
       className={cn(
-        "bg-card flex flex-col gap-6 rounded-md border border-border py-6 shadow-md",
+        "bg-card flex flex-col gap-6 rounded-xl border border-border py-6 shadow-md",
         className
       )}
       {...props}

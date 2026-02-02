@@ -4,6 +4,13 @@ import * as React from "react"
 import { Users, Heart, Shield, BadgeCheck, Lock } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+
+/**
+ * Icon Optical Sizing:
+ * - Stat icons (Users, Heart): size-5 (20px) contained in 40px circle
+ * - Security badge icons (Lock, BadgeCheck, Shield): size-4 (16px) in 32px container
+ * These icons are contained in circles, so optical correction is less critical.
+ */
 import { Separator } from "@/components/ui/separator"
 
 export interface TrustStripProps {

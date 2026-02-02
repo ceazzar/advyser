@@ -25,9 +25,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "h-11 w-full rounded-md px-4 text-sm",
             "bg-transparent border-2 border-foreground/20",
             "text-foreground placeholder:text-muted-foreground",
-            "transition-all duration-200 outline-none",
-            // Focus state - Teal ring
-            "focus:border-primary focus:ring-2 focus:ring-primary/20",
+            "transition-colors duration-200 outline-none",
+            // Focus state - Visible ring (40% opacity for dark primary)
+            "focus:border-primary focus:ring-2 focus:ring-primary/40",
             // Error state
             error && "border-destructive focus:border-destructive focus:ring-destructive/20",
             // Disabled state

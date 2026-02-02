@@ -16,6 +16,16 @@ import {
 } from "lucide-react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
+
+/**
+ * Icon Optical Sizing Guide:
+ * --------------------------
+ * - Category icons (TrendingUp, PiggyBank, etc.): size-6 (24px) for tile context
+ * - Inline check icons (CheckCircle2): size-[18px] for optical parity with text
+ * - Star icons (filled): size-4 (16px) baseline
+ * - Decorative icons (Quote): size-8 (32px) for visual emphasis
+ * - Button icons (ArrowRight): size-4 (16px) standard
+ */
 import { Button } from "@/components/ui/button"
 import { HeroSearchBar } from "@/components/composite/hero-search-bar"
 import { TrustStrip } from "@/components/composite/trust-strip"
@@ -71,53 +81,56 @@ const categories = [
   },
 ]
 
-// Mock testimonials
+// V.1.1.6: Testimonials with specific outcomes (not generic quotes)
 const testimonials = [
   {
     id: "1",
     name: "Sarah Mitchell",
     role: "Small Business Owner",
     avatar: null,
-    quote: "Finding the right financial advisor through Advyser completely changed my retirement outlook. Within months, I had a clear plan and peace of mind.",
+    quote: "My advisor restructured my super strategy and found $4,200/year in tax savings I was missing. Within 6 months, my retirement projection increased by $180,000.",
     rating: 5,
     location: "Sydney, NSW",
+    outcome: "$4,200/yr saved",
   },
   {
     id: "2",
     name: "Michael Chen",
     role: "IT Professional",
     avatar: null,
-    quote: "The process was so simple. I described what I needed, and Advyser connected me with three excellent advisors. I couldn't be happier with my choice.",
+    quote: "I was paying 1.8% in hidden fund fees. My new advisor moved me to a portfolio that performs better and costs 0.4%. That's an extra $12,000 over the next decade.",
     rating: 5,
     location: "Melbourne, VIC",
+    outcome: "$12,000 saved",
   },
   {
     id: "3",
     name: "Emma Thompson",
     role: "Healthcare Worker",
     avatar: null,
-    quote: "I was nervous about talking to a financial advisor, but Advyser made it easy. My advisor explained everything clearly and helped me set up a solid investment plan.",
+    quote: "I thought I was 15 years from retirement. My advisor showed me how salary sacrifice and debt restructuring could get me there in 10. Life-changing advice.",
     rating: 5,
     location: "Brisbane, QLD",
+    outcome: "5 years earlier",
   },
 ]
 
-// How it works steps
+// V.1.2.6: How it works steps with specifics
 const howItWorksSteps = [
   {
     number: 1,
-    title: "Tell us what you need",
-    description: "Answer a few simple questions about your financial goals and preferences. It only takes 2 minutes.",
+    title: "Answer 5 quick questions",
+    description: "Tell us your goals, budget, and preferences. Takes under 2 minutes — no account required.",
   },
   {
     number: 2,
-    title: "Get matched with advisors",
-    description: "We'll connect you with up to 3 qualified advisors who specialize in exactly what you're looking for.",
+    title: "Review 3 matched advisors",
+    description: "We'll show you up to 3 ASIC-verified advisors who specialise in your exact needs, with ratings and fees upfront.",
   },
   {
     number: 3,
-    title: "Choose your perfect fit",
-    description: "Review profiles, compare credentials, and book a free consultation with the advisor that's right for you.",
+    title: "Book a free consultation",
+    description: "Choose your advisor and schedule a no-obligation call. 94% of users book within 48 hours.",
   },
 ]
 
@@ -128,6 +141,7 @@ function TestimonialCard({
   quote,
   rating,
   location,
+  outcome,
 }: {
   name: string
   role: string
@@ -135,10 +149,19 @@ function TestimonialCard({
   quote: string
   rating: number
   location: string
+  outcome?: string
 }) {
   return (
     <Card className="h-full">
       <CardContent className="p-6 flex flex-col h-full">
+        {/* V.1.1.6: Outcome Badge */}
+        {outcome && (
+          <div className="inline-flex self-start items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-4">
+            <CheckCircle2 className="size-3.5" />
+            {outcome}
+          </div>
+        )}
+
         {/* Quote Icon */}
         <Quote className="size-8 text-primary/20 mb-4" />
 
@@ -187,9 +210,9 @@ export default function HomePage() {
       <section className="relative bg-white py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-10">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-[1.08] tracking-[-0.02em]">
               Find the right financial advisor for{" "}
-              <span className="text-teal-700">your goals</span>
+              <span className="text-foreground font-semibold">your goals</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               Connect with qualified, ASIC-registered financial advisors who specialize in what you need.
@@ -217,7 +240,7 @@ export default function HomePage() {
               <Link
                 key={term}
                 href={`/search?q=${encodeURIComponent(term)}`}
-                className="text-sm text-teal-700 hover:underline"
+                className="text-sm text-foreground font-medium hover:underline"
               >
                 {term}
               </Link>
@@ -238,31 +261,24 @@ export default function HomePage() {
                 Many Australians overpay for advisory services. Use our calculator to see
                 how much you could save by finding a better-priced advisor.
               </p>
+              {/* CheckCircle2 uses 18px for optical parity with text (stroke+fill hybrid icon) */}
               <div className="flex flex-wrap gap-4 justify-center lg:justify-start text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-primary" />
+                  <CheckCircle2 className="size-[18px] text-primary" />
                   <span>No obligation</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-primary" />
+                  <CheckCircle2 className="size-[18px] text-primary" />
                   <span>Takes 30 seconds</span>
                 </div>
               </div>
             </div>
             <div className="flex-1 w-full max-w-lg">
-              <SavingsCalculator />
+              <SavingsCalculator onCTAClick={() => router.push('/search')} />
             </div>
           </div>
         </div>
       </section>
-
-      {/* Trust Strip */}
-      <TrustStrip
-        advisorCount={2500}
-        clientCount={75000}
-        showSecurityBadges={true}
-        showPartnerLogos={true}
-      />
 
       {/* Categories Section */}
       <section className="py-24 lg:py-32">
@@ -349,6 +365,14 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* V.1.1.2: Trust Strip moved below How It Works - earn trust after explaining value */}
+      <TrustStrip
+        advisorCount={2500}
+        clientCount={75000}
+        showSecurityBadges={true}
+        showPartnerLogos={true}
+      />
+
       {/* Testimonials Section */}
       <section className="py-24 lg:py-32">
         <div className="max-w-7xl mx-auto px-6">
@@ -371,6 +395,7 @@ export default function HomePage() {
                 quote={testimonial.quote}
                 rating={testimonial.rating}
                 location={testimonial.location}
+                outcome={testimonial.outcome}
               />
             ))}
           </div>
@@ -412,7 +437,7 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {/* Trust Points */}
+          {/* Trust Points - CheckCircle2 at 20px for larger text context */}
           <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-white/80">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-5" />

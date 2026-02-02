@@ -36,8 +36,8 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        // Base styles - Filled (matching Input)
-        "h-10 w-full rounded-md px-4 text-sm",
+        // Base styles - Filled (matching Input) - h-11 = 44px touch target (WCAG 2.5.5)
+        "h-11 min-h-11 w-full rounded-md px-4 text-sm",
         "bg-input border border-transparent",
         "text-foreground",
         "transition-all duration-200 outline-none",
@@ -45,8 +45,8 @@ function SelectTrigger({
         "flex items-center justify-between gap-2",
         // Placeholder
         "data-[placeholder]:text-muted-foreground",
-        // Focus state - Teal ring
-        "focus:border-primary focus:ring-2 focus:ring-primary/20",
+        // Focus state - Visible ring (40% opacity for dark primary)
+        "focus:border-primary focus:ring-2 focus:ring-primary/40",
         // Error state
         error && "border-destructive focus:border-destructive focus:ring-destructive/20",
         // Disabled state

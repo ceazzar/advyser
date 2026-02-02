@@ -1,0 +1,130 @@
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                              ADVYSER PAGE INVENTORY                                     │
+│                              59 Pages Total - All Complete ✅                           │
+│                              Last Updated: 2 February 2026                              │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+
+PUBLIC PAGES (10)
+┌────┬─────────────────────────────┬────────────────────────────────┐
+│  # │ Route                       │ Description                    │
+├────┼─────────────────────────────┼────────────────────────────────┤
+│  1 │ /                           │ Homepage                       │
+│  2 │ /search                     │ Advisor search + filters       │
+│  3 │ /advisors/[slug]            │ Advisor profile detail         │
+│  4 │ /category/[type]            │ Category landing               │
+│  5 │ /request-intro              │ Request introduction form      │
+│  6 │ /how-it-works               │ How it works explainer         │
+│  7 │ /for-advisors               │ Advisor marketing page         │
+│  8 │ /resources                  │ Resources & guides hub         │
+│  9 │ /components                 │ Component showcase (dev)       │
+│ 10 │ /design-system              │ Design system docs (dev)       │
+└────┴─────────────────────────────┴────────────────────────────────┘
+
+AUTH PAGES (5)
+┌────┬─────────────────────────────┬────────────────────────────────┐
+│  # │ Route                       │ Description                    │
+├────┼─────────────────────────────┼────────────────────────────────┤
+│ 11 │ /login                      │ Login form                     │
+│ 12 │ /signup                     │ Registration form              │
+│ 13 │ /verify                     │ Email verification             │
+│ 14 │ /reset-password             │ Password reset (from email)    │
+│ 15 │ /forgot-password            │ Forgot password entry          │
+└────┴─────────────────────────────┴────────────────────────────────┘
+
+CONSUMER DASHBOARD (6)
+┌────┬─────────────────────────────┬────────────────────────────────┐
+│  # │ Route                       │ Description                    │
+├────┼─────────────────────────────┼────────────────────────────────┤
+│ 16 │ /dashboard                  │ Consumer dashboard home        │
+│ 17 │ /dashboard/requests         │ My advisor requests            │
+│ 18 │ /dashboard/requests/[id]    │ Request detail                 │
+│ 19 │ /dashboard/messages         │ Messages inbox                 │
+│ 20 │ /dashboard/messages/[id]    │ Conversation thread            │
+│ 21 │ /dashboard/bookings         │ My bookings                    │
+└────┴─────────────────────────────┴────────────────────────────────┘
+
+ADVISOR PORTAL (17)
+┌────┬─────────────────────────────────────┬────────────────────────────┐
+│  # │ Route                               │ Description                │
+├────┼─────────────────────────────────────┼────────────────────────────┤
+│ 22 │ /advisor                            │ Advisor dashboard home     │
+│ 23 │ /advisor/leads                      │ Leads inbox                │
+│ 24 │ /advisor/leads/[id]                 │ Lead detail                │
+│ 25 │ /advisor/messages                   │ Messages                   │
+│ 26 │ /advisor/bookings                   │ Bookings calendar          │
+│ 27 │ /advisor/clients                    │ Client list                │
+│ 28 │ /advisor/clients/[id]               │ Client overview            │
+│ 29 │ /advisor/clients/[id]/messages      │ Client messages            │
+│ 30 │ /advisor/clients/[id]/documents     │ Client documents           │
+│ 31 │ /advisor/clients/[id]/notes         │ Client notes               │
+│ 32 │ /advisor/clients/[id]/copilot       │ AI Copilot (future)        │
+│ 33 │ /advisor/clients/[id]/tasks         │ Client tasks               │
+│ 34 │ /advisor/profile                    │ Profile editor             │
+│ 35 │ /advisor/team                       │ Team members               │
+│ 36 │ /advisor/settings                   │ Settings                   │
+│ 37 │ /advisor/billing                    │ Billing & subscription     │
+│ 38 │ /advisor/onboarding                 │ Onboarding wizard          │
+└────┴─────────────────────────────────────┴────────────────────────────┘
+
+CLAIM/VERIFICATION (3)
+┌────┬─────────────────────────────┬────────────────────────────────┐
+│  # │ Route                       │ Description                    │
+├────┼─────────────────────────────┼────────────────────────────────┤
+│ 39 │ /claim                      │ Claim entry (search)           │
+│ 40 │ /claim/[id]                 │ Claim form                     │
+│ 41 │ /claim/pending              │ Verification pending           │
+└────┴─────────────────────────────┴────────────────────────────────┘
+
+ADMIN PORTAL (8)
+┌────┬─────────────────────────────┬────────────────────────────────┐
+│  # │ Route                       │ Description                    │
+├────┼─────────────────────────────┼────────────────────────────────┤
+│ 42 │ /admin                      │ Admin dashboard                │
+│ 43 │ /admin/claims               │ Claims queue                   │
+│ 44 │ /admin/claims/[id]          │ Claim review                   │
+│ 45 │ /admin/listings             │ Listings moderation            │
+│ 46 │ /admin/reviews              │ Reviews moderation             │
+│ 47 │ /admin/reports              │ Reports queue                  │
+│ 48 │ /admin/categories           │ Category management            │
+│ 49 │ /admin/analytics            │ Platform analytics             │
+└────┴─────────────────────────────┴────────────────────────────────┘
+
+SUPPORTING PAGES (10)
+┌────┬─────────────────────────────┬────────────────────────────────┐
+│  # │ Route                       │ Description                    │
+├────┼─────────────────────────────┼────────────────────────────────┤
+│ 50 │ /about                      │ About us & team                │
+│ 51 │ /contact                    │ Contact form & info            │
+│ 52 │ /help                       │ Help centre & FAQs             │
+│ 53 │ /privacy                    │ Privacy policy                 │
+│ 54 │ /terms                      │ Terms of service               │
+│ 55 │ /cookies                    │ Cookie policy                  │
+│ 56 │ /disclaimer                 │ Financial disclaimer           │
+│ 57 │ /careers                    │ Job openings                   │
+│ 58 │ /press                      │ Press & media kit              │
+│ 59 │ /advisor-resources          │ Advisor guides & tutorials     │
+└────┴─────────────────────────────┴────────────────────────────────┘
+
+───────────────────────────────────────────────────────────────────────────────────────────
+
+SUMMARY
+┌────────────────────────┬───────────┐
+│ Section                │ Count     │
+├────────────────────────┼───────────┤
+│ Public                 │ 10        │
+│ Auth                   │ 5         │
+│ Consumer Dashboard     │ 6         │
+│ Advisor Portal         │ 17        │
+│ Claim/Verification     │ 3         │
+│ Admin Portal           │ 8         │
+│ Supporting             │ 10        │
+├────────────────────────┼───────────┤
+│ TOTAL                  │ 59        │
+└────────────────────────┴───────────┘
+
+NOTES
+- All pages use mock data for demonstration
+- Responsive layouts (mobile + desktop)
+- Demo auth with role-based routing
+- AU-compliant content (ASIC, superannuation, etc.)
+- File path: site/src/app/[route]/page.tsx

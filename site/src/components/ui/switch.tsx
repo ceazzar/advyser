@@ -13,8 +13,10 @@ function Switch({
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        // Base styles
-        "inline-flex h-6 w-11 shrink-0 items-center rounded-full",
+        // Touch target - min 44px height (WCAG 2.5.5)
+        "relative min-h-11 px-1",
+        // Base styles - visual track
+        "inline-flex w-11 shrink-0 items-center rounded-full",
         "border-2 border-transparent transition-all duration-200 outline-none",
         // Unchecked state
         "bg-muted",

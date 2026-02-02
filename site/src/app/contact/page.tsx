@@ -94,7 +94,7 @@ export default function ContactPage() {
 
       {/* Contact Methods */}
       <section className="py-12 bg-muted/30">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-6">
             {contactMethods.map((method) => (
               <Card key={method.title}>
@@ -119,7 +119,7 @@ export default function ContactPage() {
 
       {/* Contact Form Section */}
       <section className="py-16 lg:py-24">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Form */}
             <div>

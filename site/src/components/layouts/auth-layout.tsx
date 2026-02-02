@@ -12,24 +12,24 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
   return (
     <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
       {/* Left side - Branding/Illustration (hidden on mobile) */}
-      <div className="hidden bg-gradient-to-br from-teal-500 via-teal-600 to-teal-700 lg:flex lg:flex-col lg:justify-between lg:p-12">
+      <div className="hidden bg-gray-50 lg:flex lg:flex-col lg:justify-between lg:p-12">
         {/* Logo */}
         <Link href="/" className="flex items-center">
-          <span className="text-2xl font-bold text-white">Advyser</span>
+          <span className="text-2xl font-bold text-gray-900">Advyser</span>
         </Link>
 
         {/* Illustration/Content Area */}
         <div className="flex flex-1 flex-col items-center justify-center">
           {/* Abstract illustration */}
           <div className="relative">
-            <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-            <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-white/10" />
-            <div className="relative z-10 rounded-2xl bg-white/10 p-8 backdrop-blur-sm">
+            <div className="absolute -left-8 -top-8 h-32 w-32 rounded-full bg-gray-200/60" />
+            <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-gray-200/60" />
+            <div className="relative z-10 rounded-2xl bg-white p-8 shadow-lg border border-gray-100">
               <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                     <svg
-                      className="h-6 w-6 text-white"
+                      className="h-6 w-6 text-gray-700"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -42,15 +42,15 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
                       />
                     </svg>
                   </div>
-                  <div className="text-white">
-                    <p className="text-sm font-medium">Financial Advisors</p>
-                    <p className="text-xs text-white/70">Expert guidance</p>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Financial Advisors</p>
+                    <p className="text-xs text-gray-500">Expert guidance</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
                     <svg
-                      className="h-6 w-6 text-white"
+                      className="h-6 w-6 text-gray-700"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -63,9 +63,9 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
                       />
                     </svg>
                   </div>
-                  <div className="text-white">
-                    <p className="text-sm font-medium">Property Advisors</p>
-                    <p className="text-xs text-white/70">Real estate experts</p>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Property Advisors</p>
+                    <p className="text-xs text-gray-500">Real estate experts</p>
                   </div>
                 </div>
               </div>
@@ -74,9 +74,9 @@ export function AuthLayout({ children, title, description }: AuthLayoutProps) {
         </div>
 
         {/* Tagline */}
-        <div className="text-white">
-          <p className="text-lg font-medium">Find your perfect advisor</p>
-          <p className="mt-1 text-sm text-white/70">
+        <div>
+          <p className="text-lg font-medium text-gray-900">Find your perfect advisor</p>
+          <p className="mt-1 text-sm text-gray-500">
             Connect with trusted financial and property experts
           </p>
         </div>

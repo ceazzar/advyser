@@ -8,7 +8,6 @@ import {
   Loader2,
   X,
 } from "lucide-react"
-import { useTheme } from "next-themes"
 import { Toaster as Sonner, toast as sonnerToast, type ToasterProps } from "sonner"
 
 import { cn } from "@/lib/utils"
@@ -30,11 +29,9 @@ import { cn } from "@/lib/utils"
  */
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
-
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme="light"
       className="toaster group"
       position="bottom-right"
       duration={5000}
@@ -80,10 +77,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "opacity-0 group-hover:opacity-100 transition-opacity",
             "focus:outline-none focus:ring-2 focus:ring-ring"
           ),
-          success: "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/50",
-          error: "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50",
-          warning: "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/50",
-          info: "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/50",
+          success: "border-green-200 bg-green-50",
+          error: "border-red-200 bg-red-50",
+          warning: "border-yellow-200 bg-yellow-50",
+          info: "border-blue-200 bg-blue-50",
           loading: "border-border bg-popover",
         },
       }}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
+import { ShortlistProvider } from "@/lib/shortlist-context";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 
@@ -20,7 +21,9 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} font-sans antialiased`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <ShortlistProvider>{children}</ShortlistProvider>
+        </AuthProvider>
       </body>
     </html>
   );

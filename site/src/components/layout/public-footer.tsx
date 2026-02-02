@@ -86,7 +86,7 @@ export function PublicFooter() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
                   aria-label={social.label}
                 >
                   {social.icon}
@@ -103,7 +103,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
                   >
                     {link.label}
                   </Link>
@@ -119,7 +119,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
                   >
                     {link.label}
                   </Link>
@@ -135,7 +135,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
                   >
                     {link.label}
                   </Link>
@@ -151,7 +151,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
                   >
                     {link.label}
                   </Link>
@@ -167,7 +167,7 @@ export function PublicFooter() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
                   >
                     {link.label}
                   </Link>
@@ -178,18 +178,17 @@ export function PublicFooter() {
         </div>
       </div>
 
-      {/* Regulatory Disclaimer */}
+      {/* Why We're an Introducer - Trust Signal */}
       <div className="border-t bg-muted/30">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="text-xs text-muted-foreground space-y-2">
             <p>
-              <strong>Important:</strong> Advyser Pty Ltd (ABN: XX XXX XXX XXX) is an introducer service only and does not hold an Australian Financial Services Licence (AFSL).
-              We do not provide financial advice, credit assistance, or any other financial services.
+              <strong>Why we're an introducer, not an advisor:</strong> We connect you with licensed professionals - we never sell products or earn commissions from advice.
+              This means our recommendations are based purely on helping you find the right match, not on what pays us the most.
             </p>
             <p>
-              All financial advisors listed on this platform are independently licensed under their own AFSL or as authorised representatives.
-              Verify credentials on the{" "}
-              <a href="https://moneysmart.gov.au/financial-advice/financial-advisers-register" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              Every advisor on Advyser holds their own AFSL or is an authorised representative - you can verify their credentials directly on the{" "}
+              <a href="https://moneysmart.gov.au/financial-advice/financial-advisers-register" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm">
                 ASIC Financial Advisers Register
               </a>.
             </p>
@@ -206,8 +205,7 @@ export function PublicFooter() {
               <p className="mt-1">ABN: XX XXX XXX XXX</p>
             </div>
             <p className="text-sm text-muted-foreground text-center md:text-right max-w-xl">
-              Advyser is an introducer service only. We do not provide financial advice.
-              All advisors listed are independently licensed and regulated by ASIC.
+              We connect, we don't sell. All advisors are independently ASIC-licensed professionals.
             </p>
           </div>
         </div>

@@ -1,8 +1,9 @@
 /**
  * Advyser Design Reference — 3 Locked Websites
  * Locked: 2026-02-01
+ * Updated: 2026-02-02 (migrated from #14B8A6 → #0A0A0A neutral palette)
  *
- * Mirror UI/UX patterns from these sites. Apply Advyser colors (#14B8A6).
+ * Mirror UI/UX patterns from these sites. Apply Advyser neutral gray palette.
  */
 
 export const referenceWebsites = [

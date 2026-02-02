@@ -5,6 +5,78 @@ import { Upload, X, File, Image, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "./button"
 
+// MIME type mapping for server-side validation
+// The accept attribute is client-side only and can be bypassed
+const ALLOWED_MIME_TYPES: Record<string, string[]> = {
+  '.pdf': ['application/pdf'],
+  '.doc': ['application/msword'],
+  '.docx': ['application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  '.txt': ['text/plain'],
+  '.jpg': ['image/jpeg'],
+  '.jpeg': ['image/jpeg'],
+  '.png': ['image/png'],
+  '.gif': ['image/gif'],
+  '.webp': ['image/webp'],
+  '.svg': ['image/svg+xml'],
+  '.csv': ['text/csv', 'application/csv'],
+  '.xls': ['application/vnd.ms-excel'],
+  '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+  '.zip': ['application/zip', 'application/x-zip-compressed'],
+  '.mp3': ['audio/mpeg'],
+  '.mp4': ['video/mp4'],
+  '.json': ['application/json'],
+  '.xml': ['application/xml', 'text/xml'],
+}
+
+/**
+ * Parse the accept prop and return allowed MIME types
+ * Handles formats like ".pdf,.doc" or "image/*" or "application/pdf"
+ */
+function parseAcceptToMimeTypes(accept: string): Set<string> {
+  const allowedMimes = new Set<string>()
+  const parts = accept.split(',').map(p => p.trim().toLowerCase())
+
+  for (const part of parts) {
+    if (part.startsWith('.')) {
+      // Extension format: .pdf, .doc, etc.
+      const mimes = ALLOWED_MIME_TYPES[part]
+      if (mimes) {
+        mimes.forEach(m => allowedMimes.add(m))
+      }
+    } else if (part.endsWith('/*')) {
+      // Wildcard format: image/*, video/*, etc.
+      const category = part.slice(0, -2)
+      // Add the category prefix for wildcard matching
+      allowedMimes.add(`${category}/*`)
+    } else {
+      // Direct MIME type: application/pdf, etc.
+      allowedMimes.add(part)
+    }
+  }
+
+  return allowedMimes
+}
+
+/**
+ * Check if a file's MIME type is allowed
+ */
+function isValidMimeType(file: File, allowedMimes: Set<string>): boolean {
+  const fileType = file.type.toLowerCase()
+
+  // Direct match
+  if (allowedMimes.has(fileType)) {
+    return true
+  }
+
+  // Check for wildcard matches (e.g., image/*)
+  const [category] = fileType.split('/')
+  if (allowedMimes.has(`${category}/*`)) {
+    return true
+  }
+
+  return false
+}
+
 export interface FileUploadProps {
   accept?: string
   multiple?: boolean
@@ -33,8 +105,20 @@ function FileUpload({
     if (!newFiles) return
     setError(null)
 
+    // Parse allowed MIME types if accept prop is provided
+    const allowedMimes = accept ? parseAcceptToMimeTypes(accept) : null
+
     const validFiles: File[] = []
     Array.from(newFiles).forEach((file) => {
+      // Validate MIME type if accept prop is provided
+      if (allowedMimes && allowedMimes.size > 0) {
+        if (!isValidMimeType(file, allowedMimes)) {
+          setError(`File "${file.name}" has invalid file type. Allowed: ${accept}`)
+          return
+        }
+      }
+
+      // Validate file size
       if (file.size > maxSize * 1024 * 1024) {
         setError(`File "${file.name}" exceeds ${maxSize}MB limit`)
         return

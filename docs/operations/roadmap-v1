@@ -1,0 +1,353 @@
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                         │
+│                    ADVYSER IMPLEMENTATION STATUS ROADMAP v1                             │
+│                                                                                         │
+│                    Generated: 2026-02-02                                                │
+│                                                                                         │
+│                    ████████████████████░░░░░░░░░░░░░░░░░░░░                             │
+│                    UI Complete (70%)    Features Missing (30%)                          │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                                    WHAT'S IMPLEMENTED
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 1: FOUNDATION                                                        [100% DONE] │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   ✓ Design System         ✓ 61 UI Components      ✓ 5 Layout Templates                 │
+│   ✓ Color Tokens          ✓ Typography            ✓ Spacing Scale                      │
+│   ✓ Database Schema       ✓ 29 Tables             ✓ 21 Enums                           │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 2: UI PAGES                                                          [100% DONE] │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   PUBLIC (7/7)              CONSUMER (6/6)           ADVISOR (15/15)                    │
+│   ✓ Homepage                ✓ Dashboard              ✓ Dashboard                        │
+│   ✓ Search Results          ✓ My Requests            ✓ Leads + Detail                   │
+│   ✓ Advisor Profile         ✓ Request Detail         ✓ Messages                         │
+│   ✓ Category Landing        ✓ Messages               ✓ Bookings                         │
+│   ✓ Sign Up                 ✓ Conversation           ✓ Profile Editor                   │
+│   ✓ Log In                  ✓ Bookings               ✓ Team, Settings, Billing          │
+│   ✓ Request Intro                                    ✓ Client Workspace (6 tabs)        │
+│                                                                                         │
+│   VERIFICATION (4/4)        ADMIN (8/8)              AUTH (2/2)                         │
+│   ✓ Claim Entry             ✓ Dashboard              ✓ Email Verify                     │
+│   ✓ Claim Form              ✓ Claims + Review        ✓ Password Reset                   │
+│   ✓ Pending                 ✓ Listings, Reviews                                         │
+│   ✓ Onboarding              ✓ Reports, Categories                                       │
+│                             ✓ Analytics                                                 │
+│                                                                                         │
+│   EXTRA PAGES (6)                                                                       │
+│   ✓ How It Works    ✓ For Advisors    ✓ Resources                                      │
+│   ✓ Components      ✓ Design System   ✓ Clients List                                   │
+│                                                                                         │
+│   TOTAL: 53 Pages Implemented                                                           │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                                    WHAT'S MISSING (DELTA)
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ CRITICAL GAP 1: BACKEND INTEGRATION                                            [0%]    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   CURRENT STATE                           NEEDED                                        │
+│   ─────────────                           ──────                                        │
+│   × All pages use MOCK DATA               → Supabase/Postgres connection               │
+│   × No API routes                         → /api/* endpoints                           │
+│   × No authentication                     → NextAuth or Supabase Auth                  │
+│   × No data fetching                      → Server actions or tRPC                     │
+│   × handleSend() = setTimeout()           → Real database mutations                    │
+│                                                                                         │
+│   FILES AFFECTED: Every page.tsx (53 files)                                            │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ CRITICAL GAP 2: AU COMPLIANCE                                                  [0%]    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   CURRENT STATE                           NEEDED                                        │
+│   ─────────────                           ──────                                        │
+│   × US cities in search dropdown          → Sydney, Melbourne, Brisbane, Perth         │
+│   × "FINRA Compliant" badge               → "ASIC Regulated" badge                     │
+│   × No AFSL display on profiles           → AFSL Number, Authorised Rep ID             │
+│   × No ASIC register link                 → "Verify on ASIC" link                      │
+│   × Generic disclaimer                    → AU-specific financial disclaimer           │
+│                                                                                         │
+│   FILES TO UPDATE:                                                                      │
+│   • site/src/app/search/page.tsx (line 85-95: location dropdown)                       │
+│   • site/src/components/composite/trust-strip.tsx (line 126: FINRA badge)              │
+│   • site/src/app/advisors/[slug]/page.tsx (add AFSL section)                           │
+│   • site/src/components/layout/public-footer.tsx (disclaimer)                          │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ CRITICAL GAP 3: COPILOT AI INTEGRATION                                         [0%]    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   CURRENT STATE                           NEEDED                                        │
+│   ─────────────                           ──────                                        │
+│   × Mock responses after 2s delay         → Claude/GPT API integration                 │
+│   × No file upload in Copilot             → Transcript upload (.txt, .docx, PDF)       │
+│   × No safety checking                    → AU compliance guardrails                   │
+│   × No prompt versioning                  → prompt_version tracking                    │
+│   × No streaming                          → Real-time token streaming                  │
+│                                                                                         │
+│   FILES TO UPDATE:                                                                      │
+│   • site/src/app/advisor/clients/[id]/copilot/page.tsx                                 │
+│   • NEW: site/src/lib/ai/copilot.ts (LLM integration)                                  │
+│   • NEW: site/src/lib/ai/safety-checker.ts                                             │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ HIGH GAP 4: UI POLISH (vs Wise)                                               [70%]    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   ISSUE                      CURRENT              TARGET                                │
+│   ─────                      ───────              ──────                                │
+│   Header height              76px                 64px                                  │
+│   Nav link font              18px semibold        14px medium                           │
+│   CTA button height          32px (h-8)           40px (h-10)                           │
+│   Hero H1 size               36-60px              48-72px                               │
+│   Section padding            80-96px              100-128px                             │
+│   Card grid gaps             24px                 32px                                  │
+│   Border-bottom on header    None                 border-gray-100                       │
+│   Hover transitions          Inconsistent         duration-200 everywhere              │
+│   Focus ring on Select       DISABLED (bug!)      Enabled for a11y                      │
+│                                                                                         │
+│   FILES TO UPDATE:                                                                      │
+│   • site/src/components/layout/public-header.tsx                                       │
+│   • site/src/components/composite/hero-search-bar.tsx (line 73: focus:ring-0)          │
+│   • site/src/app/page.tsx (hero sizing, section padding)                               │
+│   • site/src/app/search/page.tsx (header padding)                                      │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ MEDIUM GAP 5: MISSING WIREFRAME FEATURES                                      [60%]    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   HOMEPAGE                                                                              │
+│   × Featured Advisors section (has Testimonials instead)                               │
+│   × Location autocomplete in search bar                                                │
+│                                                                                         │
+│   SEARCH PAGE                                                                           │
+│   × "Verified only" filter toggle                                                       │
+│   × "Available this week" filter                                                        │
+│   × Distance/radius filter                                                              │
+│   × "Nearest" sort option                                                               │
+│   × "Soonest availability" sort option                                                  │
+│   × Response time display on cards                                                      │
+│   × Price tier display ($-$$$$)                                                         │
+│                                                                                         │
+│   ADVISOR PROFILE                                                                       │
+│   × Rating distribution chart (5-star breakdown)                                        │
+│   × "Who I Help / Don't Work With" sections                                            │
+│   × Service duration column                                                             │
+│   × Multiple CTAs (Book, Message, Request Intro)                                        │
+│   × Back to Search link                                                                 │
+│                                                                                         │
+│   ADVISOR DASHBOARD                                                                     │
+│   × Profile Completeness indicator                                                      │
+│   × Copilot Usage Summary                                                               │
+│   × Conversion Rate KPI                                                                 │
+│   × Profile Views KPI                                                                   │
+│   × Inline Accept/Decline on leads                                                      │
+│   × Personalized greeting with name                                                     │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ LOW GAP 6: MOBILE & RESPONSIVENESS                                            [65%]    │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   × useIsMobile hook = 768px (should be 1024px per design)                             │
+│   × No responsive grid system for cards                                                 │
+│   × Touch targets below 44px minimum                                                    │
+│   × Filter sheet slides LEFT (wireframe says BOTTOM)                                   │
+│   × No mobile table strategy                                                            │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                                    IMPLEMENTATION ROADMAP
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+     NOW                                                                          LAUNCH
+      │                                                                              │
+      ▼                                                                              ▼
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│ PHASE 1 │───▶│ PHASE 2 │───▶│ PHASE 3 │───▶│ PHASE 4 │───▶│ PHASE 5 │───▶│ PHASE 6 │
+│ CRITICAL│    │   AU    │    │ BACKEND │    │   UI    │    │ COPILOT │    │  FINAL  │
+│  FIXES  │    │COMPLIANT│    │  INTEG  │    │ POLISH  │    │   AI    │    │   QA    │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+     │              │              │              │              │              │
+     │              │              │              │              │              │
+     ▼              ▼              ▼              ▼              ▼              ▼
+
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 1: CRITICAL FIXES                                                                 │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   □ Fix focus:ring-0 accessibility bug in HeroSearchBar                                │
+│   □ Fix useIsMobile breakpoint (768 → 1024)                                            │
+│   □ Update BUILD_PLAN.md (mark 42 items complete)                                      │
+│   □ Fix LeadStatus type (add "booked" | "closed")                                      │
+│                                                                                         │
+│   Effort: 2-4 hours                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 2: AU COMPLIANCE                                                                  │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   □ Replace US cities with AU locations (Sydney, Melbourne, Brisbane, Perth, Adelaide) │
+│   □ Change "FINRA Compliant" → "ASIC Regulated" in trust-strip.tsx                    │
+│   □ Add AFSL/Authorised Rep display to advisor profile                                 │
+│   □ Add "Verify on ASIC" link to credentials section                                   │
+│   □ Update footer disclaimer for AU regulations                                         │
+│   □ Add ABN to footer                                                                   │
+│                                                                                         │
+│   Effort: 4-6 hours                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 3: BACKEND INTEGRATION                                                            │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   □ Set up Supabase project + connect to schema.sql                                    │
+│   □ Implement authentication (Supabase Auth)                                            │
+│   □ Create API routes or server actions for:                                            │
+│       • User registration/login                                                         │
+│       • Advisor search with real data                                                   │
+│       • Lead management CRUD                                                            │
+│       • Message/conversation system                                                     │
+│       • Booking management                                                              │
+│   □ Replace mock data with real queries                                                 │
+│   □ Add loading states (skeletons already exist)                                        │
+│   □ Add error boundaries                                                                │
+│                                                                                         │
+│   Effort: 2-3 weeks                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 4: UI POLISH                                                                      │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   □ Header: 76px → 64px, add border-bottom                                             │
+│   □ Nav links: 18px semibold → 14px medium                                             │
+│   □ CTA button: h-8 → h-10, px-4 → px-6                                               │
+│   □ Hero H1: text-4xl/5xl/6xl → text-5xl/6xl/7xl                                      │
+│   □ Section padding: py-20/24 → py-24/32                                               │
+│   □ Card gaps: gap-6 → gap-8                                                           │
+│   □ Add duration-200 to all hover transitions                                           │
+│   □ Add hover:shadow-md + scale-[1.01] to buttons                                      │
+│   □ Implement missing wireframe features (filters, sorts, etc.)                        │
+│                                                                                         │
+│   Effort: 1-2 weeks                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 5: COPILOT AI                                                                     │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   □ Integrate Claude API for Copilot                                                    │
+│   □ Implement transcript upload (FileUpload component exists)                           │
+│   □ Build prompt templates (Meeting Summary, Action Items, etc.)                        │
+│   □ Add safety checker with AU compliance rules                                         │
+│   □ Implement streaming responses                                                       │
+│   □ Track prompt_version and model_id                                                   │
+│   □ Add edit/approval workflow for outputs                                              │
+│                                                                                         │
+│   Effort: 2-3 weeks                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                           │
+                                           ▼
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│ PHASE 6: FINAL QA                                                                       │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   □ Mobile testing across devices                                                       │
+│   □ Accessibility audit (WCAG 2.1 AA)                                                  │
+│   □ Performance optimization (Core Web Vitals)                                          │
+│   □ Security review (remove console.logs, fix XSS in chart.tsx)                        │
+│   □ End-to-end testing                                                                  │
+│   □ AU legal review of disclaimers                                                      │
+│                                                                                         │
+│   Effort: 1-2 weeks                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                                    QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────┬─────────────────┬─────────────────┬─────────────────┐
+│           CATEGORY               │   IMPLEMENTED   │     MISSING     │   COMPLETION    │
+├──────────────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│ Design System / Tokens           │       ✓         │        -        │      100%       │
+│ UI Components (Shadcn)           │      61         │        0        │      100%       │
+│ Layout Templates                 │       5         │        0        │      100%       │
+│ Page Routes                      │      53         │        0        │      100%       │
+│ Database Schema                  │      29 tables  │        0        │      100%       │
+├──────────────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│ Backend Integration              │       0         │      ALL        │        0%       │
+│ Authentication                   │       0         │      ALL        │        0%       │
+│ Real Data Queries                │       0         │      ALL        │        0%       │
+│ API Routes                       │       0         │      ALL        │        0%       │
+├──────────────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│ AU Compliance                    │       0         │        6        │        0%       │
+│ Copilot AI Integration           │       0         │        7        │        0%       │
+├──────────────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│ UI Polish (vs Wise)              │     ~70%        │      ~30%       │       70%       │
+│ Wireframe Feature Parity         │     ~60%        │      ~40%       │       60%       │
+│ Mobile Responsiveness            │     ~65%        │      ~35%       │       65%       │
+├──────────────────────────────────┼─────────────────┼─────────────────┼─────────────────┤
+│ OVERALL FRONTEND                 │                 │                 │       70%       │
+│ OVERALL FULL-STACK               │                 │                 │       35%       │
+└──────────────────────────────────┴─────────────────┴─────────────────┴─────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                              IMMEDIATE NEXT ACTIONS
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+   1. Fix focus:ring-0 bug         →  site/src/components/composite/hero-search-bar.tsx:73
+   2. Fix FINRA → ASIC badge       →  site/src/components/composite/trust-strip.tsx:126
+   3. Replace US → AU cities       →  site/src/app/search/page.tsx:85-95
+   4. Update BUILD_PLAN.md         →  plans/BUILD_PLAN.md (mark phases 2-7 complete)
+   5. Set up Supabase              →  Connect database/schema.sql
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════
+                                    DOCUMENT HISTORY
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+┌────────────┬───────────────────────────────────┬─────────────────────────────────────────┐
+│    Date    │              Change               │                 Author                  │
+├────────────┼───────────────────────────────────┼─────────────────────────────────────────┤
+│ 2026-02-02 │ Initial roadmap v1 creation       │ Multi-agent UI audit                    │
+└────────────┴───────────────────────────────────┴─────────────────────────────────────────┘

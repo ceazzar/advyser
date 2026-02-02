@@ -1,0 +1,946 @@
+================================================================================
+                    PROSPECT FINANCE SAAS TEMPLATE
+                       FRONTEND REVIEW v2
+
+                    Source: prospect-finance-saas-webflow-template.webflow.io
+                    Review Date: 2026-02-02
+================================================================================
+
+
+================================================================================
+EXECUTIVE SUMMARY
+================================================================================
+
+Prospect is a premium Webflow template designed for B2B SaaS and fintech
+applications. It features a sophisticated dark-mode aesthetic, multiple page
+variations for A/B testing, and a component system optimized for conversion.
+
+Key Strengths:
+- Multiple homepage/feature/about variations for testing
+- Strong social proof integration throughout
+- Problem-solution narrative structure
+- Clean visual hierarchy with generous whitespace
+- Professional photography over stock illustrations
+
+
+================================================================================
+LAYOUT ANALYSIS
+================================================================================
+
+GRID SYSTEM
+--------------------------------------------------------------------------------
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Property       │                    Specification                       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Breakpoints        │ Desktop: 992px+                                        │
+│                    │ Tablet: 768-991px                                      │
+│                    │ Mobile Large: 480-767px                                │
+│                    │ Mobile Small: <480px                                   │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Container          │ Centered, max-width constrained                        │
+│                    │ Full-bleed sections for hero/feature blocks            │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Column Grid        │ Flexible (2-col, 3-col, 4-col layouts observed)        │
+│                    │ Cards use equal-width distribution                     │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Spacing            │ Generous vertical padding between sections             │
+│                    │ Consistent internal padding on cards                   │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+
+SECTION STRUCTURE PATTERNS
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TYPICAL PAGE FLOW (Homepage Example)                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. NAVIGATION BAR (sticky)                                                 │
+│     ├── Logo (left)                                                         │
+│     ├── Nav links with dropdowns (center-left)                              │
+│     └── CTA button (right)                                                  │
+│                                                                             │
+│  2. HERO SECTION                                                            │
+│     ├── Large headline (problem/benefit statement)                          │
+│     ├── Supporting subheadline                                              │
+│     ├── Dual CTA buttons (primary + secondary)                              │
+│     └── Social proof cluster (avatars + rating)                             │
+│                                                                             │
+│  3. LOGO BAR                                                                │
+│     └── "Join 500+ companies" + 5-6 client logos                            │
+│                                                                             │
+│  4. FEATURE SECTIONS (2-3 blocks)                                           │
+│     └── Alternating image/text layout                                       │
+│                                                                             │
+│  5. TESTIMONIAL SECTION                                                     │
+│     └── Video testimonial or quote carousel                                 │
+│                                                                             │
+│  6. PRICING PREVIEW (optional)                                              │
+│     └── 2-tier comparison cards                                             │
+│                                                                             │
+│  7. BLOG/RESOURCES SECTION                                                  │
+│     └── 3 recent articles in card grid                                      │
+│                                                                             │
+│  8. NEWSLETTER CTA                                                          │
+│     └── Email capture with privacy note                                     │
+│                                                                             │
+│  9. FOOTER                                                                  │
+│     └── Multi-column links + social + legal                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+ABOVE-THE-FOLD STRATEGY
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   Priority 1: Value proposition headline (what you get)                     │
+│   Priority 2: Benefit statement (why it matters)                            │
+│   Priority 3: Dual CTAs (action options)                                    │
+│   Priority 4: Social proof (trust signals)                                  │
+│   Priority 5: Product imagery/dashboard preview                             │
+│                                                                             │
+│   Pattern: Everything needed to decide "should I explore?" appears          │
+│   within first viewport. No scrolling required for basic understanding.     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+COMPONENT PATTERNS
+================================================================================
+
+HERO SECTION VARIATIONS
+--------------------------------------------------------------------------------
+
+Home 1 - "Built for Fast-Moving Businesses"
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   [Logo]    Nav Nav Nav Nav                              [Buy Template]     │
+│                                                                             │
+│   ─────────────────────────────────────────────────────────────────────     │
+│                                                                             │
+│   Built for Fast-Moving                                                     │
+│   Businesses                             ┌─────────────────────────────┐    │
+│                                          │                             │    │
+│   Prospect surfaces what matters,        │    [Dashboard Preview]      │    │
+│   automates the rest, and keeps          │                             │    │
+│   you moving with intention.             │                             │    │
+│                                          └─────────────────────────────┘    │
+│   [Get started now]  [Explore more]                                         │
+│                                                                             │
+│   [Avatar Stack] Rated 4.97/5 from 500+ reviews                             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Home 2 - "Robust AI for the Finance Sector"
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   Centered layout variation                                                 │
+│   - Headline emphasizes AI/technology angle                                 │
+│   - Free trial signup form inline                                           │
+│   - Four feature cards below hero (Collaboration, Security, etc.)           │
+│   - Interactive data table visualization                                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Home 3 - "Unite your Data, Tools, and Decisions"
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   - Integration-focused messaging                                           │
+│   - Revenue dashboard showcase as hero visual                               │
+│   - Testimonial carousel with badges                                        │
+│   - "100% Real Reviews" and "97% Recommend" trust badges                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+FEATURE BLOCK PATTERNS
+--------------------------------------------------------------------------------
+
+Pattern A: Alternating Image/Text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   ┌──────────────────┐   Feature Title                                      │
+│   │                  │   ────────────────────                               │
+│   │   [Screenshot]   │   Descriptive paragraph explaining                   │
+│   │                  │   the benefit and how it works.                      │
+│   │                  │                                                      │
+│   └──────────────────┘   [Learn more ->]                                    │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                        Feature Title   ┌──────────────────┐                 │
+│              ────────────────────      │                  │                 │
+│   Descriptive paragraph explaining     │   [Screenshot]   │                 │
+│   the benefit and how it works.        │                  │                 │
+│                                        │                  │                 │
+│                        [Learn more ->] └──────────────────┘                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Pattern B: Feature Cards (3-4 column grid)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   ┌───────────────┐  ┌───────────────┐  ┌───────────────┐                   │
+│   │ [Icon]        │  │ [Icon]        │  │ [Icon]        │                   │
+│   │               │  │               │  │               │                   │
+│   │ Title         │  │ Title         │  │ Title         │                   │
+│   │ Description   │  │ Description   │  │ Description   │                   │
+│   │ text here     │  │ text here     │  │ text here     │                   │
+│   └───────────────┘  └───────────────┘  └───────────────┘                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Pattern C: Tabbed Features (Features-1)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   [Access Control] [Spending Insights] [Revenue Tracking] [Approvals]       │
+│   ───────────────────────────────────────────────────────────────           │
+│                                                                             │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                                                                     │   │
+│   │   Full-width content for selected tab                               │   │
+│   │   with imagery and detailed description                             │   │
+│   │                                                                     │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+TESTIMONIAL PATTERNS
+--------------------------------------------------------------------------------
+
+Pattern A: Quote Card with Avatar
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   "Before Prospect, our team was drowning in reconciliation tasks           │
+│   that ate into our evenings and weekends. Now? We're done by 3pm           │
+│   most days."                                                               │
+│                                                                             │
+│   [Photo]  Cassandra H.                                                     │
+│            HR Director, Continuum                                           │
+│            ★★★★★                                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Pattern B: Video Testimonial
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   ┌───────────────────────────────────────────────────────────┐             │
+│   │                                                           │             │
+│   │                    [Video Embed]                          │             │
+│   │                       ▶ Play                              │             │
+│   │                      3:49                                 │             │
+│   │                                                           │             │
+│   └───────────────────────────────────────────────────────────┘             │
+│                                                                             │
+│   "The first day using Prospect felt like someone turned the                │
+│   lights on. Suddenly everything just... made sense."                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Pattern C: Metrics-Driven Testimonial
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   CONTINUUM  |  Stockholm, Sweden  |  Fintech                               │
+│                                                                             │
+│   ┌────────────────────────────────────────────────┐                        │
+│   │                                                │                        │
+│   │  87% reduction in reporting time               │                        │
+│   │  since switching to Prospect                   │                        │
+│   │                                                │                        │
+│   └────────────────────────────────────────────────┘                        │
+│                                                                             │
+│   [Photo]  "Quote from customer about transformation"                       │
+│            Lisa Q., Design Director                                         │
+│                                                                             │
+│                                              [Read their story ->]          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+PRICING TABLE STRUCTURE
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│   │   FREE      │ │   BASIC     │ │    PRO      │ │  ENHANCED   │           │
+│   │             │ │             │ │             │ │             │           │
+│   │   $0/mo     │ │   $19/mo    │ │   $39/mo    │ │   $79/mo    │           │
+│   │             │ │             │ │             │ │             │           │
+│   │ Core        │ │ Core        │ │ Core        │ │ Core        │           │
+│   │ Features:   │ │ Features:   │ │ Features:   │ │ Features:   │           │
+│   │ - Item      │ │ - Item      │ │ - Item      │ │ - Item      │           │
+│   │ - Item      │ │ - Item      │ │ - Item      │ │ - Item      │           │
+│   │             │ │             │ │             │ │             │           │
+│   │ Platform    │ │ Platform    │ │ Platform    │ │ Platform    │           │
+│   │ Access:     │ │ Access:     │ │ Access:     │ │ Access:     │           │
+│   │ - Item      │ │ - Item      │ │ - Item      │ │ - Item      │           │
+│   │             │ │             │ │             │ │             │           │
+│   │ [Start      │ │ [Get        │ │ [Get        │ │ [Get        │           │
+│   │  Free]      │ │  Basic]     │ │  Pro]       │ │  Enhanced]  │           │
+│   └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘           │
+│                                                                             │
+│   Note: No monthly/annual toggle. All tiers equal visual weight.            │
+│         No "recommended" badge on any tier.                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+CTA SECTION PATTERNS
+--------------------------------------------------------------------------------
+
+Pattern A: Simple CTA Band
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│              Ready to transform your finance operations?                    │
+│                                                                             │
+│              [Get started now]    [Explore more]                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Pattern B: CTA with Social Proof
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   Let us show you the future of Business Intelligence                       │
+│                                                                             │
+│   Prospect balances depth with simplicity, so your                          │
+│   team moves faster from day one.                                           │
+│                                                                             │
+│   Join over 500 companies                                                   │
+│   [Logo] [Logo] [Logo] [Logo] [Logo]                                        │
+│                                                                             │
+│   [Request Demo]                                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Pattern C: Newsletter CTA
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   Stay in the loop                                                          │
+│   Subscribe for insights, updates, and early access.                        │
+│                                                                             │
+│   ┌──────────────────────────────────┐ [Subscribe]                          │
+│   │ Enter your email                 │                                      │
+│   └──────────────────────────────────┘                                      │
+│                                                                             │
+│   We never share your data with third parties.                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+FOOTER STRUCTURE
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   [Logo]                                                                    │
+│   Company tagline or description                                            │
+│                                                                             │
+│   ───────────────────────────────────────────────────────────────────       │
+│                                                                             │
+│   Pages           More Pages       Resources        Connect                 │
+│   --------        ----------       ---------        -------                 │
+│   Home            Style Guide      Blog             LinkedIn                │
+│   Features        Changelog        Help Center      Twitter/X               │
+│   Pricing         Licenses         Contact          Instagram               │
+│   About                                             Bluesky                 │
+│                                                                             │
+│   ───────────────────────────────────────────────────────────────────       │
+│                                                                             │
+│   Legal disclaimer text placeholder.                                        │
+│   This is where compliance language would go.                               │
+│                                                                             │
+│   © 2025 Prospect. All rights reserved.                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+NAVIGATION PATTERNS
+--------------------------------------------------------------------------------
+
+Desktop Navigation:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   [Logo]    Pages ▼   Features ▼   About ▼   More ▼    [Search] [CTA]       │
+│                                                                             │
+│             ┌────────────────┐                                              │
+│             │ Home           │  (Dropdown on hover/click)                   │
+│             │ Home 2         │                                              │
+│             │ Home 3         │                                              │
+│             │ ───────────    │                                              │
+│             │ Features 1     │                                              │
+│             │ Features 2     │                                              │
+│             │ Features 3     │                                              │
+│             └────────────────┘                                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+Mobile Navigation:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   [Logo]                                                     [Hamburger]    │
+│                                                                             │
+│   → Opens slide-out menu or full-screen overlay                             │
+│   → Hamburger transforms to X on open                                       │
+│   → Accordion-style dropdowns for nested items                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+BUTTON STYLES
+================================================================================
+
+PRIMARY BUTTONS
+--------------------------------------------------------------------------------
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Property       │                    Specification                       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Background         │ Dark (likely dark gray or near-black)                  │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Text               │ Light/white                                            │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Border Radius      │ Appears rounded (pill or moderate radius)              │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Icon               │ Arrow icon (↗) appended to text for CTAs               │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Size               │ Standard and Small variants available                  │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Examples           │ "Get started now", "Buy Template", "Start with Pro"    │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+
+SECONDARY BUTTONS (BG Light 2)
+--------------------------------------------------------------------------------
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Property       │                    Specification                       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Background         │ Light gray/off-white                                   │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Text               │ Dark                                                   │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Usage              │ Secondary actions, "Explore more", "Learn more"        │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+
+TEXT/LINK BUTTONS
+--------------------------------------------------------------------------------
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Property       │                    Specification                       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Style              │ Text only, no background                               │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Icon               │ Arrow icon (→ or ↗) often appended                     │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Usage              │ "Continue reading", "Read their story", "See more"     │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Hover              │ Likely underline or color shift                        │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+
+================================================================================
+INTERACTION PATTERNS
+================================================================================
+
+BUTTON HOVER BEHAVIORS
+--------------------------------------------------------------------------------
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Element        │                    Behavior                            │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Primary Button     │ Likely brightness/opacity shift                        │
+│                    │ Possible subtle shadow elevation                       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Secondary Button   │ Background color darkens slightly                      │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Text Links         │ Underline appears on hover                             │
+│                    │ Arrow icon may animate/shift right                     │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+
+CARD HOVER EFFECTS
+--------------------------------------------------------------------------------
+Cards appear to use subtle elevation or shadow changes on hover.
+The template emphasizes "smooth, intentional motion rather than
+aggressive animations" per analysis.
+
+
+SCROLL ANIMATIONS
+--------------------------------------------------------------------------------
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Property       │                    Specification                       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Pattern            │ Fade-in + translate on scroll into view                │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Desktop translate  │ 72px downward (starts 72px above, animates to 0)       │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Mobile translate   │ 48px downward                                          │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Opacity            │ Starts at 0, animates to 1                             │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Stagger            │ Elements animate in sequence (staggered timing)        │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+
+FORM INTERACTIONS
+--------------------------------------------------------------------------------
+- Form fields have visible focus states (likely border color change)
+- Success message: "Thank you! Your submission has been received!"
+- Error messaging for validation failures
+- Checkbox with terms agreement before submission
+
+
+ACCORDION/FAQ BEHAVIOR
+--------------------------------------------------------------------------------
+- Expandable sections for FAQ content
+- Click to toggle open/closed
+- 7-9 questions typically displayed
+- Categories may be grouped
+
+
+================================================================================
+UX PATTERNS
+================================================================================
+
+TRUST SIGNALS
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   1. RATING BADGES                                                          │
+│      "Rated 4.97/5 from 500+ reviews"                                       │
+│      Appears in hero and multiple sections                                  │
+│                                                                             │
+│   2. AVATAR STACKS                                                          │
+│      4 overlapping user photos suggesting community                         │
+│                                                                             │
+│   3. CLIENT LOGOS                                                           │
+│      "Join over 500 companies" with 5-6 recognizable logos                  │
+│                                                                             │
+│   4. NAMED TESTIMONIALS                                                     │
+│      Real names, titles, companies, photos                                  │
+│      - Cassandra H., HR Director                                            │
+│      - Caleb P., Head of Product                                            │
+│      - Maya S., VP Finance                                                  │
+│                                                                             │
+│   5. QUANTIFIED RESULTS                                                     │
+│      - "87% reduction in reporting time"                                    │
+│      - "3x improvement in forecast accuracy"                                │
+│      - "55% increase in cross-functional report usage"                      │
+│      - "75% reporting time reduction"                                       │
+│      - "18 additional billable hours"                                       │
+│                                                                             │
+│   6. VIDEO TESTIMONIALS                                                     │
+│      3-4 minute customer success story videos                               │
+│                                                                             │
+│   7. TRUST BADGES                                                           │
+│      "100% Real Reviews", "97% Recommend"                                   │
+│                                                                             │
+│   8. TEAM TRANSPARENCY                                                      │
+│      Named leadership with photos, bios, social links                       │
+│                                                                             │
+│   9. OFFICE LOCATIONS                                                       │
+│      London HQ, Amsterdam Office (physical presence)                        │
+│                                                                             │
+│  10. TECHNICAL CREDENTIALS (About-3)                                        │
+│      99.99% uptime, 200ms response time, 2,400+ events/second               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+CONVERSION OPTIMIZATION TACTICS
+--------------------------------------------------------------------------------
+
+1. DUAL CTA STRATEGY
+   Every hero section offers two options:
+   - Primary: "Get started now" (high intent)
+   - Secondary: "Explore more" (low intent)
+   Reduces decision paralysis while capturing both user types.
+
+2. SOCIAL PROOF PROXIMITY
+   Trust signals placed directly adjacent to CTAs.
+   Rating appears immediately below action buttons.
+
+3. PROBLEM-SOLUTION NARRATIVE (Features-2)
+   "Before Prospect" → "After Prospect" storytelling.
+   Addresses pain points before presenting features.
+
+4. MULTIPLE CONVERSION MOMENTS
+   CTAs appear every 2-3 sections throughout page.
+   Never more than one scroll away from an action.
+
+5. PRIVACY REASSURANCE
+   "We never share your data with third parties"
+   Appears near every form submission.
+
+6. LOW-FRICTION ENTRY
+   Free tier prominently displayed.
+   "Start with Free" reduces commitment anxiety.
+
+7. SPECIFICITY IN METRICS
+   Not "faster" but "87% reduction"
+   Not "better" but "3x improvement in forecast accuracy"
+
+8. HUMAN PHOTOGRAPHY
+   Real team photos over illustrations.
+   Customer headshots over generic avatars.
+
+
+CONTENT HIERARCHY
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   LEVEL 1: Main headline (largest, bold)                                    │
+│            Communicates primary value proposition                           │
+│                                                                             │
+│   LEVEL 2: Section headlines                                                │
+│            Introduces each major content block                              │
+│                                                                             │
+│   LEVEL 3: Subheadlines/descriptions                                        │
+│            Supporting context and explanations                              │
+│                                                                             │
+│   LEVEL 4: Feature titles                                                   │
+│            Individual capability names                                      │
+│                                                                             │
+│   LEVEL 5: Body text                                                        │
+│            Detailed descriptions and explanations                           │
+│                                                                             │
+│   LEVEL 6: Captions/labels                                                  │
+│            Metadata, dates, categories                                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+COLOR SYSTEM
+================================================================================
+
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Token          │                    Usage                               │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Dark               │ Primary backgrounds, button backgrounds                │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Light 1            │ Secondary backgrounds, card surfaces                   │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Light 2            │ Tertiary backgrounds, button variants                  │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ White              │ Text on dark, clean backgrounds                        │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Dark at 12%        │ Borders, dividers, subtle separators                   │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+Note: Template uses a dark-mode primary aesthetic with high contrast.
+No specific hex values documented in style guide.
+
+
+================================================================================
+TYPOGRAPHY SYSTEM
+================================================================================
+
+┌────────────────────┬────────────────────────────────────────────────────────┐
+│     Level          │                    Usage                               │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ H1                 │ Page heroes, main headlines                            │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ H2                 │ Section titles                                         │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ H3                 │ Card titles, feature names                             │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ H4                 │ Subsection headers                                     │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ H5                 │ Minor headings, labels                                 │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Lead Text          │ Hero subheadlines, introductory paragraphs             │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Body Text          │ Standard paragraph content                             │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Small Text         │ Captions, metadata, legal                              │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+Note: Specific font families and sizes not documented in style guide.
+
+
+================================================================================
+PAGE-BY-PAGE ANALYSIS
+================================================================================
+
+HOMEPAGES (/, /home-2, /home-3)
+--------------------------------------------------------------------------------
+Purpose: A/B testing different value propositions and visual approaches
+
+Home 1: Speed/efficiency angle ("Fast-Moving Businesses")
+Home 2: AI/technology angle ("Robust AI for Finance Sector")
+Home 3: Integration/unification angle ("Unite your Data, Tools, and Decisions")
+
+Key Insight: Same product, three positioning strategies.
+
+
+FEATURES PAGES (/features-1, /features-2, /features-3)
+--------------------------------------------------------------------------------
+Features-1: Product capability catalog (tabbed interface)
+Features-2: Problem-solution narrative (before/after storytelling)
+Features-3: Integration directory (CMS-driven, filterable)
+
+Key Insight: Different buyer personas need different feature presentations.
+
+
+ABOUT PAGES (/about-1, /about-2, /about-3)
+--------------------------------------------------------------------------------
+About-1: Company story + leadership team
+About-2: Culture + careers + recruitment
+About-3: Technology + infrastructure credentials
+
+Key Insight: "About" serves multiple audiences (customers, candidates, technical buyers).
+
+
+PRICING (/pricing)
+--------------------------------------------------------------------------------
+- 4 tiers: Free ($0), Basic ($19), Pro ($39), Enhanced ($79)
+- No monthly/annual toggle
+- No "recommended" tier highlighted
+- Feature comparison in two categories per tier
+- FAQ accordion below
+
+Key Insight: Neutral presentation lets users self-select tier.
+
+
+CUSTOMERS (/customers)
+--------------------------------------------------------------------------------
+- 3 featured customer stories
+- Card format with metric, quote, and CTA to full story
+- Social proof header with rating
+
+Key Insight: Metrics-first approach (lead with number, explain with quote).
+
+
+CUSTOMER STORIES (/customers/continuum, /customers/intertial)
+--------------------------------------------------------------------------------
+- Hero with company info + location + industry
+- Single prominent metric
+- Pull quotes throughout
+- Related case study at bottom
+
+Key Insight: Template for repeatable success story format.
+
+
+BLOG (/blog, /blog-posts/*)
+--------------------------------------------------------------------------------
+Listing:
+- Vertical card stack (not grid)
+- Date + category + headline + excerpt
+- No author on cards
+- No pagination visible
+
+Article:
+- Author with photo at top
+- Centered readable column width
+- Images with captions break up text
+- Related posts at bottom
+- No visible social sharing buttons
+
+Key Insight: Content-first, minimal chrome.
+
+
+CAREERS (/careers/senior-product-designer)
+--------------------------------------------------------------------------------
+- Breadcrumb navigation back to careers
+- Role + location + type header
+- Responsibilities in bullet points
+- "Why Prospect?" company pitch section
+- Application form embedded (no separate ATS link)
+
+Key Insight: Sells the company alongside the role.
+
+
+INTEGRATIONS (/integrations/*, /integration-categories/*)
+--------------------------------------------------------------------------------
+Detail Page:
+- Integration name + logo + category tags
+- "What this integration does" bullet list
+- Related integrations grid below
+
+Category Page:
+- Filterable by category (Payments, Finance, Data, Collaboration)
+- Card grid with logo, description, "See Integration" CTA
+
+Key Insight: CMS-driven directory pattern.
+
+
+UTILITY PAGES
+--------------------------------------------------------------------------------
+Style Guide: Component showcase (not comprehensive design system)
+404: Minimal, clear recovery path ("Back to Home")
+
+
+================================================================================
+BEST PRACTICES & PATTERNS WORTH BORROWING
+================================================================================
+
+WHAT PROSPECT DOES EXCEPTIONALLY WELL
+--------------------------------------------------------------------------------
+
+1. MULTIPLE PAGE VARIATIONS
+   Three versions of key pages (Home, Features, About) enable:
+   - A/B testing different positioning
+   - Different buyer persona journeys
+   - Narrative flexibility without rebuilding
+
+2. TRUST SIGNAL SATURATION
+   Social proof appears every 2-3 sections:
+   - Rating badges
+   - Avatar stacks
+   - Client logos
+   - Named testimonials
+   - Quantified results
+   Never feels salesy because it's integrated naturally.
+
+3. PROBLEM-SOLUTION NARRATIVE (Features-2)
+   The "Before/After" pattern transforms feature lists into stories:
+   - "Before Prospect: scattered communication, low morale"
+   - "After Prospect: unified visibility, reclaimed evenings"
+   Emotional resonance > feature enumeration.
+
+4. METRICS-FIRST TESTIMONIALS
+   Lead with the number, explain with the quote:
+   "87% reduction in reporting time"
+   → Then the human story behind it
+   Specificity builds credibility.
+
+5. DUAL CTA PATTERN
+   Every conversion moment offers two paths:
+   - High intent: "Get started now"
+   - Low intent: "Explore more"
+   Reduces bounce from decision paralysis.
+
+6. HUMAN PHOTOGRAPHY
+   Real faces throughout:
+   - Team leadership with bios
+   - Customer headshots with titles
+   - Office location photography
+   Builds trust through authenticity.
+
+7. GENEROUS WHITESPACE
+   Sections breathe. Content isn't cramped.
+   Professional aesthetic over information density.
+
+8. SCROLL ANIMATION RESTRAINT
+   Subtle fade-in + translate on scroll.
+   No aggressive motion that distracts.
+   "Intentional motion" philosophy.
+
+
+PATTERNS WORTH BORROWING FOR ADVYSER
+--------------------------------------------------------------------------------
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  PRIORITY 1 - IMPLEMENT NOW                                                 │
+│  ─────────────────────────────                                              │
+│                                                                             │
+│  1. Rating Badge Pattern                                                    │
+│     "[Star] Rated X.X/5 from N+ reviews"                                    │
+│     Placement: Hero section, near primary CTA                               │
+│                                                                             │
+│  2. Avatar Stack Social Proof                                               │
+│     4-5 overlapping advisor photos                                          │
+│     Caption: "Join 500+ Australians finding the right advice"               │
+│                                                                             │
+│  3. Dual CTA Hero                                                           │
+│     Primary: "Find an Advisor" (search intent)                              │
+│     Secondary: "How It Works" (education intent)                            │
+│                                                                             │
+│  4. Client/Partner Logo Bar                                                 │
+│     "Advisors from firms including..."                                      │
+│     Or: "Featured in..." with media logos                                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  PRIORITY 2 - PLAN FOR                                                      │
+│  ─────────────────────                                                      │
+│                                                                             │
+│  5. Metrics-First Testimonials                                              │
+│     "Saved $12,000 in fees by finding the right advisor"                    │
+│     → Quote explaining the experience                                       │
+│                                                                             │
+│  6. Before/After Narrative                                                  │
+│     "Before Advyser: Overwhelmed by options, unsure who to trust"           │
+│     "After Advyser: Matched with verified advisor in 10 minutes"            │
+│                                                                             │
+│  7. Multiple Page Variations                                                │
+│     Home 1: Consumer-focused (find an advisor)                              │
+│     Home 2: Advisor-focused (grow your practice)                            │
+│     Test different value propositions                                       │
+│                                                                             │
+│  8. Integration/Partner Directory                                           │
+│     For advisor tools, AFSL partners, etc.                                  │
+│     Filterable CMS-driven pattern                                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│  PRIORITY 3 - FUTURE CONSIDERATION                                          │
+│  ────────────────────────────────                                           │
+│                                                                             │
+│  9. Video Testimonials                                                      │
+│     Consumer success stories finding the right advisor                      │
+│                                                                             │
+│ 10. Team/About Transparency                                                 │
+│     Named leadership, office locations                                      │
+│     Builds trust for platform credibility                                   │
+│                                                                             │
+│ 11. Technical Credentials Page                                              │
+│     Security, privacy, data handling                                        │
+│     Important for advisor trust                                             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+DIFFERENCES FROM ADVYSER CONTEXT
+================================================================================
+
+Prospect is B2B SaaS selling to finance teams.
+Advyser is a B2C marketplace connecting consumers with financial advisors.
+
+ADAPTATIONS NEEDED
+--------------------------------------------------------------------------------
+
+1. TRUST SIGNALS
+   Prospect: "500+ companies" (B2B credibility)
+   Advyser: "Licensed advisors" (regulatory credibility)
+   → Emphasize AFSL verification, ASIC compliance
+
+2. TESTIMONIALS
+   Prospect: Business outcomes (time saved, efficiency)
+   Advyser: Life outcomes (retirement confidence, debt freedom)
+   → Focus on emotional transformation, not operational metrics
+
+3. PRICING
+   Prospect: Clear tiers for subscription product
+   Advyser: Free for consumers, advisor-side monetization
+   → Pricing page becomes "For Advisors" with lead credits/subscription
+
+4. HERO IMAGERY
+   Prospect: Dashboard screenshots, product interfaces
+   Advyser: People meeting advisors, diverse Australians planning futures
+   → Human connection over software screenshots
+
+
+================================================================================
+END OF REVIEW
+================================================================================
+
+Document: prospect-frontend-review-v2
+Template: Prospect Finance SaaS Webflow Template
+Domain: prospect-finance-saas-webflow-template.webflow.io
+Review Date: 2026-02-02

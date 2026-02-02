@@ -1,8 +1,22 @@
 "use client"
 
+/**
+ * @deprecated Use DashboardHeaderSlim instead.
+ * This component will be removed in a future version.
+ * Migration: Replace <AdvisorHeader /> with <DashboardHeaderSlim portalType="advisor" />
+ */
+
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+
+// Deprecation warning
+if (typeof window !== "undefined") {
+  console.warn(
+    "[Deprecated] AdvisorHeader is deprecated. Use DashboardHeaderSlim instead.\n" +
+    "Migration: Replace <AdvisorHeader /> with <DashboardHeaderSlim portalType=\"advisor\" />"
+  )
+}
 import {
   LayoutDashboard,
   Users,

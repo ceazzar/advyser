@@ -4,6 +4,12 @@ import * as React from "react"
 import { DollarSign, Users, ShieldCheck } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+
+/**
+ * Icon Optical Sizing:
+ * - Feature icons (DollarSign, Users, ShieldCheck): size-6 (24px) in 56px circles
+ * These icons are contained in large circles for emphasis, no optical correction needed.
+ */
 import { Card, CardContent } from "@/components/ui/card"
 
 export interface TransparencyBlockProps {

@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { FormProgress } from "@/components/ui/form-progress"
 import { FileUpload } from "@/components/ui/file-upload"
 import {
   Select,
@@ -239,11 +240,11 @@ export default function AdvisorOnboardingPage() {
 
         {/* Progress Section */}
         <div className="mx-auto max-w-3xl">
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Step {currentStep} of {steps.length}</span>
-            <span className="text-muted-foreground">{Math.round((currentStep / steps.length) * 100)}% complete</span>
-          </div>
-          <Progress value={(currentStep / steps.length) * 100} className="h-2" />
+          <FormProgress
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            labels={steps.map((s) => s.name)}
+          />
         </div>
 
         {/* Step Navigation */}
