@@ -2,50 +2,15 @@
 
 import * as React from "react"
 import { useRouter, usePathname } from "next/navigation"
-
-// Demo users for testing the end-to-end workflow
-// In production, this would be replaced with real authentication
-const DEMO_USERS = {
-  "consumer@user.com": {
-    id: "demo-consumer-001",
-    email: "consumer@user.com",
-    password: "consumer123",
-    role: "consumer" as const,
-    displayName: "Demo Consumer",
-  },
-  "advisor@user.com": {
-    id: "demo-advisor-001",
-    email: "advisor@user.com",
-    password: "advisor123",
-    role: "advisor" as const,
-    displayName: "Sarah Mitchell, CFP",
-    advisorProfile: {
-      firm: "Mitchell Financial Planning",
-      yearsExperience: 12,
-      specializations: ["Retirement Planning", "Wealth Management"],
-    },
-  },
-  "admin@user.com": {
-    id: "demo-admin-001",
-    email: "admin@user.com",
-    password: "admin123",
-    role: "admin" as const,
-    displayName: "Admin User",
-  },
-} as const
-
-type UserRole = "consumer" | "advisor" | "admin"
+import type { UserRole } from "@/types/user"
+import { createClient } from "@/lib/supabase/client"
+import { signIn as signInAction, signOut as signOutAction } from "@/lib/auth-actions"
 
 interface User {
   id: string
   email: string
   role: UserRole
   displayName: string
-  advisorProfile?: {
-    firm: string
-    yearsExperience: number
-    specializations: readonly string[] | string[]
-  }
 }
 
 interface AuthContextType {
@@ -53,72 +18,92 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   logout: () => void
-  isDemoMode: boolean
 }
 
 const AuthContext = React.createContext<AuthContextType | undefined>(undefined)
 
-const STORAGE_KEY = "advyser_demo_auth"
+function mapDbUserToAppUser(dbUser: Record<string, unknown>): User {
+  return {
+    id: dbUser.id as string,
+    email: dbUser.email as string,
+    role: dbUser.role as UserRole,
+    displayName:
+      (dbUser.display_name as string) ||
+      `${(dbUser.first_name as string) || ""} ${(dbUser.last_name as string) || ""}`.trim() ||
+      (dbUser.email as string),
+  }
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
-  const router = useRouter()
 
-  // Restore session from localStorage on mount
   React.useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        setUser(parsed)
-      } catch {
-        localStorage.removeItem(STORAGE_KEY)
+    const supabase = createClient()
+
+    // Check initial session
+    supabase.auth.getUser().then(async ({ data: { user: authUser } }) => {
+      if (authUser) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", authUser.id)
+          .single()
+        if (error) console.error("Failed to fetch user profile:", error.message)
+        if (data) setUser(mapDbUserToAppUser(data))
       }
-    }
-    setIsLoading(false)
+      setIsLoading(false)
+    })
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          const { data, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single()
+          if (error) console.error("Failed to fetch user profile:", error.message)
+          if (data) setUser(mapDbUserToAppUser(data))
+        } else {
+          setUser(null)
+        }
+        setIsLoading(false)
+      }
+    )
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 800))
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password", password)
 
-    const normalizedEmail = email.toLowerCase().trim()
-    const demoUser = DEMO_USERS[normalizedEmail as keyof typeof DEMO_USERS]
+    const result = await signInAction(formData)
 
-    if (!demoUser) {
-      return { success: false, error: "Invalid email or password" }
+    if (!result.success) {
+      return { success: false, error: result.error || "Login failed" }
     }
 
-    if (demoUser.password !== password) {
-      return { success: false, error: "Invalid email or password" }
+    // Refresh the client-side session after server action signs in
+    const supabase = createClient()
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (authUser) {
+      const { data } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .single()
+      if (data) setUser(mapDbUserToAppUser(data))
     }
-
-    // Create user object without password
-    const { password: _, ...userWithoutPassword } = demoUser
-    const userToStore: User = {
-      id: userWithoutPassword.id,
-      email: userWithoutPassword.email,
-      role: userWithoutPassword.role,
-      displayName: userWithoutPassword.displayName,
-      advisorProfile: "advisorProfile" in userWithoutPassword
-        ? {
-            firm: userWithoutPassword.advisorProfile.firm,
-            yearsExperience: userWithoutPassword.advisorProfile.yearsExperience,
-            specializations: [...userWithoutPassword.advisorProfile.specializations],
-          }
-        : undefined,
-    }
-    setUser(userToStore)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userToStore))
 
     return { success: true }
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
-    router.push("/login")
+  const logout = async () => {
+    await signOutAction()
   }
 
   return (
@@ -128,7 +113,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         login,
         logout,
-        isDemoMode: true,
       }}
     >
       {children}

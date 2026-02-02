@@ -7,44 +7,54 @@ import type { User, Profile } from './user'
 
 /**
  * Verification status for credentials
+ * Matches: credential_status ENUM in schema.sql
  */
-export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected'
+export type VerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected' | 'expired'
 
 /**
  * Verification level for advisors
+ * Matches: verification_level ENUM in schema.sql
  */
-export type VerificationLevel = 'basic' | 'verified' | 'premium'
+export type VerificationLevel = 'none' | 'basic' | 'licence_verified' | 'enhanced'
 
 /**
  * Credential types for Australian financial services
+ * Matches: credential_type ENUM in schema.sql
  */
 export type CredentialType =
-  | 'afsl'           // Australian Financial Services Licence
-  | 'authorised_rep' // Authorised Representative
-  | 'credit_licence' // Credit Licence
-  | 'real_estate'    // Real Estate Licence
-  | 'tax_agent'      // Registered Tax Agent
-  | 'cpa'            // CPA Australia
-  | 'ca'             // Chartered Accountant
-  | 'cfp'            // Certified Financial Planner
+  | 'afsl'                // Australian Financial Services Licence (business)
+  | 'limited_afsl'        // Limited AFSL (business, restricted scope)
+  | 'authorised_rep'      // Authorised Representative under AFSL
+  | 'relevant_provider'   // Registered on Financial Advisers Register (individual)
+  | 'acl'                 // Australian Credit Licence (business)
+  | 'credit_rep'          // Credit Representative
+  | 'real_estate_licence' // State-based real estate licence
+  | 'buyers_agent_licence' // State-based buyer's agent (CPP41419 + state licence)
+  | 'qpia'                // Qualified Property Investment Adviser (PIPA accreditation)
 
 /**
  * Credential - professional licence or certification
  */
 export interface Credential {
   id: string
-  advisorProfileId: string
+  /** Owner: advisor profile or business (at least one set) */
+  advisorProfileId?: string
+  businessId?: string
   credentialType: CredentialType
-  credentialNumber: string
-  issuingBody: string
-  /** Australian state if applicable */
+  credentialNumber?: string
+  nameOnRegister?: string
+  issuingBody?: string
+  /** Australian state for state-based licences (NULL for federal like AFSL) */
   state?: string
   expiresAt?: Date
   verificationStatus: VerificationStatus
+  verificationSource?: 'asic_far' | 'asic_prs' | 'state_register' | 'document_only' | 'manual'
   verifiedAt?: Date
   verifiedByAdminId?: string
-  /** URL to evidence document */
-  evidenceFileUrl?: string
+  /** File upload ID for evidence */
+  evidenceFileId?: string
+  /** URL to public register entry */
+  registerUrl?: string
 }
 
 /**
@@ -120,9 +130,10 @@ export interface ClaimRequest {
   id: string
   userId: string
   businessId: string
-  status: 'pending' | 'approved' | 'denied'
+  status: 'pending' | 'needs_more_info' | 'approved' | 'denied'
   submittedAt: Date
   reviewedAt?: Date
   reviewedByAdminId?: string
-  notesInternal?: string
+  reviewNotes?: string
+  denialReason?: string
 }

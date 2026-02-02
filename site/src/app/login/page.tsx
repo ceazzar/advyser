@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Eye, EyeOff, Mail, Lock, User, Briefcase, Shield } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 
 import { AuthLayout } from "@/components/layouts/auth-layout"
 import { Button } from "@/components/ui/button"
@@ -148,18 +148,6 @@ function LoginForm() {
     // Redirect will happen via the useEffect when user state updates
   }
 
-  const handleQuickLogin = async (email: string, password: string) => {
-    setLoginError(null)
-    setIsLoading(true)
-    const result = await login(email, password)
-    setIsLoading(false)
-
-    if (!result.success) {
-      setLoginError(result.error || "Login failed")
-    }
-    // Redirect will happen via the useEffect when user state updates
-  }
-
   const handleSocialLogin = (provider: string) => {
     toast.info(`${provider} login coming soon`, {
       description: "Social authentication will be available in a future update.",
@@ -168,46 +156,6 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Quick Demo Login */}
-      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-        <p className="text-sm font-medium text-primary mb-3">Quick Demo Login</p>
-        <div className="grid grid-cols-3 gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isLoading}
-            onClick={() => handleQuickLogin("consumer@user.com", "consumer123")}
-            className="flex-col h-auto py-3 gap-1"
-          >
-            <User className="size-4" />
-            <span className="text-xs">Consumer</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isLoading}
-            onClick={() => handleQuickLogin("advisor@user.com", "advisor123")}
-            className="flex-col h-auto py-3 gap-1"
-          >
-            <Briefcase className="size-4" />
-            <span className="text-xs">Advisor</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={isLoading}
-            onClick={() => handleQuickLogin("admin@user.com", "admin123")}
-            className="flex-col h-auto py-3 gap-1"
-          >
-            <Shield className="size-4" />
-            <span className="text-xs">Admin</span>
-          </Button>
-        </div>
-      </div>
-
       {/* Social Login Buttons */}
       <div className="space-y-3">
         <Button

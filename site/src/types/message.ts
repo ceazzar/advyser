@@ -35,8 +35,6 @@ export interface Message {
   /** Delivery status */
   status: MessageStatus
   createdAt: Date
-  /** When recipient read the message */
-  readAt?: Date
   /** If message was edited */
   editedAt?: Date
 }

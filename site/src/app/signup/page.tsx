@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Check, X } from "lucide-react"
 
 import { AuthLayout } from "@/components/layouts/auth-layout"
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
+import { signUp } from "@/lib/auth-actions"
 
 // Google "G" logo SVG
 function GoogleIcon({ className }: { className?: string }) {
@@ -109,6 +111,7 @@ function PasswordRequirement({ met, text }: { met: boolean; text: string }) {
 }
 
 export default function SignupPage() {
+  const router = useRouter()
   const [accountType, setAccountType] = React.useState<AccountType>("consumer")
   const [fullName, setFullName] = React.useState("")
   const [email, setEmail] = React.useState("")
@@ -118,6 +121,7 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [agreedToTerms, setAgreedToTerms] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [signupError, setSignupError] = React.useState<string | null>(null)
 
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0
   const passwordRequirements = {
@@ -139,10 +143,23 @@ export default function SignupPage() {
     if (!isFormValid) return
 
     setIsLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setSignupError(null)
+
+    const formData = new FormData()
+    formData.append("email", email)
+    formData.append("password", password)
+    formData.append("fullName", fullName)
+    formData.append("accountType", accountType)
+
+    const result = await signUp(formData)
     setIsLoading(false)
-    // Handle signup logic here
+
+    if (!result.success) {
+      setSignupError(result.error || "Signup failed")
+      return
+    }
+
+    router.push(`/verify?email=${encodeURIComponent(email)}`)
   }
 
   const handleSocialLogin = (provider: string) => {
@@ -191,6 +208,13 @@ export default function SignupPage() {
             <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
           </div>
         </div>
+
+        {/* Signup Error */}
+        {signupError && (
+          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+            {signupError}
+          </div>
+        )}
 
         {/* Account Type Selector */}
         <div className="space-y-3">

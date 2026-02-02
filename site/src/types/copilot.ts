@@ -81,7 +81,7 @@ export type Severity = z.infer<typeof SeveritySchema>
 /**
  * Task status for action items.
  */
-export const TaskStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'blocked'])
+export const TaskStatusSchema = z.enum(['pending', 'in_progress', 'completed', 'cancelled'])
 export type TaskStatus = z.infer<typeof TaskStatusSchema>
 
 /**

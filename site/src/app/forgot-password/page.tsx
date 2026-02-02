@@ -9,20 +9,31 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { resetPassword } from "@/lib/auth-actions"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = React.useState("")
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [isSubmitted, setIsSubmitted] = React.useState(false)
+  const [submitError, setSubmitError] = React.useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError(null)
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const formData = new FormData()
+    formData.append("email", email)
+
+    const result = await resetPassword(formData)
 
     setIsSubmitting(false)
+
+    if (!result.success) {
+      setSubmitError(result.error || "Failed to send reset email")
+      return
+    }
+
     setIsSubmitted(true)
   }
 
@@ -93,6 +104,12 @@ export default function ForgotPasswordPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {submitError && (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm text-destructive" role="alert">
+                      {submitError}
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email address</Label>
                     <Input

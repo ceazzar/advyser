@@ -17,9 +17,9 @@ export interface SearchFilters {
   /** Location (suburb, postcode) */
   location?: string
   /** Australian state */
-  state?: 'nsw' | 'vic' | 'qld' | 'wa' | 'sa' | 'tas' | 'act' | 'nt'
+  state?: 'NSW' | 'VIC' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT'
   /** Service mode */
-  serviceMode?: 'online' | 'in-person' | 'both'
+  serviceMode?: 'online' | 'in_person' | 'both'
   /** Minimum verification level */
   verificationLevel?: VerificationLevel
   /** Minimum rating */

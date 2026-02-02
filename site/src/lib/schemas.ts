@@ -66,9 +66,9 @@ export const searchFiltersSchema = z.object({
   query: z.string().optional(),
   category: z.string().optional(),
   location: z.string().optional(),
-  state: z.enum(['nsw', 'vic', 'qld', 'wa', 'sa', 'tas', 'act', 'nt']).optional(),
-  serviceMode: z.enum(['online', 'in-person', 'both']).optional(),
-  verificationLevel: z.enum(['basic', 'verified', 'premium']).optional(),
+  state: z.enum(['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT']).optional(),
+  serviceMode: z.enum(['online', 'in_person', 'both']).optional(),
+  verificationLevel: z.enum(['none', 'basic', 'licence_verified', 'enhanced']).optional(),
   minRating: z.number().min(1).max(5).optional(),
   availableThisWeek: z.boolean().optional(),
   priceRange: z.enum(['budget', 'mid', 'premium']).optional(),
@@ -155,7 +155,7 @@ export const bookingSchema = z.object({
   time: z.string()
     .min(1, 'Please select a time')
     .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Invalid time format'),
-  mode: z.enum(['online', 'in-person']),
+  mode: z.enum(['online', 'in_person']),
   notes: z.string()
     .max(500, 'Notes must be less than 500 characters')
     .optional(),
