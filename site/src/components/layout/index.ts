@@ -1,0 +1,12 @@
+// Layout Components - Barrel Export
+export { AdminHeader } from "./admin-header"
+export { AdvisorHeader } from "./advisor-header"
+export { ConsumerHeader } from "./consumer-header"
+export { DashboardFooter } from "./dashboard-footer"
+export { MobileBottomNav } from "./mobile-bottom-nav"
+export { MobileMenu } from "./mobile-menu"
+export type { MobileMenuProps } from "./mobile-menu"
+export { PublicFooter } from "./public-footer"
+export { PublicHeader } from "./public-header"
+export { Sidebar } from "./sidebar"
+export type { SidebarProps, SidebarItem } from "./sidebar"
