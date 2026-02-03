@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Plus, Calendar as CalendarIcon, List, ChevronLeft, ChevronRight } from "lucide-react"
+import { Plus, Calendar as CalendarIcon, List, ChevronLeft, ChevronRight, Loader2, AlertCircle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -28,73 +28,96 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-// Mock bookings data
-const mockBookings = [
-  {
-    id: "1",
-    name: "David Wilson",
-    avatar: undefined,
-    dateTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-    duration: 60,
-    type: "video" as const,
-    status: "upcoming" as const,
-  },
-  {
-    id: "2",
-    name: "Lisa Anderson",
-    avatar: undefined,
-    dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-    duration: 30,
-    type: "phone" as const,
-    status: "upcoming" as const,
-  },
-  {
-    id: "3",
-    name: "Michael Brown",
-    avatar: undefined,
-    dateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
-    duration: 45,
-    type: "in-person" as const,
-    status: "upcoming" as const,
-  },
-  {
-    id: "4",
-    name: "Sarah Mitchell",
-    avatar: undefined,
-    dateTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
-    duration: 60,
-    type: "video" as const,
-    status: "upcoming" as const,
-  },
-  {
-    id: "5",
-    name: "James Chen",
-    avatar: undefined,
-    dateTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // Yesterday
-    duration: 60,
-    type: "video" as const,
-    status: "completed" as const,
-  },
-  {
-    id: "6",
-    name: "Emma Thompson",
-    avatar: undefined,
-    dateTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
-    duration: 30,
-    type: "phone" as const,
-    status: "completed" as const,
-  },
-  {
-    id: "7",
-    name: "Robert Smith",
-    avatar: undefined,
-    dateTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    duration: 45,
-    type: "video" as const,
-    status: "cancelled" as const,
-  },
-]
+// API response types
+interface BookingSummary {
+  id: string
+  otherParty: {
+    id: string
+    displayName: string
+    avatarUrl: string | null
+  }
+  startsAt: string
+  endsAt: string
+  mode: string
+  locationText: string | null
+  status: string
+  createdAt: string
+}
+
+interface BookingsApiResponse {
+  success: boolean
+  data: {
+    items: BookingSummary[]
+    pagination: {
+      page: number
+      limit: number
+      total: number
+      totalPages: number
+    }
+  }
+}
+
+// UI booking type (what BookingCard expects)
+interface UIBooking {
+  id: string
+  name: string
+  avatar: string | undefined
+  dateTime: Date
+  duration: number
+  type: "video" | "phone" | "in-person"
+  status: "upcoming" | "completed" | "cancelled"
+}
+
+// Map API mode to UI type
+function mapModeToType(mode: string): "video" | "phone" | "in-person" {
+  switch (mode) {
+    case "online":
+      return "video"
+    case "in_person":
+      return "in-person"
+    case "phone":
+      return "phone"
+    default:
+      return "video"
+  }
+}
+
+// Map API status to UI status
+function mapStatus(status: string): "upcoming" | "completed" | "cancelled" {
+  switch (status) {
+    case "proposed":
+    case "confirmed":
+      return "upcoming"
+    case "completed":
+      return "completed"
+    case "cancelled":
+      return "cancelled"
+    default:
+      return "upcoming"
+  }
+}
+
+// Calculate duration in minutes from startsAt and endsAt
+function calculateDuration(startsAt: string, endsAt: string): number {
+  const start = new Date(startsAt)
+  const end = new Date(endsAt)
+  return Math.round((end.getTime() - start.getTime()) / (1000 * 60))
+}
+
+// Transform API booking to UI booking
+function transformBooking(booking: BookingSummary): UIBooking {
+  return {
+    id: booking.id,
+    name: booking.otherParty.displayName,
+    avatar: booking.otherParty.avatarUrl ?? undefined,
+    dateTime: new Date(booking.startsAt),
+    duration: calculateDuration(booking.startsAt, booking.endsAt),
+    type: mapModeToType(booking.mode),
+    status: mapStatus(booking.status),
+  }
+}
 
 // Generate calendar days for the current month
 function generateCalendarDays(date: Date) {
@@ -131,14 +154,88 @@ export default function BookingsPage() {
   const [activeTab, setActiveTab] = React.useState<"upcoming" | "past">("upcoming")
   const [isNewBookingOpen, setIsNewBookingOpen] = React.useState(false)
 
+  // API state
+  const [bookings, setBookings] = React.useState<UIBooking[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [cancellingId, setCancellingId] = React.useState<string | null>(null)
+
+  // Fetch bookings on mount
+  React.useEffect(() => {
+    async function fetchBookings() {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await fetch("/api/bookings")
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch bookings: ${response.statusText}`)
+        }
+
+        const data: BookingsApiResponse = await response.json()
+
+        if (!data.success) {
+          throw new Error("Failed to fetch bookings")
+        }
+
+        const transformedBookings = data.data.items.map(transformBooking)
+        setBookings(transformedBookings)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [])
+
+  // Handle cancel booking
+  const handleCancel = async (bookingId: string) => {
+    try {
+      setCancellingId(bookingId)
+
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "cancelled" }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to cancel booking: ${response.statusText}`)
+      }
+
+      // Update local state
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === bookingId
+            ? { ...booking, status: "cancelled" as const }
+            : booking
+        )
+      )
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to cancel booking")
+    } finally {
+      setCancellingId(null)
+    }
+  }
+
+  // Handle reschedule (placeholder for now)
+  const handleReschedule = (bookingId: string) => {
+    alert(`Reschedule functionality coming soon for booking ${bookingId}`)
+  }
+
   const calendarDays = generateCalendarDays(currentMonth)
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-  const upcomingBookings = mockBookings.filter((b) => b.status === "upcoming")
-  const pastBookings = mockBookings.filter((b) => b.status !== "upcoming")
+  const upcomingBookings = bookings.filter((b) => b.status === "upcoming")
+  const pastBookings = bookings.filter((b) => b.status !== "upcoming")
 
   const getBookingsForDate = (date: Date) => {
-    return mockBookings.filter((booking) => {
+    return bookings.filter((booking) => {
       const bookingDate = booking.dateTime
       return (
         bookingDate.getDate() === date.getDate() &&
@@ -158,6 +255,40 @@ export default function BookingsPage() {
       }
       return newMonth
     })
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          <p className="text-muted-foreground">Loading bookings...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
+          <p className="text-muted-foreground">
+            Manage your appointments and schedule meetings.
+          </p>
+        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -292,8 +423,8 @@ export default function BookingsPage() {
                     key={booking.id}
                     {...booking}
                     onJoin={() => {}}
-                    onReschedule={() => {}}
-                    onCancel={() => {}}
+                    onReschedule={() => handleReschedule(booking.id)}
+                    onCancel={() => handleCancel(booking.id)}
                   />
                 ))}
               </div>
@@ -317,7 +448,7 @@ export default function BookingsPage() {
                   <BookingCard
                     key={booking.id}
                     {...booking}
-                    onReschedule={() => {}}
+                    onReschedule={() => handleReschedule(booking.id)}
                   />
                 ))}
               </div>

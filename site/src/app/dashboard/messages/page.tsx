@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Search, MessageSquare, Inbox } from "lucide-react"
+import { Search, MessageSquare, Inbox, Loader2, AlertCircle } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,73 +21,126 @@ interface Conversation {
   unreadCount: number
 }
 
-// Mock conversations data
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    advisorName: "Sarah Chen",
-    advisorAvatar: "/avatars/advisor-1.jpg",
-    lastMessage: "Thanks for reaching out! I'd love to discuss your retirement planning goals. I've reviewed your initial message and have some thoughts on how we can maximize your superannuation contributions while also exploring additional tax-advantaged accounts.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-    unread: true,
-    unreadCount: 2,
-  },
-  {
-    id: "2",
-    advisorName: "Michael Rodriguez",
-    advisorAvatar: "/avatars/advisor-2.jpg",
-    lastMessage: "Great question about asset allocation. Based on your risk tolerance and time horizon, I'd recommend a diversified approach that balances growth with stability...",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
-    unread: true,
-    unreadCount: 1,
-  },
-  {
-    id: "3",
-    advisorName: "Emily Thompson",
-    advisorAvatar: "/avatars/advisor-3.jpg",
-    lastMessage: "I've reviewed your financial goals and have some recommendations. Let me know when you're available for a call to discuss the details.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    unread: false,
-    unreadCount: 0,
-  },
-  {
-    id: "4",
-    advisorName: "David Kim",
-    advisorAvatar: "/avatars/advisor-4.jpg",
-    lastMessage: "The estimated tax documents I mentioned are attached. Let me know if you have any questions about the quarterly filing schedule.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
-    unread: false,
-    unreadCount: 0,
-  },
-  {
-    id: "5",
-    advisorName: "Jennifer Martinez",
-    advisorAvatar: "/avatars/advisor-5.jpg",
-    lastMessage: "Thank you for sharing those documents. I'll review them and get back to you with my analysis of your current estate plan by end of week.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72), // 3 days ago
-    unread: false,
-    unreadCount: 0,
-  },
-]
+// API response types
+interface ConversationSummary {
+  id: string
+  subject: string | null
+  otherParty: {
+    id: string
+    displayName: string
+    avatarUrl: string | null
+  }
+  lastMessage: {
+    body: string
+    createdAt: string
+    isFromMe: boolean
+  } | null
+  unreadCount: number
+  lastMessageAt: string | null
+  isArchived: boolean
+  createdAt: string
+}
+
+interface ApiResponse {
+  success: boolean
+  data: {
+    items: ConversationSummary[]
+    pagination: {
+      total: number
+      page: number
+      limit: number
+      totalPages: number
+    }
+  }
+  error?: string
+}
+
+// Map API data to Conversation interface
+function mapApiToConversation(item: ConversationSummary): Conversation {
+  return {
+    id: item.id,
+    advisorName: item.otherParty.displayName,
+    advisorAvatar: item.otherParty.avatarUrl || undefined,
+    lastMessage: item.lastMessage?.body || "No messages yet",
+    timestamp: item.lastMessage
+      ? new Date(item.lastMessage.createdAt)
+      : item.lastMessageAt
+        ? new Date(item.lastMessageAt)
+        : new Date(item.createdAt),
+    unread: item.unreadCount > 0,
+    unreadCount: item.unreadCount,
+  }
+}
 
 export default function MessagesPage() {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = React.useState("")
+  const [conversations, setConversations] = React.useState<Conversation[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
-  const totalUnread = mockConversations.reduce((acc, conv) => acc + conv.unreadCount, 0)
+  // Fetch conversations on mount
+  React.useEffect(() => {
+    async function fetchConversations() {
+      setIsLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch("/api/conversations")
+        const data: ApiResponse = await response.json()
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || "Failed to fetch conversations")
+        }
+
+        const mapped = data.data.items.map(mapApiToConversation)
+        setConversations(mapped)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchConversations()
+  }, [])
+
+  const totalUnread = conversations.reduce((acc, conv) => acc + conv.unreadCount, 0)
 
   const filteredConversations = React.useMemo(() => {
-    if (!searchQuery.trim()) return mockConversations
+    if (!searchQuery.trim()) return conversations
     const query = searchQuery.toLowerCase()
-    return mockConversations.filter(
+    return conversations.filter(
       (conv) =>
         conv.advisorName.toLowerCase().includes(query) ||
         conv.lastMessage.toLowerCase().includes(query)
     )
-  }, [searchQuery])
+  }, [searchQuery, conversations])
 
   const handleConversationClick = (id: string) => {
     router.push(`/dashboard/messages/${id}`)
+  }
+
+  const handleRetry = () => {
+    setIsLoading(true)
+    setError(null)
+    // Re-trigger the effect by forcing a state update
+    setConversations([])
+    // The useEffect will run again since we're changing state
+    fetch("/api/conversations")
+      .then((res) => res.json())
+      .then((data: ApiResponse) => {
+        if (!data.success) {
+          throw new Error(data.error || "Failed to fetch conversations")
+        }
+        setConversations(data.data.items.map(mapApiToConversation))
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "An error occurred")
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   return (
@@ -119,6 +171,7 @@ export default function MessagesPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           leftIcon={<Search className="size-4" />}
+          disabled={isLoading}
         />
       </div>
 
@@ -131,7 +184,23 @@ export default function MessagesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {filteredConversations.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center p-12">
+              <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : error ? (
+            <div className="p-6">
+              <EmptyState
+                icon={<AlertCircle className="text-destructive" />}
+                title="Failed to load messages"
+                description={error}
+                action={{
+                  label: "Try again",
+                  onClick: handleRetry,
+                }}
+              />
+            </div>
+          ) : filteredConversations.length > 0 ? (
             <div className="divide-y">
               {filteredConversations.map((conversation) => (
                 <MessageCard

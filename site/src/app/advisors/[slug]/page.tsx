@@ -362,7 +362,6 @@ export default function AdvisorProfilePage() {
 
   const handleRequestIntro = () => {
     // TODO: Implement request intro modal/flow
-    console.log("Request intro clicked for:", advisor.name)
   }
 
   return (

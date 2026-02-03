@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { Calendar, Clock, Video, Phone, MapPin, Plus } from "lucide-react"
+import { Calendar, Clock, Video, Phone, MapPin, Plus, Loader2, AlertCircle } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { BookingCard } from "@/components/composite/booking-card"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // Types
 type BookingType = "video" | "phone" | "in-person"
@@ -26,69 +27,100 @@ interface Booking {
   notes?: string
 }
 
-// Mock bookings data
-const mockBookings: Booking[] = [
-  {
-    id: "1",
-    advisorName: "Sarah Chen",
-    advisorAvatar: "/avatars/advisor-1.jpg",
-    dateTime: new Date(Date.now() + 1000 * 60 * 60 * 24), // Tomorrow
-    duration: 60,
-    type: "video",
-    status: "upcoming",
-    notes: "Discuss retirement planning strategy and superannuation optimization",
-  },
-  {
-    id: "2",
-    advisorName: "Michael Rodriguez",
-    advisorAvatar: "/avatars/advisor-2.jpg",
-    dateTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3), // 3 days from now
-    duration: 30,
-    type: "phone",
-    status: "upcoming",
-    notes: "Follow-up on inheritance investment plan",
-  },
-  {
-    id: "3",
-    advisorName: "David Kim",
-    advisorAvatar: "/avatars/advisor-4.jpg",
-    dateTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week from now
-    duration: 45,
-    type: "in-person",
-    status: "upcoming",
-    notes: "Tax planning review for Q1",
-  },
-  {
-    id: "4",
-    advisorName: "Emily Thompson",
-    advisorAvatar: "/avatars/advisor-3.jpg",
-    dateTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-    duration: 60,
-    type: "video",
-    status: "completed",
-    notes: "Initial consultation - investment portfolio review",
-  },
-  {
-    id: "5",
-    advisorName: "Jennifer Martinez",
-    advisorAvatar: "/avatars/advisor-5.jpg",
-    dateTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 1 week ago
-    duration: 45,
-    type: "video",
-    status: "completed",
-    notes: "Estate planning discussion",
-  },
-  {
-    id: "6",
-    advisorName: "Robert Williams",
-    advisorAvatar: "/avatars/advisor-6.jpg",
-    dateTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10), // 10 days ago
-    duration: 30,
-    type: "phone",
-    status: "cancelled",
-    notes: "Portfolio rebalancing consultation",
-  },
-]
+// API types
+interface BookingSummary {
+  id: string
+  otherParty: {
+    id: string
+    displayName: string
+    avatarUrl: string | null
+  }
+  startsAt: string
+  endsAt: string
+  mode: string
+  status: string
+}
+
+interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: {
+    code: string
+    message: string
+  }
+}
+
+interface PaginatedResponse<T> {
+  items: T[]
+  pagination: {
+    page: number
+    pageSize: number
+    totalItems: number
+    totalPages: number
+    hasNextPage: boolean
+    hasPreviousPage: boolean
+  }
+}
+
+/**
+ * Map API mode to booking type
+ */
+function mapModeToType(mode: string): BookingType {
+  switch (mode) {
+    case "video":
+      return "video"
+    case "phone":
+      return "phone"
+    case "in_person":
+    case "in-person":
+      return "in-person"
+    default:
+      return "video"
+  }
+}
+
+/**
+ * Map API status to UI status
+ */
+function mapApiStatusToUiStatus(apiStatus: string): BookingStatus {
+  switch (apiStatus) {
+    case "proposed":
+    case "confirmed":
+      return "upcoming"
+    case "completed":
+      return "completed"
+    case "cancelled":
+    case "no_show":
+      return "cancelled"
+    default:
+      return "upcoming"
+  }
+}
+
+/**
+ * Calculate duration in minutes from start and end times
+ */
+function calculateDuration(startsAt: string, endsAt: string): number {
+  const start = new Date(startsAt)
+  const end = new Date(endsAt)
+  const diffMs = end.getTime() - start.getTime()
+  return Math.round(diffMs / (1000 * 60))
+}
+
+/**
+ * Map API booking to UI booking
+ */
+function mapApiBookingToBooking(apiBooking: BookingSummary): Booking {
+  return {
+    id: apiBooking.id,
+    advisorName: apiBooking.otherParty.displayName,
+    advisorAvatar: apiBooking.otherParty.avatarUrl || undefined,
+    dateTime: new Date(apiBooking.startsAt),
+    duration: calculateDuration(apiBooking.startsAt, apiBooking.endsAt),
+    type: mapModeToType(apiBooking.mode),
+    status: mapApiStatusToUiStatus(apiBooking.status),
+  }
+}
 
 function getNextBooking(bookings: Booking[]): Booking | undefined {
   const upcoming = bookings.filter((b) => b.status === "upcoming")
@@ -119,10 +151,40 @@ function formatCountdown(dateTime: Date): string {
 
 export default function BookingsPage() {
   const [activeTab, setActiveTab] = React.useState("upcoming")
+  const [bookings, setBookings] = React.useState<Booking[]>([])
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [actionLoading, setActionLoading] = React.useState<string | null>(null)
 
-  const upcomingBookings = mockBookings.filter((b) => b.status === "upcoming")
-  const completedBookings = mockBookings.filter((b) => b.status === "completed")
-  const cancelledBookings = mockBookings.filter((b) => b.status === "cancelled")
+  // Fetch bookings on mount
+  React.useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  async function fetchBookings() {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/bookings")
+      const result: ApiResponse<PaginatedResponse<BookingSummary>> = await response.json()
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error?.message || "Failed to fetch bookings")
+      }
+
+      const mappedBookings = result.data.items.map(mapApiBookingToBooking)
+      setBookings(mappedBookings)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load bookings")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const upcomingBookings = bookings.filter((b) => b.status === "upcoming")
+  const completedBookings = bookings.filter((b) => b.status === "completed")
+  const cancelledBookings = bookings.filter((b) => b.status === "cancelled")
 
   const filteredBookings = React.useMemo(() => {
     switch (activeTab) {
@@ -133,22 +195,82 @@ export default function BookingsPage() {
       case "cancelled":
         return cancelledBookings
       default:
-        return mockBookings
+        return bookings
     }
-  }, [activeTab])
+  }, [activeTab, bookings, upcomingBookings, completedBookings, cancelledBookings])
 
-  const nextBooking = getNextBooking(mockBookings)
+  const nextBooking = getNextBooking(bookings)
 
   const handleJoin = (id: string) => {
     // In a real app, this would open the video call
   }
 
-  const handleCancel = (id: string) => {
-    // In a real app, this would show a confirmation modal
+  const handleConfirm = async (id: string) => {
+    setActionLoading(id)
+    try {
+      const response = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "confirmed" }),
+      })
+
+      const result: ApiResponse<{ id: string; status: string }> = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error?.message || "Failed to confirm booking")
+      }
+
+      // Refresh bookings list
+      await fetchBookings()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to confirm booking")
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleCancel = async (id: string) => {
+    setActionLoading(id)
+    try {
+      const response = await fetch(`/api/bookings/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "cancelled" }),
+      })
+
+      const result: ApiResponse<{ id: string; status: string }> = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error?.message || "Failed to cancel booking")
+      }
+
+      // Refresh bookings list
+      await fetchBookings()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to cancel booking")
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const handleReschedule = (id: string) => {
     // In a real app, this would open a reschedule modal
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          <p className="text-muted-foreground">Loading bookings...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -170,6 +292,26 @@ export default function BookingsPage() {
           </Link>
         </Button>
       </div>
+
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setError(null)
+                fetchBookings()
+              }}
+            >
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Next Booking Highlight */}
       {nextBooking && (

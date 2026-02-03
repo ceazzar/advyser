@@ -5,6 +5,7 @@ import Link from "next/link"
 import { AlertTriangle, RefreshCw, Home, HelpCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { logger } from "@/lib/logger"
 import { Card, CardContent } from "@/components/ui/card"
 
 interface ErrorProps {
@@ -19,17 +20,13 @@ interface ErrorProps {
  */
 export default function DashboardError({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Only log full details in development
-    if (process.env.NODE_ENV === "development") {
-      console.error("Dashboard error:", {
-        message: error.message,
-        digest: error.digest,
-        stack: error.stack,
-        timestamp: new Date().toISOString(),
-        location: "dashboard",
-      })
-    }
-    // In production, you would send to error tracking service here
+    // Log error with structured logger (handles dev/prod appropriately)
+    logger.error("Dashboard error", {
+      error: error.message,
+      digest: error.digest,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      location: "dashboard",
+    })
   }, [error])
 
   return (

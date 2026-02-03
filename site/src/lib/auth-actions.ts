@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { logger } from "@/lib/logger"
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient()
@@ -44,7 +45,7 @@ export async function signUp(formData: FormData) {
   })
 
   if (dbError) {
-    console.error("Failed to create user profile:", dbError.message)
+    logger.error("Failed to create user profile", { error: dbError.message })
     // Don't fail signup — the DB trigger will create the row from auth metadata
   }
 

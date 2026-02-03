@@ -2,92 +2,53 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { FileText, Clock, CheckCircle, XCircle, ChevronRight } from "lucide-react"
+import { FileText, Clock, CheckCircle, XCircle, ChevronRight, Loader2 } from "lucide-react"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import type { RequestSummary } from "@/app/api/requests/route"
 
-// Types
+// UI status type (maps from API status)
 type RequestStatus = "pending" | "accepted" | "declined"
 
-interface AdvisorRequest {
-  id: string
-  advisorName: string
-  advisorAvatar?: string
-  advisorCredentials: string
-  specialty: string
-  location: string
-  status: RequestStatus
-  sentAt: Date
-  respondedAt?: Date
-  message: string
+interface RequestsApiResponse {
+  success: boolean
+  data?: {
+    items: RequestSummary[]
+    pagination: {
+      page: number
+      pageSize: number
+      totalItems: number
+      totalPages: number
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+  }
+  error?: {
+    code: string
+    message: string
+  }
 }
 
-// Mock data
-const mockRequests: AdvisorRequest[] = [
-  {
-    id: "1",
-    advisorName: "David Kim",
-    advisorAvatar: "/avatars/advisor-4.jpg",
-    advisorCredentials: "CPA, CFP",
-    specialty: "Tax Planning",
-    location: "Perth, WA",
-    status: "pending",
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    message: "I'm looking for help with tax optimization strategies for my small business.",
-  },
-  {
-    id: "2",
-    advisorName: "Jennifer Martinez",
-    advisorAvatar: "/avatars/advisor-5.jpg",
-    advisorCredentials: "CFP, CDFA",
-    specialty: "Estate Planning",
-    location: "Adelaide, SA",
-    status: "pending",
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    message: "I need assistance with setting up a trust for my family.",
-  },
-  {
-    id: "3",
-    advisorName: "Sarah Chen",
-    advisorAvatar: "/avatars/advisor-1.jpg",
-    advisorCredentials: "CFP, CFA",
-    specialty: "Retirement Planning",
-    location: "Sydney, NSW",
-    status: "accepted",
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    respondedAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-    message: "Looking to maximize my superannuation contributions and plan for early retirement.",
-  },
-  {
-    id: "4",
-    advisorName: "Michael Rodriguez",
-    advisorAvatar: "/avatars/advisor-2.jpg",
-    advisorCredentials: "CFP, ChFC",
-    specialty: "Wealth Management",
-    location: "Melbourne, VIC",
-    status: "accepted",
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 96),
-    respondedAt: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    message: "I'm interested in comprehensive wealth management services.",
-  },
-  {
-    id: "5",
-    advisorName: "Robert Williams",
-    advisorAvatar: "/avatars/advisor-6.jpg",
-    advisorCredentials: "CFP, AIF",
-    specialty: "Investment Management",
-    location: "Gold Coast, QLD",
-    status: "declined",
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 120),
-    respondedAt: new Date(Date.now() - 1000 * 60 * 60 * 96),
-    message: "Looking for help with diversifying my investment portfolio.",
-  },
-]
+// Map API status to UI status
+function mapToUiStatus(apiStatus: string): RequestStatus {
+  switch (apiStatus) {
+    case "new":
+      return "pending"
+    case "contacted":
+    case "booked":
+    case "converted":
+      return "accepted"
+    case "declined":
+      return "declined"
+    default:
+      return "pending"
+  }
+}
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
@@ -130,7 +91,19 @@ function getStatusLabel(status: RequestStatus): string {
   }
 }
 
-function RequestCard({ request }: { request: AdvisorRequest }) {
+// Adapted request interface for the card component
+interface AdaptedRequest {
+  id: string
+  advisorName: string
+  advisorAvatar?: string
+  headline: string | null
+  businessName: string | null
+  status: RequestStatus
+  sentAt: Date
+  message: string
+}
+
+function RequestCard({ request }: { request: AdaptedRequest }) {
   return (
     <Link
       href={`/dashboard/requests/${request.id}`}
@@ -153,13 +126,17 @@ function RequestCard({ request }: { request: AdvisorRequest }) {
                 <h3 className="font-semibold text-foreground">
                   {request.advisorName}
                 </h3>
-                <span className="text-sm text-muted-foreground">
-                  {request.advisorCredentials}
-                </span>
+                {request.businessName && (
+                  <span className="text-sm text-muted-foreground">
+                    {request.businessName}
+                  </span>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground">
-                {request.specialty} - {request.location}
-              </p>
+              {request.headline && (
+                <p className="text-sm text-muted-foreground">
+                  {request.headline}
+                </p>
+              )}
               <p className="line-clamp-1 text-sm text-muted-foreground">
                 &quot;{request.message}&quot;
               </p>
@@ -184,11 +161,51 @@ function RequestCard({ request }: { request: AdvisorRequest }) {
 }
 
 export default function RequestsPage() {
+  const [requests, setRequests] = React.useState<RequestSummary[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState("all")
 
-  const pendingRequests = mockRequests.filter((r) => r.status === "pending")
-  const acceptedRequests = mockRequests.filter((r) => r.status === "accepted")
-  const declinedRequests = mockRequests.filter((r) => r.status === "declined")
+  // Fetch requests from API
+  React.useEffect(() => {
+    async function fetchRequests() {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await fetch("/api/requests")
+        const data: RequestsApiResponse = await response.json()
+
+        if (data.success && data.data) {
+          setRequests(data.data.items)
+        } else {
+          setError(data.error?.message || "Failed to fetch requests")
+        }
+      } catch (err) {
+        setError("Failed to connect to server")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchRequests()
+  }, [])
+
+  // Adapt API data to card format
+  const adaptedRequests: AdaptedRequest[] = React.useMemo(() => {
+    return requests.map((r) => ({
+      id: r.id,
+      advisorName: r.advisor.name,
+      advisorAvatar: r.advisor.avatar || undefined,
+      headline: r.advisor.headline,
+      businessName: r.advisor.businessName,
+      status: mapToUiStatus(r.status),
+      sentAt: new Date(r.createdAt),
+      message: r.problemSummary || "No details provided",
+    }))
+  }, [requests])
+
+  const pendingRequests = adaptedRequests.filter((r) => r.status === "pending")
+  const acceptedRequests = adaptedRequests.filter((r) => r.status === "accepted")
+  const declinedRequests = adaptedRequests.filter((r) => r.status === "declined")
 
   const filteredRequests = React.useMemo(() => {
     switch (activeTab) {
@@ -199,9 +216,33 @@ export default function RequestsPage() {
       case "declined":
         return declinedRequests
       default:
-        return mockRequests
+        return adaptedRequests
     }
-  }, [activeTab])
+  }, [activeTab, adaptedRequests, pendingRequests, acceptedRequests, declinedRequests])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <EmptyState
+        icon={<FileText />}
+        title="Failed to load requests"
+        description={error}
+        action={{
+          label: "Try again",
+          onClick: () => window.location.reload(),
+        }}
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -263,7 +304,7 @@ export default function RequestsPage() {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList variant="line">
               <TabsTrigger value="all">
-                All ({mockRequests.length})
+                All ({adaptedRequests.length})
               </TabsTrigger>
               <TabsTrigger value="pending">
                 Pending ({pendingRequests.length})

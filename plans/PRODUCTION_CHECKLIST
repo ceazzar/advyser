@@ -5,7 +5,7 @@
 ║  Created: 2026-02-02                                                                  ║
 ║  Last Updated: 2026-02-02                                                             ║
 ║  Status: IN PROGRESS                                                                  ║
-║  Total Items: 127 | Complete: 4 (3%)                                                  ║
+║  Total Items: 127 | Complete: 8 (6%) | In Progress: 2                                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════╝
 
 Status Legend:  [x] Complete  [ ] Pending  [~] In Progress  [!] Blocked
@@ -93,9 +93,9 @@ until all items show [x].
 │         │ ├─ Validate token server-side on all mutation endpoints                   │
 │         │ └─ Use SameSite=Strict cookies as additional defense                      │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
-│   [ ]   │ 1.8 Create production database with schema                                 │
-│         │ ├─ Provision Supabase project (production tier)                           │
-│         │ ├─ Apply all migrations from database/migrations/                         │
+│   [~]   │ 1.8 Create production database with schema                                 │
+│         │ ├─ ✓ Provision Supabase project (advyser-db, ap-southeast-2)              │
+│         │ ├─ ✓ Apply schema (44 tables deployed)                                    │
 │         │ ├─ Enable Row Level Security on ALL tables                                │
 │         │ └─ Verify RLS policies prevent cross-user data access                     │
 └─────────┴────────────────────────────────────────────────────────────────────────────┘
@@ -110,8 +110,8 @@ Complete authentication system setup and role-based access control.
 ┌─────────┬────────────────────────────────────────────────────────────────────────────┐
 │ Status  │                              Item                                          │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
-│   [ ]   │ 2.1 Set up Supabase Auth                                                   │
-│         │ ├─ Enable email/password authentication                                    │
+│   [~]   │ 2.1 Set up Supabase Auth                                                   │
+│         │ ├─ ✓ Auth foundation (auth-actions.ts, auth-context.tsx, middleware.ts)   │
 │         │ ├─ Configure email templates (verification, reset, magic link)            │
 │         │ ├─ Set password requirements (min 8 chars, 1 uppercase, 1 number)         │
 │         │ └─ Configure session duration (15 min access, 7 day refresh)              │
@@ -188,21 +188,21 @@ Database schema, migrations, and data access patterns.
 ┌─────────┬────────────────────────────────────────────────────────────────────────────┐
 │ Status  │                              Item                                          │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
-│   [ ]   │ 3.1 Create Supabase project                                                │
-│         │ ├─ Create project at supabase.com                                         │
-│         │ ├─ Choose region closest to AU users (ap-southeast-2 Sydney)              │
-│         │ ├─ Enable email auth in Auth settings                                     │
-│         │ └─ Copy connection strings to .env.local                                  │
+│   [x]   │ 3.1 Create Supabase project                                                │
+│         │ ├─ ✓ Created: advyser-db at supabase.com                                  │
+│         │ ├─ ✓ Region: ap-southeast-2 Sydney                                        │
+│         │ ├─ ✓ Email auth enabled                                                   │
+│         │ └─ ✓ Connection strings in .env.local                                     │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
-│   [ ]   │ 3.2 Apply core schema migrations                                           │
-│         │ ├─ Users table (extends Supabase auth.users)                              │
-│         │ ├─ Advisors table (profiles, AFSL, verification)                          │
-│         │ ├─ Categories table (nested, for service types)                           │
-│         │ ├─ Leads table (introduction requests)                                    │
-│         │ ├─ Conversations table (message threads)                                  │
-│         │ ├─ Messages table (individual messages)                                   │
-│         │ ├─ Bookings table (scheduled consultations)                               │
-│         │ └─ Reviews table (client reviews)                                         │
+│   [x]   │ 3.2 Apply core schema migrations                                           │
+│         │ ├─ ✓ 44 tables deployed via database/schema.sql                           │
+│         │ ├─ ✓ Advisors table (profiles, AFSL, verification)                        │
+│         │ ├─ ✓ Categories table (nested, for service types)                         │
+│         │ ├─ ✓ Leads table (introduction requests)                                  │
+│         │ ├─ ✓ Conversations table (message threads)                                │
+│         │ ├─ ✓ Messages table (individual messages)                                 │
+│         │ ├─ ✓ Bookings table (scheduled consultations)                             │
+│         │ └─ ✓ Reviews table (client reviews)                                       │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
 │   [ ]   │ 3.3 Apply extended schema migrations                                       │
 │         │ ├─ advisor_verifications (FAR check history)                              │
@@ -249,11 +249,11 @@ Database schema, migrations, and data access patterns.
 │         │ ├─ Immutable logs (INSERT only, no UPDATE/DELETE permissions)             │
 │         │ └─ 7-year retention for AFSL compliance                                   │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
-│   [ ]   │ 3.9 Install @supabase/supabase-js                                          │
-│         │ ├─ npm install @supabase/supabase-js                                      │
-│         │ ├─ Create site/src/lib/supabase/client.ts (browser client)                │
-│         │ ├─ Create site/src/lib/supabase/server.ts (server client)                 │
-│         │ └─ Create site/src/lib/supabase/admin.ts (service role client)            │
+│   [x]   │ 3.9 Install @supabase/supabase-js                                          │
+│         │ ├─ ✓ @supabase/ssr installed                                              │
+│         │ ├─ ✓ site/src/lib/supabase/client.ts (browser client)                     │
+│         │ ├─ ✓ site/src/lib/supabase/server.ts (server client)                      │
+│         │ └─ ✓ site/src/lib/supabase/admin.ts (service role client)                 │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
 │   [ ]   │ 3.10 Generate TypeScript types from schema                                 │
 │         │ ├─ Run: npx supabase gen types typescript                                 │
@@ -283,11 +283,11 @@ Database schema, migrations, and data access patterns.
 │         │ ├─ Update RLS policies to exclude deleted records                         │
 │         │ └─ Create admin endpoint to permanently purge old deleted records         │
 ├─────────┼────────────────────────────────────────────────────────────────────────────┤
-│   [ ]   │ 3.15 Seed initial data                                                     │
-│         │ ├─ Categories (Financial Advisors, Mortgage Brokers, etc.)                │
-│         │ ├─ Admin user account                                                     │
-│         │ ├─ Test advisor accounts (dev/staging only)                               │
-│         │ └─ Create: database/seeds/                                                │
+│   [x]   │ 3.15 Seed initial data                                                     │
+│         │ ├─ ✓ Specialties seeded                                                   │
+│         │ ├─ ✓ Service offerings seeded                                             │
+│         │ ├─ ✓ Qualifications seeded                                                │
+│         │ └─ ✓ Subscription plans seeded                                            │
 └─────────┴────────────────────────────────────────────────────────────────────────────┘
 
 ═══════════════════════════════════════════════════════════════════════════════════════
@@ -939,11 +939,11 @@ Documentation for developers, operations, and users.
 ┌─────────────────────────────────────┬──────────┬───────────┬──────────┬──────────┐
 │              Section                │ Complete │  Pending  │ Progress │  Total   │
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
-│ 1.  Critical Blockers               │    0     │     8     │    0%    │    8     │
+│ 1.  Critical Blockers               │    0     │     7     │   ~6%    │    8     │
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
-│ 2.  Authentication & Authorization  │    0     │    12     │    0%    │   12     │
+│ 2.  Authentication & Authorization  │    0     │    11     │   ~4%    │   12     │
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
-│ 3.  Database & Data Layer           │    0     │    15     │    0%    │   15     │
+│ 3.  Database & Data Layer           │    4     │    11     │   27%    │   15     │
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
 │ 4.  API Endpoints                   │    0     │    18     │    0%    │   18     │
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
@@ -961,7 +961,7 @@ Documentation for developers, operations, and users.
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
 │ 11. Documentation & Handoff         │    0     │     9     │    0%    │    9     │
 ├─────────────────────────────────────┼──────────┼───────────┼──────────┼──────────┤
-│ TOTAL                               │    4     │   123     │    3%    │  127     │
+│ TOTAL                               │    8     │   117     │    6%    │  127     │
 └─────────────────────────────────────┴──────────┴───────────┴──────────┴──────────┘
 
 ═══════════════════════════════════════════════════════════════════════════════════════
@@ -1011,6 +1011,11 @@ Documentation for developers, operations, and users.
 │            │         │ Added: Auth, Database, API, Performance, Documentation       │
 │            │         │ Reorganized into 11 logical sections                         │
 │            │         │ Added deployment gates per stage                             │
+├────────────┼─────────┼──────────────────────────────────────────────────────────────┤
+│ 2026-02-03 │  2.1.0  │ Progress update: 4 → 8 complete (6%)                         │
+│            │         │ Completed: Supabase project (3.1), Schema (3.2),             │
+│            │         │   Client libs (3.9), Seed data (3.15)                        │
+│            │         │ In Progress: Database w/ schema (1.8), Auth setup (2.1)      │
 └────────────┴─────────┴──────────────────────────────────────────────────────────────┘
 
 ═══════════════════════════════════════════════════════════════════════════════════════

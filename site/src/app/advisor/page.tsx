@@ -11,6 +11,8 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertCircle,
+  Loader2,
+  RefreshCw,
 } from "lucide-react"
 
 import { StatCard } from "@/components/ui/stat-card"
@@ -19,94 +21,74 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 
-// Mock data for dashboard
-const dashboardStats = {
-  newLeads: 12,
-  newLeadsChange: { value: 15, type: "increase" as const },
-  activeClients: 48,
-  activeClientsChange: { value: 5, type: "increase" as const },
-  pendingBookings: 8,
-  responseRate: "94%",
-  responseRateChange: { value: 3, type: "increase" as const },
+// Types for API response
+interface DashboardStats {
+  newLeads: number
+  activeClients: number
+  pendingBookings: number
+  responseRate: number
+  avgResponseTimeHours: number
 }
 
-const recentLeads = [
-  {
-    id: "1",
-    name: "Sarah Mitchell",
-    category: "Retirement Planning",
-    status: "new" as const,
-    createdAt: "2 hours ago",
-    avatar: undefined,
-  },
-  {
-    id: "2",
-    name: "James Chen",
-    category: "Investment Strategy",
-    status: "new" as const,
-    createdAt: "5 hours ago",
-    avatar: undefined,
-  },
-  {
-    id: "3",
-    name: "Emma Thompson",
-    category: "Superannuation",
-    status: "contacted" as const,
-    createdAt: "1 day ago",
-    avatar: undefined,
-  },
-]
+interface RecentLead {
+  id: string
+  consumerName: string
+  consumerAvatar?: string
+  category: string
+  status: string
+  createdAt: string
+}
 
-const upcomingBookings = [
-  {
-    id: "1",
-    clientName: "David Wilson",
-    dateTime: "Today, 2:00 PM",
-    type: "video" as const,
-    avatar: undefined,
-  },
-  {
-    id: "2",
-    clientName: "Lisa Anderson",
-    dateTime: "Tomorrow, 10:00 AM",
-    type: "phone" as const,
-    avatar: undefined,
-  },
-  {
-    id: "3",
-    clientName: "Michael Brown",
-    dateTime: "Thu, 3:30 PM",
-    type: "in-person" as const,
-    avatar: undefined,
-  },
-]
+interface UpcomingBooking {
+  id: string
+  clientName: string
+  clientAvatar?: string
+  startsAt: string
+  mode: string
+}
 
-const recentActivity = [
-  {
-    id: "1",
-    type: "lead_accepted",
-    description: "You accepted a lead from Sarah Mitchell",
-    time: "30 min ago",
-  },
-  {
-    id: "2",
-    type: "message_sent",
-    description: "Message sent to David Wilson",
-    time: "1 hour ago",
-  },
-  {
-    id: "3",
-    type: "booking_completed",
-    description: "Consultation completed with Lisa Anderson",
-    time: "3 hours ago",
-  },
-  {
-    id: "4",
-    type: "document_uploaded",
-    description: "SOA uploaded for Michael Brown",
-    time: "5 hours ago",
-  },
-]
+interface RecentActivity {
+  type: string
+  description: string
+  timestamp: string
+}
+
+interface DashboardData {
+  stats: DashboardStats
+  recentLeads: RecentLead[]
+  upcomingBookings: UpcomingBooking[]
+  recentActivity: RecentActivity[]
+}
+
+interface ApiResponse {
+  success: boolean
+  data: DashboardData
+}
+
+// Mapped types for UI
+interface MappedLead {
+  id: string
+  name: string
+  category: string
+  status: "new" | "contacted"
+  createdAt: string
+  avatar?: string
+}
+
+interface MappedBooking {
+  id: string
+  clientName: string
+  dateTime: string
+  type: "video" | "phone" | "in-person"
+  avatar?: string
+}
+
+interface MappedActivity {
+  id: string
+  type: string
+  description: string
+  time: string
+}
 
 const activityIcons: Record<string, React.ReactNode> = {
   lead_accepted: <CheckCircle2 className="size-4 text-green-600" />,
@@ -115,7 +97,168 @@ const activityIcons: Record<string, React.ReactNode> = {
   document_uploaded: <AlertCircle className="size-4 text-orange-600" />,
 }
 
+// Helper to format relative time from ISO string
+function formatRelativeTime(isoString: string): string {
+  const date = new Date(isoString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 60) {
+    return diffMins <= 1 ? "1 min ago" : `${diffMins} min ago`
+  } else if (diffHours < 24) {
+    return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`
+  } else {
+    return diffDays === 1 ? "1 day ago" : `${diffDays} days ago`
+  }
+}
+
+// Helper to format booking date/time
+function formatBookingDateTime(isoString: string): string {
+  const date = new Date(isoString)
+  const now = new Date()
+  const tomorrow = new Date(now)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  const timeStr = date.toLocaleTimeString("en-AU", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  })
+
+  if (date.toDateString() === now.toDateString()) {
+    return `Today, ${timeStr}`
+  } else if (date.toDateString() === tomorrow.toDateString()) {
+    return `Tomorrow, ${timeStr}`
+  } else {
+    const dayStr = date.toLocaleDateString("en-AU", { weekday: "short" })
+    return `${dayStr}, ${timeStr}`
+  }
+}
+
+// Helper to map mode to type
+function mapModeToType(mode: string): "video" | "phone" | "in-person" {
+  const modeMap: Record<string, "video" | "phone" | "in-person"> = {
+    video: "video",
+    phone: "phone",
+    "in-person": "in-person",
+    "in_person": "in-person",
+  }
+  return modeMap[mode.toLowerCase()] || "video"
+}
+
 export default function AdvisorDashboardPage() {
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [dashboardData, setDashboardData] = React.useState<DashboardData | null>(null)
+
+  const fetchDashboard = React.useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/dashboard/advisor")
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch dashboard data: ${response.statusText}`)
+      }
+
+      const json: ApiResponse = await response.json()
+
+      if (!json.success) {
+        throw new Error("Failed to load dashboard data")
+      }
+
+      setDashboardData(json.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    fetchDashboard()
+  }, [fetchDashboard])
+
+  // Map API data to UI format
+  const mappedLeads: MappedLead[] = React.useMemo(() => {
+    if (!dashboardData?.recentLeads) return []
+    return dashboardData.recentLeads.map((lead) => ({
+      id: lead.id,
+      name: lead.consumerName,
+      category: lead.category,
+      status: (lead.status === "new" ? "new" : "contacted") as "new" | "contacted",
+      createdAt: formatRelativeTime(lead.createdAt),
+      avatar: lead.consumerAvatar,
+    }))
+  }, [dashboardData?.recentLeads])
+
+  const mappedBookings: MappedBooking[] = React.useMemo(() => {
+    if (!dashboardData?.upcomingBookings) return []
+    return dashboardData.upcomingBookings.map((booking) => ({
+      id: booking.id,
+      clientName: booking.clientName,
+      dateTime: formatBookingDateTime(booking.startsAt),
+      type: mapModeToType(booking.mode),
+      avatar: booking.clientAvatar,
+    }))
+  }, [dashboardData?.upcomingBookings])
+
+  const mappedActivity: MappedActivity[] = React.useMemo(() => {
+    if (!dashboardData?.recentActivity) return []
+    return dashboardData.recentActivity.map((activity, index) => ({
+      id: `activity-${index}`,
+      type: activity.type,
+      description: activity.description,
+      time: formatRelativeTime(activity.timestamp),
+    }))
+  }, [dashboardData?.recentActivity])
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="size-10 text-destructive" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Failed to load dashboard</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={fetchDashboard}>
+            <RefreshCw className="size-4" />
+            Try again
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!dashboardData) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <p className="text-sm text-muted-foreground">No dashboard data available</p>
+      </div>
+    )
+  }
+
+  const { stats } = dashboardData
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -130,25 +273,22 @@ export default function AdvisorDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="New Leads"
-          value={dashboardStats.newLeads}
-          change={dashboardStats.newLeadsChange}
+          value={stats.newLeads}
           icon={<Users className="size-5" />}
         />
         <StatCard
           label="Active Clients"
-          value={dashboardStats.activeClients}
-          change={dashboardStats.activeClientsChange}
+          value={stats.activeClients}
           icon={<TrendingUp className="size-5" />}
         />
         <StatCard
           label="Pending Bookings"
-          value={dashboardStats.pendingBookings}
+          value={stats.pendingBookings}
           icon={<Calendar className="size-5" />}
         />
         <StatCard
           label="Response Rate"
-          value={dashboardStats.responseRate}
-          change={dashboardStats.responseRateChange}
+          value={`${Math.round(stats.responseRate * 100)}%`}
           icon={<Clock className="size-5" />}
         />
       </div>
@@ -169,37 +309,43 @@ export default function AdvisorDashboardPage() {
             </CardAction>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="space-y-4">
-              {recentLeads.map((lead) => (
-                <div
-                  key={lead.id}
-                  className="flex items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar size="default">
-                      {lead.avatar && <AvatarImage src={lead.avatar} />}
-                      <AvatarFallback size="default">
-                        {getInitials(lead.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium">{lead.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {lead.category}
+            {mappedLeads.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No recent leads
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {mappedLeads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar size="default">
+                        {lead.avatar && <AvatarImage src={lead.avatar} />}
+                        <AvatarFallback size="default">
+                          {getInitials(lead.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium">{lead.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {lead.category}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge leadStatus={lead.status} size="sm">
+                        {lead.status === "new" ? "New" : "Contacted"}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {lead.createdAt}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Badge leadStatus={lead.status} size="sm">
-                      {lead.status === "new" ? "New" : "Contacted"}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {lead.createdAt}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -217,38 +363,44 @@ export default function AdvisorDashboardPage() {
             </CardAction>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="space-y-4">
-              {upcomingBookings.map((booking) => (
-                <div
-                  key={booking.id}
-                  className="flex items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <Avatar size="default">
-                      {booking.avatar && <AvatarImage src={booking.avatar} />}
-                      <AvatarFallback size="default">
-                        {getInitials(booking.clientName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium">
-                        {booking.clientName}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {booking.type === "video"
-                          ? "Video Call"
-                          : booking.type === "phone"
-                          ? "Phone Call"
-                          : "In-Person"}
-                      </span>
+            {mappedBookings.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No upcoming bookings
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {mappedBookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar size="default">
+                        {booking.avatar && <AvatarImage src={booking.avatar} />}
+                        <AvatarFallback size="default">
+                          {getInitials(booking.clientName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-sm font-medium">
+                          {booking.clientName}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {booking.type === "video"
+                            ? "Video Call"
+                            : booking.type === "phone"
+                            ? "Phone Call"
+                            : "In-Person"}
+                        </span>
+                      </div>
                     </div>
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
+                      {booking.dateTime}
+                    </span>
                   </div>
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    {booking.dateTime}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -258,24 +410,30 @@ export default function AdvisorDashboardPage() {
             <CardTitle>Recent Activity</CardTitle>
           </CardHeader>
           <CardContent className="pt-4">
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-3"
-                >
-                  <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                    {activityIcons[activity.type]}
+            {mappedActivity.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No recent activity
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {mappedActivity.map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3"
+                  >
+                    <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                      {activityIcons[activity.type] || <AlertCircle className="size-4 text-gray-600" />}
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5">
+                      <span className="text-sm">{activity.description}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {activity.time}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-1 flex-col gap-0.5">
-                    <span className="text-sm">{activity.description}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {activity.time}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

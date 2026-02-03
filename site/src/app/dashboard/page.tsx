@@ -10,6 +10,9 @@ import {
   ArrowRight,
   Search,
   Bell,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react"
 
 import { StatCard } from "@/components/ui/stat-card"
@@ -19,75 +22,46 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import { EmptyState } from "@/components/ui/empty-state"
 
-// Mock data for the dashboard
-const mockStats = {
-  activeRequests: 3,
-  unreadMessages: 2,
-  upcomingBookings: 1,
-  totalAdvisorsContacted: 8,
+// Types for API response
+interface DashboardStats {
+  activeRequests: number
+  unreadMessages: number
+  upcomingBookings: number
+  totalAdvisorsContacted: number
 }
 
-const mockRecentActivity = [
-  {
-    id: "1",
-    type: "message" as const,
-    title: "New message from Sarah Chen",
-    description: "Thanks for reaching out! I'd love to discuss your retirement planning goals...",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-    avatar: "/avatars/advisor-1.jpg",
-    name: "Sarah Chen",
-    unread: true,
-  },
-  {
-    id: "2",
-    type: "booking" as const,
-    title: "Upcoming consultation with Michael Rodriguez",
-    description: "Video call scheduled for tomorrow at 2:00 PM",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    avatar: "/avatars/advisor-2.jpg",
-    name: "Michael Rodriguez",
-  },
-  {
-    id: "3",
-    type: "request" as const,
-    title: "Request sent to David Kim",
-    description: "Your introduction request is pending review",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    avatar: "/avatars/advisor-4.jpg",
-    name: "David Kim",
-  },
-  {
-    id: "4",
-    type: "message" as const,
-    title: "Message from Emily Thompson",
-    description: "I've reviewed your financial goals and have some recommendations...",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), // 2 days ago
-    avatar: "/avatars/advisor-3.jpg",
-    name: "Emily Thompson",
-    unread: false,
-  },
-]
+interface ActivityItem {
+  type: "message" | "booking" | "request"
+  title: string
+  description: string
+  timestamp: string
+  entityType?: string
+  entityId?: string
+}
 
-const mockPendingRequests = [
-  {
-    id: "1",
-    advisorName: "David Kim",
-    avatar: "/avatars/advisor-4.jpg",
-    specialty: "Tax Planning",
-    status: "pending" as const,
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: "2",
-    advisorName: "Jennifer Martinez",
-    avatar: "/avatars/advisor-5.jpg",
-    specialty: "Estate Planning",
-    status: "pending" as const,
-    sentAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-  },
-]
+interface PendingRequest {
+  id: string
+  advisorName: string
+  advisorAvatar?: string
+  specialty: string
+  status: "pending" | "accepted" | "declined"
+  sentAt: string
+}
 
-function formatTimeAgo(date: Date): string {
+interface DashboardData {
+  stats: DashboardStats
+  recentActivity: ActivityItem[]
+  pendingRequests: PendingRequest[]
+}
+
+interface ApiResponse {
+  success: boolean
+  data: DashboardData
+  error?: string
+}
+
+function formatTimeAgo(dateString: string): string {
+  const date = new Date(dateString)
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
 
   if (seconds < 60) return "Just now"
@@ -108,25 +82,115 @@ function getActivityIcon(type: "message" | "booking" | "request") {
   }
 }
 
-function getActivityLink(type: "message" | "booking" | "request", id: string): string {
+function getActivityLink(activity: ActivityItem): string {
+  const { type, entityId } = activity
   switch (type) {
     case "message":
-      return `/dashboard/messages/${id}`
+      return entityId ? `/dashboard/messages/${entityId}` : "/dashboard/messages"
     case "booking":
-      return `/dashboard/bookings`
+      return entityId ? `/dashboard/bookings/${entityId}` : "/dashboard/bookings"
     case "request":
-      return `/dashboard/requests/${id}`
+      return entityId ? `/dashboard/requests/${entityId}` : "/dashboard/requests"
+    default:
+      return "/dashboard"
   }
 }
 
+// Extract name from activity title for avatar
+function extractNameFromTitle(title: string): string {
+  // Try to extract name from patterns like "New message from Sarah Chen" or "Upcoming consultation with Michael Rodriguez"
+  const fromMatch = title.match(/from\s+(.+)$/i)
+  if (fromMatch) return fromMatch[1]
+
+  const withMatch = title.match(/with\s+(.+)$/i)
+  if (withMatch) return withMatch[1]
+
+  const toMatch = title.match(/to\s+(.+)$/i)
+  if (toMatch) return toMatch[1]
+
+  return title
+}
+
 export default function DashboardPage() {
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [dashboardData, setDashboardData] = React.useState<DashboardData | null>(null)
+
+  const fetchDashboardData = React.useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch("/api/dashboard/consumer")
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch dashboard data: ${response.statusText}`)
+      }
+
+      const result: ApiResponse = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || "Failed to load dashboard data")
+      }
+
+      setDashboardData(result.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  React.useEffect(() => {
+    fetchDashboardData()
+  }, [fetchDashboardData])
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error || !dashboardData) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="flex flex-col items-center gap-4 p-6 text-center">
+            <div className="rounded-full bg-destructive/10 p-3">
+              <AlertCircle className="size-6 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">Failed to load dashboard</h3>
+              <p className="text-sm text-muted-foreground">
+                {error || "Unable to load your dashboard data. Please try again."}
+              </p>
+            </div>
+            <Button onClick={fetchDashboardData} variant="outline">
+              <RefreshCw className="size-4" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  const { stats, recentActivity, pendingRequests } = dashboardData
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Welcome back, John
+            Welcome back
           </h1>
           <p className="mt-1 text-muted-foreground">
             Here&apos;s what&apos;s happening with your advisor search
@@ -144,22 +208,22 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Active Requests"
-          value={mockStats.activeRequests}
+          value={stats.activeRequests}
           icon={<FileText className="size-5" />}
         />
         <StatCard
           label="Unread Messages"
-          value={mockStats.unreadMessages}
+          value={stats.unreadMessages}
           icon={<MessageSquare className="size-5" />}
         />
         <StatCard
           label="Upcoming Bookings"
-          value={mockStats.upcomingBookings}
+          value={stats.upcomingBookings}
           icon={<Calendar className="size-5" />}
         />
         <StatCard
           label="Advisors Contacted"
-          value={mockStats.totalAdvisorsContacted}
+          value={stats.totalAdvisorsContacted}
           icon={<Bell className="size-5" />}
         />
       </div>
@@ -180,42 +244,39 @@ export default function DashboardPage() {
             </CardAction>
           </CardHeader>
           <CardContent className="p-6">
-            {mockRecentActivity.length > 0 ? (
+            {recentActivity.length > 0 ? (
               <div className="space-y-1">
-                {mockRecentActivity.map((activity) => (
-                  <Link
-                    key={activity.id}
-                    href={getActivityLink(activity.type, activity.id)}
-                    className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent"
-                  >
-                    <div className="relative shrink-0">
-                      <Avatar size="default">
-                        {activity.avatar && (
-                          <AvatarImage src={activity.avatar} alt={activity.name} />
-                        )}
-                        <AvatarFallback size="default">
-                          {getInitials(activity.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      {activity.unread && (
-                        <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full border-2 border-background bg-primary" />
-                      )}
-                    </div>
-                    <div className="flex min-w-0 flex-1 flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-medium text-foreground">
-                          {activity.title}
-                        </span>
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {formatTimeAgo(activity.timestamp)}
-                        </span>
+                {recentActivity.map((activity, index) => {
+                  const name = extractNameFromTitle(activity.title)
+                  return (
+                    <Link
+                      key={`${activity.entityId || index}-${activity.timestamp}`}
+                      href={getActivityLink(activity)}
+                      className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent"
+                    >
+                      <div className="relative shrink-0">
+                        <Avatar size="default">
+                          <AvatarFallback size="default">
+                            {getInitials(name)}
+                          </AvatarFallback>
+                        </Avatar>
                       </div>
-                      <p className="line-clamp-1 text-sm text-muted-foreground">
-                        {activity.description}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate text-sm font-medium text-foreground">
+                            {activity.title}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {formatTimeAgo(activity.timestamp)}
+                          </span>
+                        </div>
+                        <p className="line-clamp-1 text-sm text-muted-foreground">
+                          {activity.description}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             ) : (
               <EmptyState
@@ -245,17 +306,17 @@ export default function DashboardPage() {
             </CardAction>
           </CardHeader>
           <CardContent className="p-6">
-            {mockPendingRequests.length > 0 ? (
+            {pendingRequests.length > 0 ? (
               <div className="space-y-3">
-                {mockPendingRequests.map((request) => (
+                {pendingRequests.map((request) => (
                   <Link
                     key={request.id}
                     href={`/dashboard/requests/${request.id}`}
                     className="flex items-center gap-3 rounded-lg p-3 transition-colors hover:bg-accent"
                   >
                     <Avatar size="sm">
-                      {request.avatar && (
-                        <AvatarImage src={request.avatar} alt={request.advisorName} />
+                      {request.advisorAvatar && (
+                        <AvatarImage src={request.advisorAvatar} alt={request.advisorName} />
                       )}
                       <AvatarFallback size="sm">
                         {getInitials(request.advisorName)}

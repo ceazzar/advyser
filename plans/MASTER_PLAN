@@ -19,14 +19,15 @@ Read this section FIRST to understand what we're building and why.
 WINNING THESIS
 ────────────────────────────────────────────────────────────────────────────────────────
 
-"Trusted adviser introductions + the workspace to turn introductions into
-retained clients."
+"Australia's default advice platform: find, verify, and work with any licensed
+financial or property adviser in one place."
 
 Most competitors win EITHER discovery/trust (Adviser Ratings, VouchedFor) OR
 lead generation (Unbiased, SmartAsset). Advyser wins by bundling all three:
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ LAYER 1: TRUST       │ ASIC/FAR verification system (not just a link)       │
+│                      │ Cross-license signals (credit + state REA checks)    │
 │                      │ Review integrity + dispute/right-of-reply            │
 │                      │ "Verified" (earned) vs "Promoted" (paid) badges      │
 │                      │ Transparent fees displayed upfront                   │
@@ -41,6 +42,69 @@ lead generation (Unbiased, SmartAsset). Advyser wins by bundling all three:
 │                      │ Advisor analytics (response time, conversion,        │
 │                      │ review momentum) tied to performance                 │
 └──────────────────────┴──────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+CATEGORY DESIGN: THE DEFAULT ADVICE PLATFORM FOR AUSTRALIA
+────────────────────────────────────────────────────────────────────────────────────────
+
+Category Promise (what no one else can credibly claim):
+"Any Australian can get matched to a verified adviser for any money or property
+decision, then complete the advice journey in one compliant workspace."
+
+NON-NEGOTIABLE DIFFERENTIATORS (Build + communicate early)
+• National Trust Ledger: license verification across ASIC FAR, credit licensing,
+  and state real-estate licensing (where applicable), with "last checked" stamps
+• Advice Fit Score: matching that combines intent, complexity, location, and
+  adviser specialization (not just category + postcode)
+• Verified Outcomes: post-engagement reviews + response/right-of-reply tied to
+  real interactions (not open, anonymous listings)
+• The Advice Workspace: a shared timeline for briefs, documents, tasks, and
+  compliance-ready audit trails (turns introductions into retained clients)
+
+DESIGN MANDATE (Make the differentiation obvious)
+• Trust signals are visible above the fold (license badges, "last verified" time)
+• Matching is explainer-led ("why this adviser") not a faceless list
+• The UI communicates regulated confidence, not generic SaaS directory
+• Every advisor action ties to an outcome metric (response time, conversion,
+  review momentum, referral rate)
+
+────────────────────────────────────────────────────────────────────────────────────────
+GO-TO-MARKET ENGINE (How We Become the Default Fast)
+────────────────────────────────────────────────────────────────────────────────────────
+
+SUPPLY WEDGE: "Claim your verified profile" for every FAR-registered adviser
+• Auto-create advisor pages from FAR import -> email claim flow
+• Free listing includes verification badge + basic insights
+• Paid tier unlocks lead controls, response templates, analytics
+
+DEMAND WEDGE: Advice-first consumer entry points
+• "Best adviser for X" landing pages + local SEO (state, city, suburb)
+• Short "Advice Fit" quiz with immediate shortlist + booking
+• Property + finance calculators that always route to verified advisers
+
+NETWORK EFFECTS: Trust + workflow creates retention
+• Advisers improve response metrics -> rank higher -> more quality leads
+• Clients reuse the workspace for follow-ups -> reviews -> better matching
+
+────────────────────────────────────────────────────────────────────────────────────────
+30-DAY $1M REVENUE SPRINT (Aggressive, founder-led)
+────────────────────────────────────────────────────────────────────────────────────────
+
+Goal: $1,000,000 in booked revenue commitments in 30 days (cash or contracts).
+This is a stretch target and assumes strong founder-led sales + warm intros.
+
+Revenue Path (pick 1-2 and go deep):
+• Enterprise pre-sales: 8-12 advisory networks at $80k-$150k annual,
+  paid quarterly or upfront for "verified network + lead workflow"
+• Premium cohort: 200 advisors at $300-$500/month, prepaid for 6-12 months
+• Sponsored categories: banks/lenders underwrite "mortgage + property advice"
+  experiences (category sponsorship + lead fees)
+
+Operating Rhythm (weekly):
+• Week 1: Build target list, narrative deck, outcomes-based pricing, 20 pitches
+• Week 2: Close pilots (letters of intent), onboard first 30-50 advisers
+• Week 3: Publish trust-led landing pages + fit quiz + booking workflow
+• Week 4: Conversion push + case studies + expand enterprise contracts
 
 ────────────────────────────────────────────────────────────────────────────────────────
 BENCHMARK COMPETITORS (What to Copy)

@@ -32,6 +32,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command"
 import { useAuth } from "@/lib/auth-context"
+import { logger } from "@/lib/logger"
 
 // localStorage keys
 const RECENT_PAGES_KEY = "advyser-recent-pages"
@@ -101,7 +102,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           setRecentPages(JSON.parse(stored))
         }
       } catch (e) {
-        console.error("Failed to load recent pages:", e)
+        logger.error("Failed to load recent pages", { error: e instanceof Error ? e.message : String(e) })
       }
     }
   }, [])
@@ -130,7 +131,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           localStorage.setItem(RECENT_PAGES_KEY, JSON.stringify(updated))
           setRecentPages(updated)
         } catch (e) {
-          console.error("Failed to save recent page:", e)
+          logger.error("Failed to save recent page", { error: e instanceof Error ? e.message : String(e) })
         }
       }
     }

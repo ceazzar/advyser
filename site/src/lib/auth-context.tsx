@@ -4,6 +4,7 @@ import * as React from "react"
 import { useRouter, usePathname } from "next/navigation"
 import type { UserRole } from "@/types/user"
 import { createClient } from "@/lib/supabase/client"
+import { logger } from "@/lib/logger"
 import { signIn as signInAction, signOut as signOutAction } from "@/lib/auth-actions"
 
 interface User {
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .select("*")
           .eq("id", authUser.id)
           .single()
-        if (error) console.error("Failed to fetch user profile:", error.message)
+        if (error) logger.error("Failed to fetch user profile", { error: error.message })
         if (data) setUser(mapDbUserToAppUser(data))
       }
       setIsLoading(false)
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .select("*")
             .eq("id", session.user.id)
             .single()
-          if (error) console.error("Failed to fetch user profile:", error.message)
+          if (error) logger.error("Failed to fetch user profile", { error: error.message })
           if (data) setUser(mapDbUserToAppUser(data))
         } else {
           setUser(null)

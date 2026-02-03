@@ -80,8 +80,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading && (
-          <span className="absolute inset-0 flex items-center justify-center">
-            <Loader2 className="size-4 animate-spin" />
+          <span className="absolute inset-0 flex items-center justify-center" role="status" aria-live="polite">
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            <span className="sr-only">Loading, please wait</span>
           </span>
         )}
         <span className={cn("inline-flex items-center gap-2", loading && "invisible")}>

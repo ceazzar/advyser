@@ -192,3 +192,114 @@ export const leadSchema = z.object({
 })
 
 export type LeadFormData = z.infer<typeof leadSchema>
+
+// ============================================================================
+// API MUTATION SCHEMAS (Week 0: Backend APIs)
+// ============================================================================
+
+/**
+ * Create lead schema - API mutation with APPs consent
+ */
+export const createLeadApiSchema = z.object({
+  listing_id: z.string().uuid('Invalid listing ID'),
+  problem_summary: z.string()
+    .min(20, 'Please describe your situation in at least 20 characters')
+    .max(2000, 'Description must be less than 2000 characters'),
+  goal_tags: z.array(z.string().max(50)).max(5).optional(),
+  timeline: z.enum(['asap', 'next_month', 'next_3_months', 'exploring']).optional(),
+  budget_range: z.string().max(50).optional(),
+  preferred_meeting_mode: z.enum(['online', 'in_person', 'both']).optional(),
+  preferred_times: z.string().max(500).optional(),
+  idempotency_key: z.string().uuid().optional(),
+  // APPs compliance - consent fields
+  consent: z.object({
+    shareContactInfo: z.boolean().refine(val => val === true, 'You must consent to share your contact information'),
+    shareToOtherAdvisors: z.boolean().default(false),
+    retentionAcknowledged: z.boolean().refine(val => val === true, 'You must acknowledge the data retention policy'),
+    marketingOptIn: z.boolean().default(false),
+    consentVersion: z.string().default('1.0'),
+  }),
+})
+
+export type CreateLeadApiData = z.infer<typeof createLeadApiSchema>
+
+/**
+ * Update lead status schema
+ */
+export const updateLeadStatusSchema = z.object({
+  status: z.enum(['contacted', 'booked', 'converted', 'declined']),
+  version: z.number().int().positive().optional(), // For optimistic locking
+  decline_reason: z.string().max(500).optional(),
+})
+
+export type UpdateLeadStatusData = z.infer<typeof updateLeadStatusSchema>
+
+/**
+ * Create message schema
+ */
+export const createMessageSchema = z.object({
+  conversation_id: z.string().uuid('Invalid conversation ID'),
+  body: z.string()
+    .min(1, 'Message cannot be empty')
+    .max(5000, 'Message must be less than 5000 characters'),
+  idempotency_key: z.string().uuid().optional(),
+})
+
+export type CreateMessageData = z.infer<typeof createMessageSchema>
+
+/**
+ * Create booking schema - API mutation
+ */
+export const createBookingApiSchema = z.object({
+  lead_id: z.string().uuid().optional(),
+  client_record_id: z.string().uuid().optional(),
+  starts_at: z.string().datetime('Invalid start time'),
+  ends_at: z.string().datetime('Invalid end time'),
+  timezone: z.string().default('Australia/Sydney'),
+  mode: z.enum(['online', 'in_person']),
+  location_text: z.string().max(200).optional(),
+  meeting_link: z.string().url().optional(),
+  advisor_notes: z.string().max(1000).optional(),
+}).refine(
+  data => data.lead_id || data.client_record_id,
+  'Either lead_id or client_record_id is required'
+).refine(
+  data => new Date(data.ends_at) > new Date(data.starts_at),
+  'End time must be after start time'
+)
+
+export type CreateBookingApiData = z.infer<typeof createBookingApiSchema>
+
+/**
+ * Update booking schema
+ */
+export const updateBookingSchema = z.object({
+  starts_at: z.string().datetime().optional(),
+  ends_at: z.string().datetime().optional(),
+  mode: z.enum(['online', 'in_person']).optional(),
+  location_text: z.string().max(200).optional(),
+  meeting_link: z.string().url().optional(),
+  status: z.enum(['proposed', 'confirmed', 'cancelled', 'completed']).optional(),
+  advisor_notes: z.string().max(1000).optional(),
+})
+
+export type UpdateBookingData = z.infer<typeof updateBookingSchema>
+
+/**
+ * Pagination params schema (reusable)
+ */
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+})
+
+export type PaginationParams = z.infer<typeof paginationSchema>
+
+/**
+ * UUID param schema (reusable)
+ */
+export const uuidParamSchema = z.object({
+  id: z.string().uuid('Invalid ID format'),
+})
+
+export type UuidParam = z.infer<typeof uuidParamSchema>

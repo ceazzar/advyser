@@ -113,7 +113,7 @@ const TagInput = React.forwardRef<HTMLDivElement, TagInputProps>(
             placeholder={value.length === 0 ? placeholder : ""}
             disabled={disabled}
             className={cn(
-              "flex-1 min-w-[120px] bg-transparent outline-none text-sm",
+              "flex-1 min-w-[120px] bg-transparent outline-none focus:ring-2 focus:ring-ring text-sm",
               "text-foreground placeholder:text-muted-foreground"
             )}
           />

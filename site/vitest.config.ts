@@ -10,8 +10,24 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'src/test/'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['node_modules', 'e2e/**', '**/*.d.ts'],
+      thresholds: {
+        'src/lib/**': {
+          statements: 60,
+          branches: 60,
+          functions: 60,
+          lines: 60,
+        },
+        'src/components/ui/**': {
+          statements: 60,
+          branches: 60,
+          functions: 60,
+          lines: 60,
+        },
+      },
     },
   },
   resolve: {

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Send, Paperclip, MoreVertical, Phone, Video } from "lucide-react"
+import { Search, Send, Paperclip, MoreVertical, Phone, Video, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
@@ -19,115 +19,188 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { EmptyState } from "@/components/ui/empty-state"
 
-// Mock conversations data
-const mockConversations = [
-  {
-    id: "1",
-    name: "Sarah Mitchell",
-    avatar: undefined,
-    lastMessage: "Thank you for the detailed explanation about the pension options.",
-    lastMessageTime: "2 min ago",
-    unreadCount: 2,
-    online: true,
-  },
-  {
-    id: "2",
-    name: "James Chen",
-    avatar: undefined,
-    lastMessage: "I've reviewed the documents you sent. Can we schedule a call?",
-    lastMessageTime: "1 hour ago",
-    unreadCount: 0,
-    online: true,
-  },
-  {
-    id: "3",
-    name: "Emma Thompson",
-    avatar: undefined,
-    lastMessage: "Perfect, I'll send over the super statements tomorrow.",
-    lastMessageTime: "3 hours ago",
-    unreadCount: 0,
-    online: false,
-  },
-  {
-    id: "4",
-    name: "David Wilson",
-    avatar: undefined,
-    lastMessage: "Looking forward to our meeting next week.",
-    lastMessageTime: "Yesterday",
-    unreadCount: 0,
-    online: false,
-  },
-  {
-    id: "5",
-    name: "Lisa Anderson",
-    avatar: undefined,
-    lastMessage: "The insurance review was very helpful, thanks!",
-    lastMessageTime: "2 days ago",
-    unreadCount: 0,
-    online: false,
-  },
-]
+// API Types
+interface ConversationSummary {
+  id: string
+  subject: string | null
+  otherParty: {
+    id: string
+    displayName: string
+    avatarUrl: string | null
+  }
+  lastMessage: {
+    body: string
+    createdAt: string
+    isFromMe: boolean
+  } | null
+  unreadCount: number
+  lastMessageAt: string | null
+  isArchived: boolean
+  createdAt: string
+}
 
-// Mock messages for selected conversation
-const mockMessages = [
-  {
-    id: "1",
-    senderId: "client",
-    content: "Hi, I wanted to follow up on our retirement planning discussion from last week.",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: "2",
-    senderId: "advisor",
-    content: "Hello Sarah! Of course, I've been reviewing your situation. I have some recommendations I'd like to share with you.",
-    timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000),
-  },
-  {
-    id: "3",
-    senderId: "advisor",
-    content: "Based on your current super balance and desired retirement age, I've identified a few strategies that could optimize your tax position while ensuring a comfortable retirement income.",
-    timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000),
-  },
-  {
-    id: "4",
-    senderId: "client",
-    content: "That sounds great! What are the main options you'd recommend?",
-    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
-  },
-  {
-    id: "5",
-    senderId: "advisor",
-    content: "The main strategies I'd suggest are:\n\n1. Transition to Retirement (TTR) pension - this allows you to access some super while still working\n2. Salary sacrifice arrangements to boost your super in the final years\n3. Spouse contribution splitting to optimize both your retirement positions\n\nWould you like me to prepare a detailed comparison of these options?",
-    timestamp: new Date(Date.now() - 30 * 60 * 1000),
-  },
-  {
-    id: "6",
-    senderId: "client",
-    content: "Thank you for the detailed explanation about the pension options.",
-    timestamp: new Date(Date.now() - 2 * 60 * 1000),
-  },
-]
+interface MessageItem {
+  id: string
+  senderId: string
+  senderName: string
+  senderAvatar: string | null
+  isFromMe: boolean
+  body: string
+  status: string
+  editedAt: string | null
+  createdAt: string
+  readBy: { userId: string; readAt: string }[]
+}
 
-function formatTime(date: Date): string {
+function formatTime(dateString: string): string {
   return new Intl.DateTimeFormat("en-AU", {
     hour: "numeric",
     minute: "2-digit",
-  }).format(date)
+  }).format(new Date(dateString))
+}
+
+function formatRelativeTime(dateString: string | null): string {
+  if (!dateString) return ""
+
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  if (diffMins < 1) return "Just now"
+  if (diffMins < 60) return `${diffMins} min ago`
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`
+  if (diffDays === 1) return "Yesterday"
+  return `${diffDays} days ago`
 }
 
 export default function MessagesPage() {
   const [searchQuery, setSearchQuery] = React.useState("")
-  const [selectedConversation, setSelectedConversation] = React.useState(mockConversations[0])
+  const [selectedConversation, setSelectedConversation] = React.useState<ConversationSummary | null>(null)
   const [newMessage, setNewMessage] = React.useState("")
 
-  const filteredConversations = mockConversations.filter((conv) =>
-    conv.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // API state
+  const [conversations, setConversations] = React.useState<ConversationSummary[]>([])
+  const [messages, setMessages] = React.useState<MessageItem[]>([])
+  const [conversationsLoading, setConversationsLoading] = React.useState(true)
+  const [messagesLoading, setMessagesLoading] = React.useState(false)
+  const [conversationsError, setConversationsError] = React.useState<string | null>(null)
+  const [messagesError, setMessagesError] = React.useState<string | null>(null)
+  const [sendingMessage, setSendingMessage] = React.useState(false)
+
+  // Fetch conversations on mount
+  React.useEffect(() => {
+    async function fetchConversations() {
+      setConversationsLoading(true)
+      setConversationsError(null)
+      try {
+        const response = await fetch("/api/conversations")
+        const data = await response.json()
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error?.message || "Failed to fetch conversations")
+        }
+
+        setConversations(data.data.items)
+
+        // Auto-select first conversation if available
+        if (data.data.items.length > 0 && !selectedConversation) {
+          setSelectedConversation(data.data.items[0])
+        }
+      } catch (error) {
+        setConversationsError(error instanceof Error ? error.message : "Failed to load conversations")
+      } finally {
+        setConversationsLoading(false)
+      }
+    }
+
+    fetchConversations()
+  }, [])
+
+  // Fetch messages when conversation is selected
+  React.useEffect(() => {
+    async function fetchMessages() {
+      if (!selectedConversation) {
+        setMessages([])
+        return
+      }
+
+      setMessagesLoading(true)
+      setMessagesError(null)
+      try {
+        const response = await fetch(`/api/conversations/${selectedConversation.id}/messages`)
+        const data = await response.json()
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error?.message || "Failed to fetch messages")
+        }
+
+        setMessages(data.data.items)
+      } catch (error) {
+        setMessagesError(error instanceof Error ? error.message : "Failed to load messages")
+      } finally {
+        setMessagesLoading(false)
+      }
+    }
+
+    fetchMessages()
+  }, [selectedConversation?.id])
+
+  const filteredConversations = conversations.filter((conv) =>
+    conv.otherParty.displayName.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // In production, send message via API
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation || sendingMessage) return
+
+    setSendingMessage(true)
+    try {
+      const response = await fetch(`/api/conversations/${selectedConversation.id}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ body: newMessage.trim() }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error?.message || "Failed to send message")
+      }
+
+      // Clear the input
       setNewMessage("")
+
+      // Refresh messages to include the new one
+      const messagesResponse = await fetch(`/api/conversations/${selectedConversation.id}/messages`)
+      const messagesData = await messagesResponse.json()
+
+      if (messagesResponse.ok && messagesData.success) {
+        setMessages(messagesData.data.items)
+      }
+
+      // Also refresh conversations to update last message preview
+      const convsResponse = await fetch("/api/conversations")
+      const convsData = await convsResponse.json()
+
+      if (convsResponse.ok && convsData.success) {
+        setConversations(convsData.data.items)
+        // Update selected conversation with new data
+        const updatedConv = convsData.data.items.find(
+          (c: ConversationSummary) => c.id === selectedConversation.id
+        )
+        if (updatedConv) {
+          setSelectedConversation(updatedConv)
+        }
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error)
+      // Could add a toast notification here
+    } finally {
+      setSendingMessage(false)
     }
   }
 
@@ -153,46 +226,70 @@ export default function MessagesPage() {
 
           {/* Conversation List */}
           <ScrollArea className="flex-1">
-            <div className="divide-y">
-              {filteredConversations.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  onClick={() => setSelectedConversation(conversation)}
-                  className={cn(
-                    "flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-muted/50",
-                    selectedConversation?.id === conversation.id && "bg-muted"
-                  )}
+            {conversationsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="size-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : conversationsError ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-8 px-4 text-center">
+                <p className="text-sm text-destructive">{conversationsError}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
                 >
-                  <div className="relative">
-                    <Avatar size="default">
-                      {conversation.avatar && <AvatarImage src={conversation.avatar} />}
-                      <AvatarFallback size="default">
-                        {getInitials(conversation.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    {conversation.online && (
-                      <span className="absolute bottom-0 right-0 size-3 rounded-full border-2 border-card bg-green-500" />
+                  Try again
+                </Button>
+              </div>
+            ) : filteredConversations.length === 0 ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-sm text-muted-foreground">
+                  {searchQuery ? "No conversations found" : "No conversations yet"}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {filteredConversations.map((conversation) => (
+                  <button
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(conversation)}
+                    className={cn(
+                      "flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-muted/50",
+                      selectedConversation?.id === conversation.id && "bg-muted"
                     )}
-                  </div>
-                  <div className="flex flex-1 flex-col gap-1 overflow-hidden">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium truncate">{conversation.name}</span>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
-                        {conversation.lastMessageTime}
-                      </span>
+                  >
+                    <div className="relative">
+                      <Avatar size="default">
+                        {conversation.otherParty.avatarUrl && (
+                          <AvatarImage src={conversation.otherParty.avatarUrl} />
+                        )}
+                        <AvatarFallback size="default">
+                          {getInitials(conversation.otherParty.displayName)}
+                        </AvatarFallback>
+                      </Avatar>
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">
-                      {conversation.lastMessage}
-                    </p>
-                  </div>
-                  {conversation.unreadCount > 0 && (
-                    <Badge className="size-5 items-center justify-center rounded-full p-0 text-xs">
-                      {conversation.unreadCount}
-                    </Badge>
-                  )}
-                </button>
-              ))}
-            </div>
+                    <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium truncate">
+                          {conversation.otherParty.displayName}
+                        </span>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatRelativeTime(conversation.lastMessageAt)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {conversation.lastMessage?.body || "No messages yet"}
+                      </p>
+                    </div>
+                    {conversation.unreadCount > 0 && (
+                      <Badge className="size-5 items-center justify-center rounded-full p-0 text-xs">
+                        {conversation.unreadCount}
+                      </Badge>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </ScrollArea>
         </div>
 
@@ -203,18 +300,20 @@ export default function MessagesPage() {
             <div className="flex items-center justify-between border-b px-6 py-4">
               <div className="flex items-center gap-3">
                 <Avatar size="default">
-                  {selectedConversation.avatar && (
-                    <AvatarImage src={selectedConversation.avatar} />
+                  {selectedConversation.otherParty.avatarUrl && (
+                    <AvatarImage src={selectedConversation.otherParty.avatarUrl} />
                   )}
                   <AvatarFallback size="default">
-                    {getInitials(selectedConversation.name)}
+                    {getInitials(selectedConversation.otherParty.displayName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="font-medium">{selectedConversation.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {selectedConversation.online ? "Online" : "Offline"}
-                  </span>
+                  <span className="font-medium">{selectedConversation.otherParty.displayName}</span>
+                  {selectedConversation.subject && (
+                    <span className="text-xs text-muted-foreground">
+                      {selectedConversation.subject}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -242,38 +341,66 @@ export default function MessagesPage() {
 
             {/* Messages */}
             <ScrollArea className="flex-1 p-6">
-              <div className="space-y-4">
-                {mockMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      "flex",
-                      message.senderId === "advisor" ? "justify-end" : "justify-start"
-                    )}
+              {messagesLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : messagesError ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-8">
+                  <p className="text-sm text-destructive">{messagesError}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Re-trigger message fetch by updating dependency
+                      const conv = selectedConversation
+                      setSelectedConversation(null)
+                      setTimeout(() => setSelectedConversation(conv), 0)
+                    }}
                   >
+                    Try again
+                  </Button>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-sm text-muted-foreground">
+                    No messages yet. Start the conversation!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map((message) => (
                     <div
+                      key={message.id}
                       className={cn(
-                        "max-w-[70%] rounded-2xl px-4 py-2.5",
-                        message.senderId === "advisor"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                        "flex",
+                        message.isFromMe ? "justify-end" : "justify-start"
                       )}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                      <p
+                      <div
                         className={cn(
-                          "mt-1 text-xs",
-                          message.senderId === "advisor"
-                            ? "text-primary-foreground/70"
-                            : "text-muted-foreground"
+                          "max-w-[70%] rounded-2xl px-4 py-2.5",
+                          message.isFromMe
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
                         )}
                       >
-                        {formatTime(message.timestamp)}
-                      </p>
+                        <p className="text-sm whitespace-pre-wrap">{message.body}</p>
+                        <p
+                          className={cn(
+                            "mt-1 text-xs",
+                            message.isFromMe
+                              ? "text-primary-foreground/70"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          {formatTime(message.createdAt)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </ScrollArea>
 
             {/* Message Input */}
@@ -287,6 +414,7 @@ export default function MessagesPage() {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   className="min-h-[44px] max-h-32 resize-none"
+                  disabled={sendingMessage}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()
@@ -298,9 +426,13 @@ export default function MessagesPage() {
                   size="icon"
                   className="shrink-0"
                   onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
+                  disabled={!newMessage.trim() || sendingMessage}
                 >
-                  <Send className="size-4" />
+                  {sendingMessage ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Send className="size-4" />
+                  )}
                 </Button>
               </div>
             </div>

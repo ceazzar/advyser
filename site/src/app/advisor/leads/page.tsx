@@ -1,12 +1,10 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
-import { Search, Filter, SlidersHorizontal } from "lucide-react"
+import { Search, Filter, SlidersHorizontal, Loader2 } from "lucide-react"
 
 import { LeadCard, type LeadStatus } from "@/components/composite/lead-card"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -17,127 +15,143 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { LeadSummary } from "@/app/api/leads/route"
 
-// Mock leads data
-const mockLeads = [
-  {
-    id: "1",
-    consumerName: "Sarah Mitchell",
-    category: "Retirement Planning",
-    message:
-      "I'm looking for advice on transitioning to retirement. I'm 58 years old and want to understand my options for accessing my super and planning for the next 10 years.",
-    status: "new" as LeadStatus,
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: "2",
-    consumerName: "James Chen",
-    category: "Investment Strategy",
-    message:
-      "Looking to diversify my investment portfolio. Currently have most assets in property and want to explore other options with a long-term growth focus.",
-    status: "new" as LeadStatus,
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
-  },
-  {
-    id: "3",
-    consumerName: "Emma Thompson",
-    category: "Superannuation",
-    message:
-      "I want to consolidate multiple super accounts and understand which fund would be best for my situation. I'm 45 and have about $400k across three funds.",
-    status: "contacted" as LeadStatus,
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-  },
-  {
-    id: "4",
-    consumerName: "David Wilson",
-    category: "Estate Planning",
-    message:
-      "Need help with estate planning and setting up appropriate structures for wealth transfer to my children. Want to minimize tax implications.",
-    status: "contacted" as LeadStatus,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: "5",
-    consumerName: "Lisa Anderson",
-    category: "Insurance Review",
-    message:
-      "Want to review my current insurance coverage. Have life insurance through super but not sure if it's adequate for my family's needs.",
-    status: "converted" as LeadStatus,
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: "6",
-    consumerName: "Michael Brown",
-    category: "Retirement Planning",
-    message:
-      "Planning to retire in 2 years and need comprehensive advice on pension strategies and investment allocation for retirement income.",
-    status: "declined" as LeadStatus,
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: "7",
-    consumerName: undefined,
-    category: "Debt Management",
-    message:
-      "Looking for help managing debt and creating a savings plan. Have mortgage and personal loans, want to optimize repayments.",
-    status: "new" as LeadStatus,
-    createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
-  },
-]
+interface LeadsApiResponse {
+  success: boolean
+  data?: {
+    items: LeadSummary[]
+    pagination: {
+      page: number
+      pageSize: number
+      totalItems: number
+      totalPages: number
+      hasNextPage: boolean
+      hasPreviousPage: boolean
+    }
+  }
+  error?: {
+    code: string
+    message: string
+  }
+}
 
-const statusTabs: { value: LeadStatus | "all"; label: string; count: number }[] = [
-  { value: "all", label: "All Leads", count: mockLeads.length },
-  { value: "new", label: "New", count: mockLeads.filter((l) => l.status === "new").length },
-  {
-    value: "contacted",
-    label: "Contacted",
-    count: mockLeads.filter((l) => l.status === "contacted").length,
-  },
-  {
-    value: "converted",
-    label: "Converted",
-    count: mockLeads.filter((l) => l.status === "converted").length,
-  },
-  {
-    value: "declined",
-    label: "Declined",
-    count: mockLeads.filter((l) => l.status === "declined").length,
-  },
-]
+// Map API status to LeadCard status (booked maps to contacted for display)
+function mapLeadStatus(status: string): LeadStatus {
+  if (status === "booked") return "contacted"
+  if (["new", "contacted", "converted", "declined"].includes(status)) {
+    return status as LeadStatus
+  }
+  return "new"
+}
 
 export default function LeadsPage() {
+  const [leads, setLeads] = React.useState<LeadSummary[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeTab, setActiveTab] = React.useState<LeadStatus | "all">("all")
   const [sortBy, setSortBy] = React.useState("newest")
 
+  // Fetch leads from API
+  React.useEffect(() => {
+    async function fetchLeads() {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const response = await fetch("/api/leads")
+        const data: LeadsApiResponse = await response.json()
+
+        if (data.success && data.data) {
+          setLeads(data.data.items)
+        } else {
+          setError(data.error?.message || "Failed to fetch leads")
+        }
+      } catch (err) {
+        setError("Failed to connect to server")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchLeads()
+  }, [])
+
+  // Calculate status counts
+  const statusCounts = React.useMemo(() => {
+    return {
+      all: leads.length,
+      new: leads.filter((l) => l.status === "new").length,
+      contacted: leads.filter((l) => l.status === "contacted" || l.status === "booked").length,
+      converted: leads.filter((l) => l.status === "converted").length,
+      declined: leads.filter((l) => l.status === "declined").length,
+    }
+  }, [leads])
+
+  const statusTabs: { value: LeadStatus | "all"; label: string; count: number }[] = [
+    { value: "all", label: "All Leads", count: statusCounts.all },
+    { value: "new", label: "New", count: statusCounts.new },
+    { value: "contacted", label: "Contacted", count: statusCounts.contacted },
+    { value: "converted", label: "Converted", count: statusCounts.converted },
+    { value: "declined", label: "Declined", count: statusCounts.declined },
+  ]
+
   const filteredLeads = React.useMemo(() => {
-    let leads = [...mockLeads]
+    let filtered = [...leads]
 
     // Filter by status
     if (activeTab !== "all") {
-      leads = leads.filter((lead) => lead.status === activeTab)
+      if (activeTab === "contacted") {
+        // Include booked in contacted tab
+        filtered = filtered.filter((lead) => lead.status === "contacted" || lead.status === "booked")
+      } else {
+        filtered = filtered.filter((lead) => lead.status === activeTab)
+      }
     }
 
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      leads = leads.filter(
+      filtered = filtered.filter(
         (lead) =>
-          lead.consumerName?.toLowerCase().includes(query) ||
-          lead.category.toLowerCase().includes(query) ||
-          lead.message.toLowerCase().includes(query)
+          lead.consumer.displayName?.toLowerCase().includes(query) ||
+          lead.goalTags.some(tag => tag.toLowerCase().includes(query)) ||
+          lead.problemSummary?.toLowerCase().includes(query)
       )
     }
 
     // Sort
     if (sortBy === "newest") {
-      leads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     } else if (sortBy === "oldest") {
-      leads.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
     }
 
-    return leads
-  }, [activeTab, searchQuery, sortBy])
+    return filtered
+  }, [leads, activeTab, searchQuery, sortBy])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <EmptyState
+        icon={<Filter />}
+        title="Failed to load leads"
+        description={error}
+        action={{
+          label: "Try again",
+          onClick: () => window.location.reload(),
+        }}
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -195,7 +209,12 @@ export default function LeadsPage() {
               {filteredLeads.map((lead) => (
                 <LeadCard
                   key={lead.id}
-                  {...lead}
+                  id={lead.id}
+                  consumerName={lead.consumer.displayName}
+                  category={lead.goalTags[0] || "General Inquiry"}
+                  message={lead.problemSummary || "No details provided"}
+                  status={mapLeadStatus(lead.status)}
+                  createdAt={new Date(lead.createdAt)}
                   onView={() => {
                     window.location.href = `/advisor/leads/${lead.id}`
                   }}
