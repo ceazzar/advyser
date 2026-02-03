@@ -15,7 +15,10 @@
 -- Uses ON CONFLICT DO UPDATE to merge data without race conditions.
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   INSERT INTO public.users (id, email, role, first_name, last_name, display_name)
   VALUES (
@@ -33,7 +36,7 @@ BEGIN
     display_name = COALESCE(EXCLUDED.display_name, public.users.display_name);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 -- Drop if exists to make this idempotent
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
