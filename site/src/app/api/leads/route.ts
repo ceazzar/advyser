@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { checkRateLimit, leadRatelimit, rateLimitHeaders } from "@/lib/ratelimit";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
@@ -229,29 +230,162 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
+    const body = await request.json();
+    const {
+      listingId,
+      problemSummary,
+      goalTags,
+      timeline,
+      budgetRange,
+      preferredMeetingMode,
+      preferredTimes,
+      idempotencyKey,
+      firstName,
+      lastName,
+      email,
+      phone,
+      privacyConsent,
+    } = body;
+
+    if (!listingId) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: {
+            code: "INVALID_REQUEST",
+            message: "Listing ID is required",
+            statusCode: 400,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
+    let actor: Awaited<ReturnType<typeof createClient>> | ReturnType<typeof createAdminClient> =
+      supabase;
+    let consumerUserId = user?.id;
+    let rateLimitIdentifier = user?.id || "";
+
     if (!user) {
+      if (!privacyConsent) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "PRIVACY_CONSENT_REQUIRED",
+              message: "Privacy consent is required to submit a request.",
+              statusCode: 400,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 400 }
+        );
+      }
+
+      const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+      if (!normalizedEmail) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "EMAIL_REQUIRED",
+              message: "Email is required for public requests.",
+              statusCode: 400,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 400 }
+        );
+      }
+
+      const admin = createAdminClient();
+      actor = admin;
+
+      const { data: existingConsumer, error: lookupError } = await admin
+        .from("users")
+        .select("id")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+
+      if (lookupError) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "DATABASE_ERROR",
+              message: "Unable to verify consumer profile.",
+              statusCode: 500,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 500 }
+        );
+      }
+
+      if (existingConsumer?.id) {
+        consumerUserId = existingConsumer.id;
+      } else {
+        const displayName = [firstName, lastName]
+          .filter((value: unknown) => typeof value === "string" && value.trim().length > 0)
+          .join(" ")
+          .trim();
+
+        const { data: createdConsumer, error: createConsumerError } = await admin
+          .from("users")
+          .insert({
+            email: normalizedEmail,
+            role: "consumer",
+            first_name: typeof firstName === "string" ? firstName.trim() || null : null,
+            last_name: typeof lastName === "string" ? lastName.trim() || null : null,
+            display_name: displayName || null,
+            phone: typeof phone === "string" ? phone.trim() || null : null,
+          })
+          .select("id")
+          .single();
+
+        if (createConsumerError || !createdConsumer?.id) {
+          return NextResponse.json<ApiResponse<null>>(
+            {
+              success: false,
+              error: {
+                code: "DATABASE_ERROR",
+                message: "Unable to create consumer profile for request.",
+                statusCode: 500,
+              },
+              timestamp: new Date().toISOString(),
+            },
+            { status: 500 }
+          );
+        }
+
+        consumerUserId = createdConsumer.id;
+      }
+
+      rateLimitIdentifier = `guest:${normalizedEmail}`;
+    }
+
+    if (!consumerUserId) {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
           error: {
             code: "UNAUTHORIZED",
-            message: "You must be logged in to request an introduction",
-            statusCode: 401,
+            message: "Unable to determine consumer identity for this request.",
+            statusCode: 400,
           },
           timestamp: new Date().toISOString(),
         },
-        { status: 401 }
+        { status: 400 }
       );
     }
 
-    // Rate limit by user ID
-    const rateLimitResult = await checkRateLimit(leadRatelimit, user.id);
+    const rateLimitResult = await checkRateLimit(leadRatelimit, rateLimitIdentifier);
     if (!rateLimitResult.success) {
       return NextResponse.json<ApiResponse<null>>(
         {
@@ -270,28 +404,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse body
-    const body = await request.json();
-    const { listingId, problemSummary, goalTags, timeline, budgetRange, preferredMeetingMode, preferredTimes, idempotencyKey } = body;
-
-    if (!listingId) {
-      return NextResponse.json<ApiResponse<null>>(
-        {
-          success: false,
-          error: {
-            code: "INVALID_REQUEST",
-            message: "Listing ID is required",
-            statusCode: 400,
-          },
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
-    }
-
     // Check idempotency
     if (idempotencyKey) {
-      const { data: existing } = await supabase
+      const { data: existing } = await actor
         .from("lead")
         .select("id")
         .eq("idempotency_key", idempotencyKey)
@@ -307,7 +422,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get listing to find business_id
-    const { data: listing, error: listingError } = await supabase
+    const { data: listing, error: listingError } = await actor
       .from("listing")
       .select("id, business_id")
       .eq("id", listingId)
@@ -330,10 +445,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing active lead
-    const { data: existingLead } = await supabase
+    const { data: existingLead } = await actor
       .from("lead")
       .select("id")
-      .eq("consumer_user_id", user.id)
+      .eq("consumer_user_id", consumerUserId)
       .eq("business_id", listing.business_id)
       .not("status", "eq", "declined")
       .not("status", "eq", "converted")
@@ -355,10 +470,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Create lead
-    const { data: lead, error: createError } = await supabase
+    const { data: lead, error: createError } = await actor
       .from("lead")
       .insert({
-        consumer_user_id: user.id,
+        consumer_user_id: consumerUserId,
         business_id: listing.business_id,
         listing_id: listingId,
         problem_summary: problemSummary,

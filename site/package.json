@@ -20,11 +20,15 @@
     "db:verify-phase6": "node ./scripts/verify-phase6-rls.mjs --mode=local",
     "db:verify-phase7": "node ./scripts/verify-phase7-trust.mjs --mode=local",
     "db:verify-phase8": "node ./scripts/verify-phase8-data-layer.mjs --mode=local",
+    "db:verify-phase9": "node ./scripts/verify-phase9-api-contracts.mjs --mode=local",
+    "verify:phase10-ui": "node ./scripts/verify-phase10-ui-integration.mjs",
     "verify:ci": "npm run lint && npm run test:run && npm run build",
     "verify:phase5": "npm run env:check && npm run db:migrate && npm run db:types && npm run db:seed && npm run db:verify-seed && npm run verify:ci",
     "verify:phase6": "npm run env:check && npm run db:migrate && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run verify:ci",
     "verify:phase7": "npm run env:check && npm run db:migrate && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run db:verify-phase7 && npm run verify:ci",
-    "verify:phase8": "npm run env:check && npm run db:migrate && npm run db:types && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run db:verify-phase7 && npm run db:verify-phase8 && npm run verify:ci"
+    "verify:phase8": "npm run env:check && npm run db:migrate && npm run db:types && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run db:verify-phase7 && npm run db:verify-phase8 && npm run verify:ci",
+    "verify:phase9": "npm run env:check && npm run db:migrate && npm run db:types && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run db:verify-phase7 && npm run db:verify-phase8 && npm run db:verify-phase9 && npm run verify:ci",
+    "verify:phase10": "npm run verify:phase9 && npm run verify:phase10-ui"
   },
   "dependencies": {
     "@base-ui/react": "^1.1.0",

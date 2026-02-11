@@ -1,6 +1,6 @@
 "use client"
 
-import { use } from "react"
+import { use, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -169,75 +169,66 @@ const categoryData: Record<string, {
   },
 }
 
-// Mock advisors for each category
-const mockAdvisors = [
-  {
-    id: "1",
-    name: "Sarah Chen",
-    credentials: "CFP, AFP",
-    specialties: ["Retirement Planning", "SMSF", "Superannuation"],
-    rating: 4.9,
-    reviewCount: 127,
-    location: "Sydney, NSW",
-    bio: "With over 15 years of experience in retirement planning, I help Australians create personalized strategies to achieve their retirement dreams. Specializing in SMSF administration and transition to retirement.",
-    verified: true,
-  },
-  {
-    id: "2",
-    name: "James Wilson",
-    credentials: "CFP",
-    specialties: ["Retirement Planning", "Pension Strategies", "Age Pension"],
-    rating: 4.8,
-    reviewCount: 89,
-    location: "Melbourne, VIC",
-    bio: "I'm passionate about helping pre-retirees and retirees maximize their retirement income. I take a holistic approach that considers Centrelink benefits, tax efficiency, and lifestyle goals.",
-    verified: true,
-  },
-  {
-    id: "3",
-    name: "Michelle Patel",
-    credentials: "AFP, SSA",
-    specialties: ["Retirement Planning", "SMSF", "Investment Strategy"],
-    rating: 4.7,
-    reviewCount: 64,
-    location: "Brisbane, QLD",
-    bio: "Specialist in self-managed super funds and retirement income strategies. I help clients take control of their super and build the retirement they deserve.",
-    verified: false,
-  },
-  {
-    id: "4",
-    name: "David Thompson",
-    credentials: "CFP, CPA",
-    specialties: ["Retirement Planning", "Tax Planning", "Estate Planning"],
-    rating: 4.9,
-    reviewCount: 156,
-    location: "Perth, WA",
-    bio: "Combining financial planning expertise with accounting knowledge to deliver comprehensive retirement strategies. Focus on tax-effective income structures.",
-    verified: true,
-  },
-  {
-    id: "5",
-    name: "Lisa Nguyen",
-    credentials: "CFP",
-    specialties: ["Retirement Planning", "Superannuation", "Insurance"],
-    rating: 4.6,
-    reviewCount: 42,
-    location: "Adelaide, SA",
-    bio: "Helping Australians prepare for retirement with personalized advice on super contributions, investment selection, and ensuring adequate insurance coverage.",
-    verified: true,
-  },
-  {
-    id: "6",
-    name: "Robert Mitchell",
-    credentials: "AFP",
-    specialties: ["Retirement Planning", "Pension Strategies", "Centrelink"],
-    rating: 4.8,
-    reviewCount: 98,
-    location: "Gold Coast, QLD",
-    bio: "Centrelink and Age Pension specialist. I help retirees navigate the complex rules to maximize their entitlements while maintaining their lifestyle.",
-    verified: false,
-  },
-]
+type CategoryAdvisor = {
+  id: string
+  name: string
+  credentials: string
+  specialties: string[]
+  rating: number
+  reviewCount: number
+  location: string
+  bio: string
+  verified: boolean
+}
+
+type ListingsResponse = {
+  success: boolean
+  data?: {
+    items: Array<{
+      id: string
+      name: string
+      credentials: string[]
+      specialties: string[]
+      rating: number | null
+      reviewCount: number
+      location: {
+        suburb: string | null
+        state: string | null
+      } | null
+      bio: string | null
+      verified: boolean
+    }>
+  }
+  error?: {
+    message?: string
+  }
+}
+
+function formatLocation(
+  location: { suburb: string | null; state: string | null } | null
+): string {
+  if (!location) return "Australia"
+  if (location.suburb && location.state) return `${location.suburb}, ${location.state}`
+  if (location.state) return location.state
+  if (location.suburb) return location.suburb
+  return "Australia"
+}
+
+function mapListingToCategoryAdvisor(
+  listing: NonNullable<NonNullable<ListingsResponse["data"]>["items"]>[number]
+): CategoryAdvisor {
+  return {
+    id: listing.id,
+    name: listing.name,
+    credentials: listing.credentials.join(", "),
+    specialties: listing.specialties,
+    rating: listing.rating ?? 0,
+    reviewCount: listing.reviewCount,
+    location: formatLocation(listing.location),
+    bio: listing.bio || "No profile bio available yet.",
+    verified: listing.verified,
+  }
+}
 
 export default function CategoryPage({
   params,
@@ -247,6 +238,84 @@ export default function CategoryPage({
   const resolvedParams = use(params)
   const router = useRouter()
   const category = categoryData[resolvedParams.type]
+  const [advisors, setAdvisors] = useState<CategoryAdvisor[]>([])
+  const [sortBy, setSortBy] = useState("relevance")
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!category) {
+      setAdvisors([])
+      setLoadError(null)
+      setIsLoading(false)
+      return
+    }
+
+    const controller = new AbortController()
+
+    async function loadCategoryAdvisors() {
+      try {
+        setIsLoading(true)
+        setLoadError(null)
+
+        const queryTerms = [category.title, ...category.keywords.slice(0, 2)]
+          .join(" ")
+          .trim()
+
+        const params = new URLSearchParams({
+          page: "1",
+          pageSize: "24",
+          sort: "rating_desc",
+        })
+        if (queryTerms) {
+          params.set("q", queryTerms)
+        }
+
+        const response = await fetch(`/api/listings?${params.toString()}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        })
+        const payload = (await response.json()) as ListingsResponse
+
+        if (!response.ok || !payload.success || !payload.data) {
+          throw new Error(payload.error?.message || "Failed to load advisors")
+        }
+
+        setAdvisors(payload.data.items.map(mapListingToCategoryAdvisor))
+      } catch (error) {
+        if (controller.signal.aborted) return
+        const message =
+          error instanceof Error ? error.message : "Unable to load advisors right now."
+        setLoadError(message)
+        setAdvisors([])
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadCategoryAdvisors()
+    return () => controller.abort()
+  }, [category])
+
+  const sortedAdvisors = useMemo(() => {
+    const items = [...advisors]
+    switch (sortBy) {
+      case "rating":
+        return items.sort((a, b) => b.rating - a.rating)
+      case "reviews":
+        return items.sort((a, b) => b.reviewCount - a.reviewCount)
+      case "name":
+        return items.sort((a, b) => a.name.localeCompare(b.name))
+      default:
+        return items
+    }
+  }, [advisors, sortBy])
+
+  const handleViewProfile = (advisorId: string) => {
+    router.push(`/advisors/${advisorId}`)
+  }
 
   // Fallback for unknown categories
   if (!category) {
@@ -263,10 +332,6 @@ export default function CategoryPage({
         </div>
       </PublicLayout>
     )
-  }
-
-  const handleViewProfile = (advisorId: string) => {
-    router.push(`/advisors/${advisorId}`)
   }
 
   return (
@@ -324,8 +389,8 @@ export default function CategoryPage({
 
       {/* Trust Strip */}
       <TrustStrip
-        advisorCount={mockAdvisors.length * 70}
-        clientCount={mockAdvisors.length * 1500}
+        advisorCount={Math.max(1, sortedAdvisors.length) * 70}
+        clientCount={Math.max(1, sortedAdvisors.length) * 1500}
         showSecurityBadges={true}
         showPartnerLogos={false}
       />
@@ -416,9 +481,9 @@ export default function CategoryPage({
               {/* Results Header */}
               <div className="flex items-center justify-between mb-6">
                 <p className="text-muted-foreground">
-                  Showing <span className="font-semibold text-foreground">{mockAdvisors.length}</span> {category.title.toLowerCase()} advisors
+                  Showing <span className="font-semibold text-foreground">{sortedAdvisors.length}</span> {category.title.toLowerCase()} advisors
                 </p>
-                <Select defaultValue="relevance">
+                <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-48">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
@@ -433,21 +498,42 @@ export default function CategoryPage({
 
               {/* Advisor Cards */}
               <div className="space-y-4">
-                {mockAdvisors.map((advisor) => (
-                  <AdvisorCard
-                    key={advisor.id}
-                    id={advisor.id}
-                    name={advisor.name}
-                    credentials={advisor.credentials}
-                    specialties={advisor.specialties}
-                    rating={advisor.rating}
-                    reviewCount={advisor.reviewCount}
-                    location={advisor.location}
-                    bio={advisor.bio}
-                    verified={advisor.verified}
-                    onViewProfile={handleViewProfile}
-                  />
-                ))}
+                {isLoading ? (
+                  <Card>
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                      Loading advisors...
+                    </CardContent>
+                  </Card>
+                ) : loadError ? (
+                  <Card>
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-muted-foreground mb-4">{loadError}</p>
+                      <Button onClick={() => window.location.reload()}>Try Again</Button>
+                    </CardContent>
+                  </Card>
+                ) : sortedAdvisors.length > 0 ? (
+                  sortedAdvisors.map((advisor) => (
+                    <AdvisorCard
+                      key={advisor.id}
+                      id={advisor.id}
+                      name={advisor.name}
+                      credentials={advisor.credentials}
+                      specialties={advisor.specialties}
+                      rating={advisor.rating}
+                      reviewCount={advisor.reviewCount}
+                      location={advisor.location}
+                      bio={advisor.bio}
+                      verified={advisor.verified}
+                      onViewProfile={handleViewProfile}
+                    />
+                  ))
+                ) : (
+                  <Card>
+                    <CardContent className="p-6 text-center text-muted-foreground">
+                      No advisors found for this category yet.
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Load More */}

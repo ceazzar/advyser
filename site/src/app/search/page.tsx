@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Filter, X, Star, ShieldCheck, Search, LayoutList, Map as MapIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { HeroSearchBar } from "@/components/composite/hero-search-bar"
@@ -73,18 +74,6 @@ const locations = [
   { value: "remote", label: "Remote / Virtual" },
 ]
 
-// Australian states/territories for filtering
-const states = [
-  { value: "nsw", label: "New South Wales" },
-  { value: "vic", label: "Victoria" },
-  { value: "qld", label: "Queensland" },
-  { value: "wa", label: "Western Australia" },
-  { value: "sa", label: "South Australia" },
-  { value: "tas", label: "Tasmania" },
-  { value: "act", label: "Australian Capital Territory" },
-  { value: "nt", label: "Northern Territory" },
-]
-
 // V.2.2.4: Category to demographic mapping for contextual social proof
 const categoryToDemographics: Record<string, ClientDemographic[]> = {
   retirement: ["retirees", "pre-retirees"],
@@ -97,126 +86,82 @@ const categoryToDemographics: Record<string, ClientDemographic[]> = {
   business: ["business-owners", "self-employed"],
 }
 
-// Mock advisors data - 9 advisors with varied specialties and client demographics
-const mockAdvisors: (Omit<AdvisorCardProps, "onViewProfile"> & { clientDemographics: ClientDemographic[] })[] = [
-  {
-    id: "1",
-    name: "Sarah Chen",
-    credentials: "CFP, CFA",
-    avatar: "/avatars/advisor-1.jpg",
-    specialties: ["Retirement Planning", "Investment Management", "Tax Planning"],
-    rating: 4.9,
-    reviewCount: 127,
-    location: "Sydney, NSW",
-    bio: "Specializing in comprehensive retirement planning and tax-efficient investment strategies. I help clients build wealth while minimizing tax burdens through strategic portfolio management.",
-    verified: true,
-    clientDemographics: ["pre-retirees", "retirees", "high-net-worth"],
-  },
-  {
-    id: "2",
-    name: "Michael Rodriguez",
-    credentials: "CFP, ChFC",
-    avatar: "/avatars/advisor-2.jpg",
-    specialties: ["Wealth Management", "Estate Planning", "Insurance"],
-    rating: 4.8,
-    reviewCount: 89,
-    location: "Melbourne, VIC",
-    bio: "Over 15 years of experience helping high-net-worth families protect and grow their wealth across generations. Expert in comprehensive estate planning strategies.",
-    verified: true,
-    clientDemographics: ["high-net-worth", "families", "retirees"],
-  },
-  {
-    id: "3",
-    name: "Emily Thompson",
-    credentials: "CFP",
-    avatar: "/avatars/advisor-3.jpg",
-    specialties: ["Investment Management", "Debt Management", "Retirement Planning"],
-    rating: 4.7,
-    reviewCount: 64,
-    location: "Brisbane, QLD",
-    bio: "I believe in making financial planning accessible to everyone. My approach focuses on debt elimination, smart investing, and building a secure retirement foundation.",
-    verified: false,
-    clientDemographics: ["first-home-buyers", "young-professionals", "families"],
-  },
-  {
-    id: "4",
-    name: "David Kim",
-    credentials: "CPA, CFP",
-    avatar: "/avatars/advisor-4.jpg",
-    specialties: ["Tax Planning", "Business Planning", "Retirement Planning"],
-    rating: 4.9,
-    reviewCount: 156,
-    location: "Perth, WA",
-    bio: "As both a CPA and CFP, I bring a unique perspective to financial planning. Specializing in tax optimization for business owners and professionals.",
-    verified: true,
-    clientDemographics: ["business-owners", "self-employed", "high-net-worth"],
-  },
-  {
-    id: "5",
-    name: "Jennifer Martinez",
-    credentials: "CFP, CDFA",
-    avatar: "/avatars/advisor-5.jpg",
-    specialties: ["Estate Planning", "Wealth Management", "Insurance"],
-    rating: 4.6,
-    reviewCount: 52,
-    location: "Adelaide, SA",
-    bio: "Certified Divorce Financial Analyst helping individuals navigate complex financial transitions. Expert in rebuilding wealth and securing financial independence.",
-    verified: false,
-    clientDemographics: ["families", "pre-retirees"],
-  },
-  {
-    id: "6",
-    name: "Robert Williams",
-    credentials: "CFP, AIF",
-    avatar: "/avatars/advisor-6.jpg",
-    specialties: ["Investment Management", "Retirement Planning", "Wealth Management"],
-    rating: 4.8,
-    reviewCount: 98,
-    location: "Gold Coast, QLD",
-    bio: "Fiduciary advisor committed to transparency and client-first investing. I help professionals maximize their superannuation and build diversified portfolios.",
-    verified: true,
-    clientDemographics: ["young-professionals", "pre-retirees", "first-home-buyers"],
-  },
-  {
-    id: "7",
-    name: "Amanda Foster",
-    credentials: "CFP, CLU",
-    avatar: "/avatars/advisor-7.jpg",
-    specialties: ["Insurance", "Estate Planning", "Business Planning"],
-    rating: 4.5,
-    reviewCount: 41,
-    location: "Canberra, ACT",
-    bio: "Specializing in risk management and insurance solutions for families and businesses. I help clients protect what matters most while planning for the future.",
-    verified: false,
-    clientDemographics: ["families", "business-owners", "self-employed"],
-  },
-  {
-    id: "8",
-    name: "James Anderson",
-    credentials: "CFP, CFA, MBA",
-    avatar: "/avatars/advisor-8.jpg",
-    specialties: ["Wealth Management", "Investment Management", "Tax Planning", "Estate Planning"],
-    rating: 5.0,
-    reviewCount: 73,
-    location: "Sydney, NSW",
-    bio: "Former investment banker turned fee-only advisor. I bring institutional-level expertise to help clients achieve their most ambitious financial goals.",
-    verified: true,
-    clientDemographics: ["high-net-worth", "business-owners", "self-employed"],
-  },
-  {
-    id: "9",
-    name: "Lisa Patel",
-    credentials: "CFP",
-    avatar: "/avatars/advisor-9.jpg",
-    specialties: ["Retirement Planning", "Debt Management", "Investment Management"],
-    rating: 4.7,
-    reviewCount: 86,
-    location: "Remote / Virtual",
-    bio: "Virtual-first financial planner helping clients nationwide. Specialized in helping millennials and Gen X professionals build wealth and plan for early retirement.",
-    verified: true,
-    clientDemographics: ["young-professionals", "first-home-buyers", "pre-retirees"],
-  },
-]
+type SearchAdvisor = Omit<AdvisorCardProps, "onViewProfile"> & {
+  clientDemographics: ClientDemographic[]
+}
+
+type ListingsResponse = {
+  success: boolean
+  data?: {
+    items: Array<{
+      id: string
+      name: string
+      credentials: string[]
+      avatar: string | null
+      specialties: string[]
+      rating: number | null
+      reviewCount: number
+      location: {
+        suburb: string | null
+        state: string | null
+        postcode: string | null
+      } | null
+      bio: string | null
+      verified: boolean
+      acceptingStatus: string
+      freeConsultation: boolean
+      responseTimeHours: number | null
+      feeModel: string | null
+    }>
+  }
+  error?: {
+    message?: string
+  }
+}
+
+function formatListingLocation(
+  location: { suburb: string | null; state: string | null } | null
+): string {
+  if (!location) return "Australia"
+  if (location.suburb && location.state) return `${location.suburb}, ${location.state}`
+  if (location.state) return location.state
+  if (location.suburb) return location.suburb
+  return "Australia"
+}
+
+function mapListingToSearchAdvisor(
+  listing: NonNullable<NonNullable<ListingsResponse["data"]>["items"]>[number]
+): SearchAdvisor {
+  const responseTime =
+    listing.responseTimeHours && listing.responseTimeHours > 0
+      ? `${listing.responseTimeHours}h`
+      : undefined
+
+  const availability: SearchAdvisor["availability"] =
+    listing.acceptingStatus === "taking_clients"
+      ? "taking-clients"
+      : listing.acceptingStatus === "waitlist"
+        ? "waitlist"
+        : "not-accepting"
+
+  return {
+    id: listing.id,
+    name: listing.name,
+    avatar: listing.avatar || undefined,
+    credentials: listing.credentials.join(", "),
+    specialties: listing.specialties,
+    rating: listing.rating ?? 0,
+    reviewCount: listing.reviewCount,
+    location: formatListingLocation(listing.location),
+    bio: listing.bio || "No profile bio available yet.",
+    verified: listing.verified,
+    freeConsult: listing.freeConsultation,
+    availability,
+    avgResponseTime: responseTime,
+    feeDisplay: listing.feeModel ? `Fee model: ${listing.feeModel.replace("_", " ")}` : undefined,
+    clientDemographics: [],
+  }
+}
 
 interface Filters {
   categories: string[]
@@ -736,11 +681,17 @@ function ActiveFilterTags({
 }
 
 export default function SearchPage() {
+  const router = useRouter()
   const [filters, setFilters] = React.useState<Filters>({
     categories: [],
     location: "",
     minRating: 0,
   })
+  const [searchKeyword, setSearchKeyword] = React.useState("")
+  const [advisors, setAdvisors] = React.useState<SearchAdvisor[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [loadError, setLoadError] = React.useState<string | null>(null)
+  const [refreshToken, setRefreshToken] = React.useState(0)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [sortBy, setSortBy] = React.useState("relevance")
   const [viewMode, setViewMode] = React.useState<ViewMode>("list")
@@ -764,10 +715,60 @@ export default function SearchPage() {
   // V.2.2.3: Shortlist integration
   const { addToShortlist, removeFromShortlist, isInShortlist } = useShortlist()
 
+  React.useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadListings() {
+      try {
+        setIsLoading(true)
+        setLoadError(null)
+
+        const params = new URLSearchParams({
+          page: "1",
+          pageSize: "100",
+          sort: "rating_desc",
+        })
+        if (searchKeyword.trim()) {
+          params.set("q", searchKeyword.trim())
+        }
+
+        const response = await fetch(`/api/listings?${params.toString()}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        })
+
+        const payload = (await response.json()) as ListingsResponse
+        if (!response.ok || !payload.success || !payload.data) {
+          throw new Error(payload.error?.message || "Failed to load advisor listings")
+        }
+
+        setAdvisors(payload.data.items.map(mapListingToSearchAdvisor))
+      } catch (error) {
+        if (controller.signal.aborted) return
+        const message =
+          error instanceof Error ? error.message : "Unable to load advisor listings right now."
+        setLoadError(message)
+        setAdvisors([])
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadListings()
+
+    return () => controller.abort()
+  }, [searchKeyword, refreshToken])
+
+  React.useEffect(() => {
+    setCurrentPage(1)
+  }, [filters, sortBy, searchKeyword])
+
   // Create advisor data map for ShortlistBar avatars
   const advisorDataMap = React.useMemo(() => {
     const map = new Map<string, AdvisorInfo>()
-    mockAdvisors.forEach(advisor => {
+    advisors.forEach(advisor => {
       map.set(advisor.id, {
         id: advisor.id,
         name: advisor.name,
@@ -775,11 +776,21 @@ export default function SearchPage() {
       })
     })
     return map
-  }, [])
+  }, [advisors])
 
   // Filter advisors based on current filters
   const filteredAdvisors = React.useMemo(() => {
-    return mockAdvisors.filter((advisor) => {
+    return advisors.filter((advisor) => {
+      if (searchKeyword.trim()) {
+        const keyword = searchKeyword.toLowerCase()
+        const keywordMatch =
+          advisor.name.toLowerCase().includes(keyword) ||
+          advisor.bio.toLowerCase().includes(keyword) ||
+          advisor.specialties.some((specialty) => specialty.toLowerCase().includes(keyword)) ||
+          advisor.location.toLowerCase().includes(keyword)
+        if (!keywordMatch) return false
+      }
+
       // Category filter
       if (filters.categories.length > 0) {
         const advisorCategoryValues = advisor.specialties.map((s) => {
@@ -820,7 +831,7 @@ export default function SearchPage() {
 
       return true
     })
-  }, [filters])
+  }, [advisors, filters, searchKeyword])
 
   // Sort advisors
   const sortedAdvisors = React.useMemo(() => {
@@ -839,8 +850,8 @@ export default function SearchPage() {
 
   // Calculate filter counts for real-time display
   const filterCounts = React.useMemo(() => {
-    return calculateFilterCounts(mockAdvisors, filters)
-  }, [filters])
+    return calculateFilterCounts(advisors, filters)
+  }, [advisors, filters])
 
   const handleSearch = (query: { category?: string; location?: string; keyword?: string }) => {
     // Update filters based on search
@@ -848,12 +859,26 @@ export default function SearchPage() {
     if (query.category && query.category !== "all") {
       newFilters.categories = [query.category]
     }
+    if (query.location) {
+      const normalized = query.location.toLowerCase()
+      const match = locations.find(
+        (location) =>
+          location.label.toLowerCase() === normalized ||
+          normalized.includes(location.label.split(",")[0].toLowerCase())
+      )
+      if (match) {
+        newFilters.location = match.value
+      }
+    }
+    if (query.keyword !== undefined) {
+      setSearchKeyword(query.keyword)
+    }
     setFilters(newFilters)
     setCurrentPage(1)
   }
 
   const handleViewProfile = (id: string) => {
-    // In a real app, this would navigate to the advisor's profile
+    router.push(`/advisors/${id}`)
   }
 
   // Pagination logic (for demo, showing all on page 1)
@@ -999,7 +1024,19 @@ export default function SearchPage() {
               ) : (
                 /* List View - Advisor Grid */
                 <>
-                  {paginatedAdvisors.length > 0 ? (
+                  {isLoading ? (
+                    <div className="rounded-xl border border-border bg-muted/20 p-8 text-center">
+                      <p className="text-muted-foreground">Loading advisor listings...</p>
+                    </div>
+                  ) : loadError ? (
+                    <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-8 text-center">
+                      <h3 className="text-lg font-semibold text-foreground mb-2">Could not load advisors</h3>
+                      <p className="text-sm text-muted-foreground mb-4">{loadError}</p>
+                      <Button onClick={() => setRefreshToken((current) => current + 1)}>
+                        Try Again
+                      </Button>
+                    </div>
+                  ) : paginatedAdvisors.length > 0 ? (
                     <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2">
                       {paginatedAdvisors.map((advisor, index) => (
                         <div

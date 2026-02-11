@@ -5,7 +5,7 @@
 ║  Purpose: Sequential-by-gates, parallel-by-waves execution blueprint                  ║
 ║  Method: MASTER_PLAN format (Gates + Waves + strict dependency order)                 ║
 ║  Created: 2026-02-10                                                                  ║
-║  Status: PHASE GATES THROUGH PHASE 7 COMPLETE; PHASE 8 IN PROGRESS                    ║
+║  Status: PHASE GATES THROUGH PHASE 10 COMPLETE                                         ║
 ║  Scope: Phase 0 through Phase 17                                                      ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════╝
 
@@ -105,11 +105,11 @@ These artifacts are maintained continuously:
 ├───────┼───────────────────────────────────────────┼───────┼──────────────────┼──────────────────────┼────────────────────┤
 │   7   │ Trust Launch [MVPv3]                      │   4   │ Trust Primitives │ COMPLETE ✅           │ MVP3               │
 ├───────┼───────────────────────────────────────────┼───────┼──────────────────┼──────────────────────┼────────────────────┤
-│   8   │ Database + Data Layer [MVPv1]             │   5   │ MVP Schema       │ IN PROGRESS ⚙️       │ MVP1               │
+│   8   │ Database + Data Layer [MVPv1]             │   5   │ MVP Schema       │ COMPLETE ✅           │ MVP1               │
 ├───────┼───────────────────────────────────────────┼───────┼──────────────────┼──────────────────────┼────────────────────┤
-│   9   │ Core API Endpoints [MVPv1]                │   5   │ Full Loop APIs   │ NOT STARTED          │ MVP1               │
+│   9   │ Core API Endpoints [MVPv1]                │   5   │ Full Loop APIs   │ COMPLETE ✅           │ MVP1               │
 ├───────┼───────────────────────────────────────────┼───────┼──────────────────┼──────────────────────┼────────────────────┤
-│  10   │ UI Integration [MVPv1]                    │   4   │ No Mock Data     │ NOT STARTED          │ MVP1               │
+│  10   │ UI Integration [MVPv1]                    │   4   │ No Mock Data     │ COMPLETE ✅           │ MVP1               │
 ├───────┼───────────────────────────────────────────┼───────┼──────────────────┼──────────────────────┼────────────────────┤
 │  11   │ Conversion Engine [MVPv3]                 │   4   │ Liquidity Engine │ NOT STARTED          │ MVP3               │
 ├───────┼───────────────────────────────────────────┼───────┼──────────────────┼──────────────────────┼────────────────────┤
@@ -456,6 +456,11 @@ PHASE 6 COMPLETION UPDATE (2026-02-11):
 - Wave 6.B delivered: middleware role-based route authorization
 - Wave 6.C delivered: table-wide RLS enablement + policy coverage + crafted tenancy tests
 - Wave 6.D delivered: deterministic one-shot phase verifier (`verify:phase6`)
+- Security hardening follow-up delivered:
+  - self role escalation blocked (`users` grant/policy + role-update guard trigger)
+  - advisor note/revision access constrained to advisor business members
+  - deterministic claim access matrix assertions added to Phase 6 verifier
+  - policy reset scope narrowed to migration-owned policy names only
 - End-to-end gate command verified: `npm run verify:phase6`
 - Gate evidence:
   - /Users/ceazar/Code Base/advyser/plans/phase-6/PHASE_6_EXECUTION_SUMMARY.md
@@ -509,7 +514,7 @@ PHASE 7 COMPLETION UPDATE (2026-02-11):
                          PHASE 8: DATABASE + DATA LAYER [MVPv1] (5 Waves)
 ════════════════════════════════════════════════════════════════════════════════════════
 
-STATUS IDENTIFIER: ⚙️ PHASE 8 IN PROGRESS (STARTED 2026-02-11)
+STATUS IDENTIFIER: ✅ PHASE 8 COMPLETE (2026-02-11)
 
 OBJECTIVE: Finalize MVP schema across marketplace, advisor ops, trust, and attribution.
 GATE: Seeded system demonstrates search -> profile -> booking/lead -> advisor visibility.
@@ -534,31 +539,38 @@ VERIFICATION GATE (Phase 8):
 │ Type generation reflects all phase-8 entities                                        │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
-PHASE 8 START UPDATE (2026-02-11):
-- Execution state: STARTED
-- Entry criteria satisfied: Phase 7 gate passed (`verify:phase7`)
-- Wave execution started:
-  - 8.A/8.B/8.C/8.D schema coverage and policy checks bundled in `db:verify-phase8`
-  - 8.E seeded flow assertions now include search/profile + lead/booking + advisor visibility path
-- Type layer refresh integrated in phase gate command:
+PHASE 8 COMPLETION UPDATE (2026-02-11):
+- Completion state: DONE (gate criteria satisfied)
+- Waves 8.A-8.E delivered through schema, RLS coverage, and seeded flow checks
+- Type layer refreshed and verified:
   - `npm run db:types`
   - generated file: `/Users/ceazar/Code Base/advyser/site/src/types/database.generated.ts`
-- Runtime scope control:
-  - MVP1 public-only route surface is active (non-public portal/auth/dev route families hard-pruned)
-  - current route inventory source of truth: `/Users/ceazar/Code Base/advyser/plans/pages.md`
-- In-progress gate command:
-  - `npm run verify:phase8`
-- Working evidence:
+- Runtime scope remains MVP1 public-only:
+  - route inventory source of truth: `/Users/ceazar/Code Base/advyser/plans/pages.md`
+- Gate command verified: `npm run verify:phase8`
+- Gate evidence:
   - /Users/ceazar/Code Base/advyser/plans/phase-8/PHASE_8_EXECUTION_SUMMARY.md
   - /Users/ceazar/Code Base/advyser/plans/phase-8/PHASE_8_GATE_EVIDENCE.md
-- MVP1 scope-control artifacts (public-only prune):
+- Scope-control references:
   - /Users/ceazar/Code Base/advyser/plans/phase-8/MVP1_PUBLIC_ONLY_SCOPE.md
   - /Users/ceazar/Code Base/advyser/plans/phase-8/MVP1_PUBLIC_ONLY_PRUNE_LOG.md
   - /Users/ceazar/Code Base/advyser/plans/phase-8/MVP1_PUBLIC_ONLY_RECOVERY_RUNBOOK.md
 
+PHASE 9/10 PRECONDITION CLOSEOUT (2026-02-11):
+- Security baseline satisfied:
+  - hardening migration present: `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211234000_phase6_security_hardening.sql`
+  - baseline verifiers green: `npm run verify:phase6` and `npm run verify:phase7`
+- Route-scope decision fixed:
+  - runtime remains public-only (see `/Users/ceazar/Code Base/advyser/plans/pages.md`)
+  - no advisor/admin/auth route restoration required for MVP1 public-loop Phase 9/10 execution
+- Pre-phase gate confirmed:
+  - `npm run verify:phase8`
+
 ════════════════════════════════════════════════════════════════════════════════════════
                          PHASE 9: CORE API ENDPOINTS [MVPv1] (5 Waves)
 ════════════════════════════════════════════════════════════════════════════════════════
+
+STATUS IDENTIFIER: ✅ PHASE 9 COMPLETE (2026-02-11)
 
 OBJECTIVE: Expose all MVP loop actions through enforceable, tested server endpoints.
 GATE: End-to-end flow works through APIs only, with no manual DB edits.
@@ -583,9 +595,22 @@ VERIFICATION GATE (Phase 9):
 │ Rule enforcement exists server-side for all critical transitions                      │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
+PHASE 9 COMPLETION UPDATE (2026-02-11):
+- Completion state: DONE (gate criteria satisfied)
+- API contract verifier added and enforced:
+  - `/Users/ceazar/Code Base/advyser/site/scripts/verify-phase9-api-contracts.mjs`
+- Lifecycle function guard checks verified:
+  - `accept_lead`, `book_lead`, `convert_lead`, `decline_lead`
+- Public lead submission path enabled with server-side validation/idempotency handling:
+  - `/Users/ceazar/Code Base/advyser/site/src/app/api/leads/route.ts`
+- Gate command verified: `npm run verify:phase9`
+- Next phase focus: Phase 10 (UI Integration)
+
 ════════════════════════════════════════════════════════════════════════════════════════
                          PHASE 10: UI INTEGRATION [MVPv1] (4 Waves)
 ════════════════════════════════════════════════════════════════════════════════════════
+
+STATUS IDENTIFIER: ✅ PHASE 10 COMPLETE (2026-02-11)
 
 OBJECTIVE: Replace mocks with live backend data across full marketplace + advisor loop.
 GATE: Stranger can find advisor, convert, and receive confirmation via live system.
@@ -608,6 +633,18 @@ VERIFICATION GATE (Phase 10):
 │ No mock data in MVP critical path                                                     │
 │ Funnel events observed: search -> profile -> booking/lead -> response                │
 └─────────────────────────────────────────────────────────────────────────────────────┘
+
+PHASE 10 COMPLETION UPDATE (2026-02-11):
+- Completion state: DONE (gate criteria satisfied)
+- Critical marketplace routes moved from mock to live API wiring:
+  - `/Users/ceazar/Code Base/advyser/site/src/app/search/page.tsx`
+  - `/Users/ceazar/Code Base/advyser/site/src/app/category/[type]/page.tsx`
+  - `/Users/ceazar/Code Base/advyser/site/src/app/advisors/[slug]/page.tsx`
+  - `/Users/ceazar/Code Base/advyser/site/src/app/request-intro/page.tsx`
+- UI integration verifier added:
+  - `/Users/ceazar/Code Base/advyser/site/scripts/verify-phase10-ui-integration.mjs`
+- Gate command verified: `npm run verify:phase10`
+- Next phase focus: Phase 11 (Conversion Engine)
 
 ════════════════════════════════════════════════════════════════════════════════════════
                          PHASE 11: CONVERSION ENGINE [MVPv3] (4 Waves)

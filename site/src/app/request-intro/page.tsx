@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   ArrowRight,
@@ -101,9 +102,12 @@ const states = [
 ]
 
 export default function RequestIntroPage() {
+  const searchParams = useSearchParams()
+  const listingId = searchParams.get("listingId") || ""
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<FormData>({
     adviceType: [],
@@ -160,11 +164,55 @@ export default function RequestIntroPage() {
   }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsSubmitting(false)
-    setIsComplete(true)
+    if (!listingId) {
+      setSubmitError("Please start from an advisor profile so we know who to introduce you to.")
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      setSubmitError(null)
+
+      const problemSummary = [formData.primaryGoal, formData.additionalInfo]
+        .filter((value) => value.trim().length > 0)
+        .join("\n\n")
+
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listingId,
+          problemSummary: problemSummary || null,
+          goalTags: formData.adviceType,
+          timeline: formData.timeline || null,
+          budgetRange: formData.investableAssets || null,
+          preferredMeetingMode: null,
+          preferredTimes: formData.location ? `Preferred state: ${formData.location.toUpperCase()}` : null,
+          idempotencyKey: crypto.randomUUID(),
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          privacyConsent: formData.privacyConsent,
+          marketingConsent: formData.marketingConsent,
+        }),
+      })
+
+      const payload = await response.json()
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error?.message || "Unable to submit your request.")
+      }
+
+      setIsComplete(true)
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to submit your request right now."
+      setSubmitError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Success state
@@ -251,6 +299,13 @@ export default function RequestIntroPage() {
 
       <section className="py-12 lg:py-16">
         <div className="max-w-4xl mx-auto px-6">
+          {!listingId && (
+            <Card className="mb-6 border-amber-200 bg-amber-50">
+              <CardContent className="p-4 text-sm text-amber-900">
+                Start this form from an advisor profile to submit to a specific advisor.
+              </CardContent>
+            </Card>
+          )}
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Form */}
             <div className="lg:col-span-2">
@@ -551,14 +606,19 @@ export default function RequestIntroPage() {
                     <ArrowRight className="ml-2 size-4" />
                   </Button>
                 ) : (
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!canProceed() || isSubmitting}
-                    loading={isSubmitting}
-                    className="min-w-[160px]"
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Request"}
-                  </Button>
+                  <div className="flex flex-col items-end gap-2">
+                    {submitError && (
+                      <p className="text-sm text-destructive text-right max-w-sm">{submitError}</p>
+                    )}
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!canProceed() || isSubmitting}
+                      loading={isSubmitting}
+                      className="min-w-[160px]"
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Request"}
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
