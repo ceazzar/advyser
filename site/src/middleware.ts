@@ -1,56 +1,39 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { pathHasPrefix } from "@/lib/mvp-mode";
+
+const DISABLED_ROUTE_PREFIXES = [
+  "/dashboard",
+  "/advisor",
+  "/admin",
+  "/claim",
+  "/login",
+  "/signup",
+  "/verify",
+  "/forgot-password",
+  "/reset-password",
+  "/auth",
+  "/components",
+  "/design-system",
+];
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  const pathname = request.nextUrl.pathname;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  // Refresh the auth token and get user — required to keep session alive
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Route protection: redirect unauthenticated users away from protected paths
-  const protectedPaths = ["/dashboard", "/advisor", "/admin"];
-  const isProtected = protectedPaths.some((p) =>
-    request.nextUrl.pathname.startsWith(p)
-  );
-
-  if (isProtected && !user) {
+  if (DISABLED_ROUTE_PREFIXES.some((prefix) => pathHasPrefix(pathname, prefix))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
+    redirectUrl.pathname = "/";
+    redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }
 
-  return supabaseResponse;
+  return NextResponse.next({
+    request,
+  });
 }
 
 export const config = {
   matcher: [
     // Run on all routes except static files and API routes
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -1,0 +1,3 @@
+-- Synced from remote migration history.
+-- Migration ID: 20260203055406
+-- Intentionally empty to align local and remote history.

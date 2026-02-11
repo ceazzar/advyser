@@ -443,26 +443,12 @@ function AnimatedStep({
   direction: "forward" | "backward"
   stepKey: number
 }) {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(false)
-    const timer = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setIsVisible(true))
-    })
-    return () => cancelAnimationFrame(timer)
-  }, [stepKey])
-
   return (
     <div
+      key={stepKey}
       className={cn(
-        "transition-all duration-300 ease-out",
-        isVisible
-          ? "opacity-100 translate-x-0"
-          : cn(
-              "opacity-0",
-              direction === "forward" ? "translate-x-12" : "-translate-x-12"
-            )
+        "animate-in fade-in-0 duration-300 ease-out",
+        direction === "forward" ? "slide-in-from-right-12" : "slide-in-from-left-12"
       )}
     >
       {children}

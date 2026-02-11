@@ -60,6 +60,8 @@
 }
 
 :root {
+  --font-dm-sans: "DM Sans";
+
   /* Base radius: 6px (small) */
   --radius: 0.375rem;
 

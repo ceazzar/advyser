@@ -305,7 +305,7 @@ function ReviewSnippetDisplay({ review }: { review: ReviewSnippet }) {
   return (
     <div className="mt-2.5 p-2.5 rounded-lg bg-muted/50 border border-border/50">
       <p className="text-sm text-muted-foreground italic line-clamp-2">
-        "{truncatedText}"
+        &ldquo;{truncatedText}&rdquo;
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
         — {review.reviewerName}, {review.date}

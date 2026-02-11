@@ -1,0 +1,447 @@
+## A) EXECUTIVE MAP (1 page)
+
+* **Discovery →** Consumers land on Fresha via marketplace search, city/service landing pages, and business profile pages; businesses publish an “online profile” to be discoverable. ([Fresha][1])
+* **Booking →** Consumers pick a venue/service/time and book via the provider’s Fresha booking page (also embeddable as “Book now” links/buttons on the business’s own channels). ([Fresha][2])
+* **Operations (SaaS) →** Businesses run scheduling + services + team + clients + checkout via the partner (merchant) product, supported by a deep Knowledge Base/Academy. ([partners.fresha.com][3])
+* **Payments →** Fresha Payments supports online + in-person payments, a “business wallet,” payouts, terminals, Tap to Pay, self-checkout links, and payment policies (deposits/upfront payments, cancellation/no-show fees). ([Fresha][4])
+* **Fees/Attribution →** A **Marketplace New Client Fee** applies when a *brand-new client* discovers a business through the **Fresha Marketplace**; it’s **one-time per new marketplace client**, calculated off the booking value; it’s **not** charged for clients sourced via direct links/website/social. ([Fresha][5])
+* **Retention/Marketing →** The system supports marketing campaigns/offers and client loyalty tooling (Knowledge Base categories). ([Fresha][6])
+* **Platform governance →** Terms define “Partner Profiles,” “Partner Services,” “Partner Terms of Sale,” and payment constructs (Partner Credit/Vouchers) underpinning bookings/commerce. ([terms.fresha.com][7])
+
+**Two-sided marketplace**
+
+* **Demand-side (Consumer marketplace):** Find nearby services, compare providers, book instantly, manage appointments; trust via ratings/reviews. ([Fresha][1])
+* **Supply-side (Business SaaS):** “Fresha for professionals” partner account to manage calendar, services, team, clients, payments, marketing, reporting, billing/fees. ([partners.fresha.com][3])
+
+**Primary monetization mechanisms discovered**
+
+* **Marketplace New Client Fee** (one-time per marketplace-sourced new client; rate/minimum referenced on pricing page; charged via wallet). ([Fresha][5])
+* **Payment processing fees / payment product attach** (Fresha Payments; rates referenced on pricing page; terminals and Tap to Pay). ([Fresha][4])
+* **Subscription/plan billing** (billing area includes “Manage your Fresha plan”; canceling removes workspace access and unlists marketplace profile at period end). ([Fresha][8])
+* **Messaging balance** appears as a billing surface (implies usage-based comms/SMS). ([Fresha][9])
+* **Card terminal hardware** ordering (implied hardware/fintech revenue). ([Fresha][4])
+
+---
+
+## B) IA INVENTORY (PAGE TYPES, NOT JUST URLS)
+
+| Page Type Name                             | URL(s)                                                                                                                                                                                                                     | Audience (Consumer / Business / Both) | Primary Job-To-Be-Done                                  | Primary CTA               | Key Objects Mentioned                                             | Notes (pricing, eligibility, dependencies)                                                |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Consumer marketing / marketplace home      | [https://www.fresha.com](https://www.fresha.com)                                                                                                                                                                           | Consumer                              | Start discovery/search; see upcoming appts if logged in | Search                    | Treatment, Location, Time, Appointment                            | Logged-in state can show “Upcoming appointments” (account surface)                        |
+| Marketplace city/service directory landing | [https://www.fresha.com/lp/en/bt/](https://www.fresha.com/lp/en/bt/)...                                                                                                                                                    | Consumer                              | Browse top providers in a location/category             | Select venue/service      | City, Category, Business, Offer/Deal, Reviews                     | Shows lists + map + “See all services” snippets ([Fresha][1])                             |
+| Business profile (“Partner Profile”)       | [https://www.fresha.com/a/{business-slug}](https://www.fresha.com/a/{business-slug})                                                                                                                                       | Consumer                              | Evaluate a venue/provider                               | Book / View services      | Business, Services, Reviews, Location                             | Canonical “Partner Profile” object in Terms ([terms.fresha.com][7])                       |
+| Booking page                               | [https://www.fresha.com/a/{business-slug}/booking](https://www.fresha.com/a/{business-slug}/booking)                                                                                                                       | Consumer                              | Choose service/time and book                            | Confirm booking           | Service, Staff, Availability, Payment policy                      | Booking links can be “direct” (no marketplace browse) ([Fresha][2])                       |
+| Direct booking link builder concept        | (described in KB)                                                                                                                                                                                                          | Business                              | Generate unique booking links                           | Generate link             | Booking link, Channel source                                      | Requires listing profile on marketplace; direct links avoid new-client fees ([Fresha][2]) |
+| Consumer account: manage booking (concept) | (referenced via “cancel online through Fresha account”)                                                                                                                                                                    | Consumer                              | Cancel/reschedule/manage appointments                   | Cancel / Reschedule       | Appointment, Client account                                       | Online cancellation affects marketplace fee timing ([Fresha][5])                          |
+| “For business” landing                     | [https://www.fresha.com/for-business](https://www.fresha.com/for-business)                                                                                                                                                 | Business                              | Learn product value; start signup                       | Start / Learn more        | Marketplace, Clients, Operations                                  | Positioning: attract + retain + streamline ([Fresha][10])                                 |
+| Partner sign-in                            | [https://partners.fresha.com/users/sign-in?lang=en](https://partners.fresha.com/users/sign-in?lang=en)                                                                                                                     | Business                              | Access admin/workspace                                  | Continue / Create account | Workspace, Appointments, Clients                                  | Gated product entry ([partners.fresha.com][3])                                            |
+| Partner sign-up                            | [https://partners.fresha.com/for-business/sign-up](https://partners.fresha.com/for-business/sign-up)                                                                                                                       | Business                              | Create partner account                                  | Continue                  | Workspace                                                         | Gated ([partners.fresha.com][11])                                                         |
+| Pricing (business)                         | [https://www.fresha.com/pricing](https://www.fresha.com/pricing) (also /en/pricing)                                                                                                                                        | Business                              | Understand fees/plans                                   | Get started               | Plan, Marketplace fee, New clients                                | Describes one-time marketplace new client fee concept; rate/min elsewhere ([Fresha][12])  |
+| Payments product marketing                 | [https://www.fresha.com/payments](https://www.fresha.com/payments)                                                                                                                                                         | Business                              | Learn payments + policies                               | Get started / Learn more  | Deposits, No-show fees, Multi-merchant                            | Highlights payment policies + routing to team members ([Fresha][13])                      |
+| Help Center home                           | [https://www.fresha.com/help-center](https://www.fresha.com/help-center)                                                                                                                                                   | Both                                  | Navigate support                                        | Get support / Search      | Knowledge base, Academy                                           | Entry to docs for gated areas ([Fresha][14])                                              |
+| Knowledge Base category index              | [https://www.fresha.com/help-center/knowledge-base](https://www.fresha.com/help-center/knowledge-base)                                                                                                                     | Business                              | Navigate feature documentation                          | Choose category           | Calendar, Clients, Services, Payments, Marketing, Inventory, etc. | Reveals full SaaS IA as categories ([Fresha][6])                                          |
+| Payments (KB category)                     | [https://www.fresha.com/help-center/knowledge-base/payments](https://www.fresha.com/help-center/knowledge-base/payments)                                                                                                   | Business                              | Learn payments setup/ops                                | Open article              | Payments, Policies, Terminals, Capital                            | Mentions wallet integration and methods ([Fresha][4])                                     |
+| Wallets (KB category)                      | [https://www.fresha.com/help-center/knowledge-base/wallets](https://www.fresha.com/help-center/knowledge-base/wallets)                                                                                                     | Business                              | Manage wallet + payouts                                 | Open article              | Business wallet, Statements, Payouts                              | Core fintech admin surface ([Fresha][15])                                                 |
+| Billing & fees (KB category)               | [https://www.fresha.com/help-center/knowledge-base/billing-and-fees](https://www.fresha.com/help-center/knowledge-base/billing-and-fees)                                                                                   | Business                              | Understand invoicing/fees/tax forms                     | Open article              | Invoices, Fees, Tax forms                                         | Mentions marketplace new client fee as one-time charge ([Fresha][16])                     |
+| Marketplace new client fees (KB article)   | [https://www.fresha.com/help-center/knowledge-base/billing-and-fees/188-marketplace-new-client-fees](https://www.fresha.com/help-center/knowledge-base/billing-and-fees/188-marketplace-new-client-fees)                   | Business                              | Understand when fee applies and defers                  | Learn more                | Marketplace fee, Booking value, Wallet                            | Precise fee triggers + deferral logic ([Fresha][5])                                       |
+| Online profile creation (KB)               | [https://www.fresha.com/help-center/knowledge-base/online-profile/194-create-your-online-profile](https://www.fresha.com/help-center/knowledge-base/online-profile/194-create-your-online-profile)                         | Business                              | Publish listing; go live                                | Create profile            | Online profile, Client import, Marketing                          | Recommends importing clients to avoid unnecessary fees ([Fresha][17])                     |
+| Add book button to website (KB)            | [https://www.fresha.com/help-center/knowledge-base/online-profile/152-add-a-book-button-to-your-website](https://www.fresha.com/help-center/knowledge-base/online-profile/152-add-a-book-button-to-your-website)           | Business                              | Add booking CTA to owned channels                       | Create booking link       | Booking links, Marketplace listing                                | Dependency: must be listed on marketplace ([Fresha][2])                                   |
+| Social bookings (KB)                       | [https://www.fresha.com/help-center/knowledge-base/online-profile/180-set-up-facebook-and-instagram-bookings](https://www.fresha.com/help-center/knowledge-base/online-profile/180-set-up-facebook-and-instagram-bookings) | Business                              | Enable social “Book now”                                | Set up                    | Channel source, New client fee                                    | Clarifies fee only when discovered via marketplace ([Fresha][18])                         |
+| Upfront payments policy (KB)               | [https://www.fresha.com/help-center/knowledge-base/payments/615-set-up-payment-policies](https://www.fresha.com/help-center/knowledge-base/payments/615-set-up-payment-policies)                                           | Business                              | Configure deposits/no-show                              | Set policies              | Payment policy, 3DS verification                                  | Mentions 3D Secure & how marketplace fee treats deposits ([Fresha][19])                   |
+| No-show/cancellation fees (KB)             | [https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees](https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees)                 | Business                              | Configure fees for protection                           | Configure                 | Group appointments, Deposit coverage                              | Group appointment edge cases ([Fresha][20])                                               |
+| Business wallet statements (KB)            | [https://www.fresha.com/help-center/knowledge-base/wallets/117-access-business-wallet-statements](https://www.fresha.com/help-center/knowledge-base/wallets/117-access-business-wallet-statements)                         | Business                              | Download statements                                     | Download                  | Payments, Fees                                                    | Wallet statement includes fees ([Fresha][21])                                             |
+| Plan management (KB)                       | [https://www.fresha.com/help-center/knowledge-base/billing-and-fees/574-manage-your-fresha-plan](https://www.fresha.com/help-center/knowledge-base/billing-and-fees/574-manage-your-fresha-plan)                           | Business                              | Cancel/change plan                                      | Cancel plan               | Plan, Marketplace profile, Reviews                                | Canceling unlists profile; reviews hidden but restored on reactivation ([Fresha][8])      |
+| Terms of Service                           | [https://terms.fresha.com/terms-service](https://terms.fresha.com/terms-service)                                                                                                                                           | Both                                  | Legal definitions governing bookings                    | —                         | Partner Profile, Partner Services, Credits/Vouchers               | Defines core marketplace objects ([terms.fresha.com][7])                                  |
+| Partner Terms                              | [https://terms.fresha.com/partner-terms](https://terms.fresha.com/partner-terms)                                                                                                                                           | Business                              | Legal partner commerce rules                            | —                         | Vouchers, Refunds, Professional services                          | Fresha as booking agent; partner-client contract ([terms.fresha.com][22])                 |
+
+> This inventory is intentionally “page types”; many additional feature areas are implied by Knowledge Base categories (Calendar, Sales/checkout, Team, Services, Marketing, Inventory, Memberships/gift cards, Reports/Insights, Workspace settings, Personal account, Privacy/security). ([Fresha][6])
+
+---
+
+## C) CORE FLOW MAPS (STEP-BY-STEP)
+
+### C1) Consumer marketplace loop
+
+1. **Discover / land**
+
+   * **Page type:** Marketplace home or city/service directory
+   * **Inputs:** location, service/category, time (optional)
+   * **Outputs:** result list + map + featured providers
+   * **Decision points:** browse vs search; deals vs standard listings ([Fresha][1])
+
+2. **Search/browse results**
+
+   * **Page type:** Directory landing / results list
+   * **Inputs:** filters (service type, price/duration implied by snippets), map view
+   * **Outputs:** set of businesses with ratings + service teasers (“See all services”) ([Fresha][1])
+
+3. **Provider profile view**
+
+   * **Page type:** Business profile (“Partner Profile”)
+   * **Inputs:** business selected
+   * **Outputs:** services menu, reviews, location, booking entry point
+   * **Decision points:** choose provider; evaluate trust via rating/reviews ([terms.fresha.com][7])
+
+4. **Pick service**
+
+   * **Page type:** Booking page
+   * **Inputs:** selected service (name, duration, price)
+   * **Outputs:** availability for service/staff
+   * **Decision points:** service variants, add-ons (implied by “additional services added at checkout” rule) ([Fresha][5])
+
+5. **Choose time / staff**
+
+   * **Page type:** Booking page
+   * **Inputs:** date/time; staff (if selectable)
+   * **Outputs:** selected slot locked for checkout
+   * **Decision points:** slot availability; payment policy gating (deposit/upfront) ([Fresha][19])
+
+6. **Book + confirm**
+
+   * **Page type:** Booking confirmation / payment step (varies)
+   * **Inputs:** customer details; payment method (online) or “Pay in store” construct
+   * **Outputs:** appointment created; confirmation; potential 3DS step
+   * **Decision points:** upfront payment required vs optional; bank 3DS requirement ([Fresha][19])
+
+7. **Manage booking**
+
+   * **Page type:** Consumer account / manage appointment (concept)
+   * **Inputs:** cancel/reschedule
+   * **Outputs:** updated appointment status
+   * **Decision points:** cancel online vs staff-cancel on behalf (affects marketplace fee application for the business) ([Fresha][5])
+
+---
+
+### C2) Business (merchant) ops loop
+
+1. **Onboard business**
+
+   * **Page type:** Partner sign-up / “For business” landing → partner account
+   * **Inputs:** business identity; workspace creation
+   * **Outputs:** workspace created (gated) ([Fresha][10])
+
+2. **Set up online profile (marketplace listing)**
+
+   * **Page type:** Online profile KB-guided setup
+   * **Inputs:** venue info, services, photos, booking settings
+   * **Outputs:** profile listed on marketplace; online booking enabled
+   * **Decision points:** list vs unlist; import clients before going live ([Fresha][17])
+
+3. **Add staff/team**
+
+   * **Page type:** Team area (inferred via KB categories)
+   * **Inputs:** staff members, roles, scheduling availability
+   * **Outputs:** staff objects usable for booking & payments routing ([Fresha][6])
+
+4. **Create services**
+
+   * **Page type:** Services area (KB category)
+   * **Inputs:** service name, duration, price, assignment to staff
+   * **Outputs:** bookable service catalog ([Fresha][6])
+
+5. **Set availability + calendar**
+
+   * **Page type:** Calendar & schedule (KB category)
+   * **Inputs:** opening hours, staff schedules, buffers
+   * **Outputs:** available slots; calendar blocks ([Fresha][6])
+
+6. **Manage bookings**
+
+   * **Page type:** Calendar/appointments + group appointments (KB)
+   * **Inputs:** create/edit appointments; group bookings; reschedules
+   * **Outputs:** appointment states; attendance tracking
+   * **Decision points:** unmanaged vs rescheduled impacts fee logic for new marketplace clients ([Fresha][5])
+
+7. **Client CRM**
+
+   * **Page type:** Clients area (KB category)
+   * **Inputs:** client profile, contact info, referrals, loyalty
+   * **Outputs:** client history; eligibility as “existing client” vs “brand-new client” for marketplace fee logic ([Fresha][23])
+
+8. **Payments/POS**
+
+   * **Page type:** Payments + checkout + terminals + Tap to Pay + self-checkout
+   * **Inputs:** collect online/in-person; saved cards; manual entry; split payments
+   * **Outputs:** transactions recorded; funds to business wallet; receipts/refunds (implied by “Sales and checkout” category) ([Fresha][4])
+
+9. **Marketing**
+
+   * **Page type:** Marketing category; “Blast campaign” referenced
+   * **Inputs:** campaigns/offers; referral links
+   * **Outputs:** client engagement + bookings ([Fresha][17])
+
+10. **Reporting + billing**
+
+* **Page type:** Reports & insights + Billing & fees + Wallet statements
+* **Inputs:** date ranges, export/download statements
+* **Outputs:** performance analytics; invoices; fee statements; wallet statement lines ([Fresha][6])
+
+---
+
+### C3) Money + attribution loop
+
+1. **Choose payment rails**
+
+   * **Who pays:** Client pays business (online or in-store)
+   * **Charged by:** Payment processing fees apply when using Fresha Payments (rates referenced on pricing page)
+   * **Trigger:** payment captured online/in-person; may require 3DS ([Fresha][4])
+
+2. **Funds settlement**
+
+   * **Who pays/receives:** Business receives proceeds into **business wallet**
+   * **Where it appears:** wallet activity + downloadable statements
+   * **Trigger:** each sale/transaction + associated fees ([Fresha][15])
+
+3. **Marketplace attribution**
+
+   * **Rule:** **Marketplace New Client Fee** applies when a client *discovers your business through the Fresha Marketplace*; not for your own website/social/direct link channels.
+   * **Trigger:** booking made by a brand-new marketplace client; fee calculated from booking value (with special handling for discounts and post-booking add-ons) ([Fresha][5])
+
+4. **Fee timing edge cases**
+
+   * If **client cancels online** in their Fresha account → fee **does not apply immediately**; instead **deferred** to next appointment value booked.
+   * If **business/staff cancels on client’s behalf** or booking is left unmanaged/rescheduled → fee can still apply. ([Fresha][5])
+
+5. **Reporting/visibility**
+
+   * Marketplace fee charges show in the **business wallet** and can be downloaded via statements; billing area also provides invoices/fees. ([Fresha][5])
+
+---
+
+## D) DATA/OBJECT MODEL (REVERSE-ENGINEERED)
+
+**Consumer-side + marketplace objects**
+
+* **Business (Partner)**
+
+  * Fields: name, category, address/geo, profile photos, rating, review_count, booking_link
+  * Relationships: Business has **Services**, **Staff**, **Policies**, **Reviews**, **Locations** (workspace) ([terms.fresha.com][7])
+* **Service (Partner Service)**
+
+  * Fields: name, duration, base_price, category, online_discounts (pre-defined), staff_assignment
+  * Relationships: Service belongs to Business; Service can be delivered by Staff; used in Booking ([terms.fresha.com][7])
+* **Staff / Team Member**
+
+  * Fields: name, role, availability, payment-routing eligibility (multi-merchant)
+  * Relationships: Staff belongs to Business; Staff can perform Services; Staff can receive routed payments ([Fresha][13])
+* **Client**
+
+  * Fields: identity/contact, source channel (marketplace vs direct), referral info, saved_cards (if enabled)
+  * Relationships: Client has Bookings; Client may have loyalty/referrals ([Fresha][24])
+* **Booking / Appointment**
+
+  * Fields: datetime, duration, price_at_booking, discount_at_booking, status, channel_source, payment_requirement
+  * Relationships: links Client + Business + Service(+Staff) + Payment(s)
+  * States (inferred): created/confirmed, rescheduled, cancelled_by_client, cancelled_by_business, no_show (feeable), checked_out ([Fresha][5])
+* **Review**
+
+  * Fields: rating, text (optional), timestamp, booking reference
+  * Constraints: hidden if business unlisted due to plan cancel; restored on reactivation ([Fresha][8])
+
+**Payments/fintech objects**
+
+* **Payment Policy**
+
+  * Fields: deposit_amount_or_percent, full_upfront_flag, card_on_file_flag, cancellation_fee_rules, no_show_fee_rules
+  * Relationships: attached to Business and/or specific appointments
+  * Constraints: applies to group booking main payer logic; supports 3DS security ([Fresha][19])
+* **Transaction (Payment)**
+
+  * Fields: amount, method (tap_to_pay, terminal, saved_card, manual_entry, gift_card, split), status, fees
+  * Relationships: belongs to Booking and Business wallet ([Fresha][4])
+* **Business Wallet**
+
+  * Fields: balance, transactions ledger, payout settings, statements
+  * Relationships: aggregates transactions + fees; supports payouts ([Fresha][15])
+* **Marketplace New Client Fee**
+
+  * Fields: fee_rate (see pricing), minimum_fee (see pricing), applied_amount, deferred_flag
+  * Relationships: linked to Client source + Booking value; appears in wallet ([Fresha][5])
+* **Voucher / Gift Card**
+
+  * Fields: voucher_code, value_remaining, expiry_rules, redemption_rules
+  * Relationships: purchased by Client; redeemable with Partner; governed by partner terms ([terms.fresha.com][22])
+
+---
+
+## E) ROLE & PERMISSION MODEL (PUBLICLY INFERRED)
+
+* **Consumer**
+
+  * Key actions: search/browse; view business profile; book; pay online (where enabled); cancel online via Fresha account
+  * Key screens: marketplace directory; business profile; booking flow; account booking management (implied) ([Fresha][1])
+
+* **Business owner/admin (Partner)**
+
+  * Key actions: create workspace; publish/unlist online profile; manage services/team/calendar/clients; configure payments & policies; view wallet & fee statements; manage plan/subscription
+  * Key screens: partner sign-in; billing; payments; wallet; online profile tools ([partners.fresha.com][3])
+
+* **Staff member**
+
+  * Key actions: view/manage appointments; deliver services; take payments/checkout; (possibly) receive routed payments in multi-merchant setup
+  * Key screens: calendar/appointments; checkout; payments tools ([Fresha][13])
+
+* **“Merchant” (payments account holder)**
+
+  * Key actions: manage merchant account/wallet transfers (personal vs workspace wallets)
+  * Key screens: merchant account management (KB) ([Fresha][25])
+
+---
+
+## F) TRUST & QUALITY CONTROLS
+
+* **Ratings & reviews** are prominent on directory pages and act as a primary trust signal. ([Fresha][1])
+* **Payment security controls:** clients may be required to complete **two-step verification (3D Secure)** when booking online, depending on bank requirements. ([Fresha][19])
+* **Cancellation/no-show protections:** businesses can configure **upfront payments/deposits** and **late cancellation/no-show fees**; group appointment logic is documented. ([Fresha][13])
+* **Marketplace fee “gaming” controls:** fee logic persists across reschedules/unmanaged bookings; online client cancellation changes fee timing (defer vs charge), which incentivizes clean self-service behavior. ([Fresha][5])
+
+---
+
+## G) MONETIZATION DETAILS (AS PRECISE AS POSSIBLE)
+
+**1) Marketplace New Client Fee (core marketplace monetization)**
+
+* **What it is:** a **one-time charge per new client from the marketplace**. ([Fresha][16])
+* **When it applies:** when a client **discovers the business through the Fresha Marketplace** (not through direct booking links, website buttons, or social channels). ([Fresha][18])
+* **How it’s calculated:** based on the **value of the booking made online** by the brand-new client;
+
+  * applies to **discounted price** if discount is pre-defined online;
+  * does **not** apply to extra services/products added later at in-store checkout. ([Fresha][5])
+* **Fee rate + minimum:** explicitly stated as “find the fee rate and minimum fee on our pricing page” (rate/min not visible in the public KB article itself). ([Fresha][5])
+* **Where it appears:** charged amounts show in **business wallet** and wallet statements. ([Fresha][5])
+* **Key edge cases:**
+
+  * If **client cancels online** via Fresha account → fee **not charged then**, **deferred** to their next appointment value. ([Fresha][5])
+  * If **business cancels on client’s behalf**, or booking is **unmanaged/rescheduled**, fee can still apply. ([Fresha][5])
+  * Importing existing clients before going live helps ensure they’re recognized as returning clients (reducing unnecessary new-client fees). ([Fresha][23])
+
+**2) Payments fees / payments product**
+
+* Fresha Payments supports online + in-person methods and routes proceeds into the business wallet; “full list of rates” is referenced on the pricing page. ([Fresha][4])
+* Payment tooling includes Tap to Pay, terminals, saved cards, self-checkout links, QR code payments, and split payments (feature surfaces that typically increase payment attach). ([Fresha][4])
+
+**3) Subscription/plan billing**
+
+* Businesses can manage/cancel their plan; cancellation removes access to workspace and unlists marketplace profile at the end of the billing cycle; reviews become hidden (not deleted). ([Fresha][8])
+
+**4) Hardware/upsells**
+
+* Card terminals are a first-class area in Payments documentation (order/activate/use), implying hardware distribution + payment volume capture. ([Fresha][4])
+
+---
+
+## H) INSTRUMENTATION EVENTS (WHAT TO MEASURE)
+
+**Consumer discovery → booking**
+
+* `landing_viewed`
+* `search_performed` (query, location, time)
+* `filter_applied` / `map_view_toggled`
+* `directory_listing_impression` / `directory_listing_clicked`
+* `profile_viewed` (business_id)
+* `service_selected` (service_id, duration, price)
+* `staff_selected` (optional)
+* `slot_selected` (datetime)
+* `booking_details_entered`
+* `payment_policy_presented` (deposit/full/card-on-file)
+* `payment_3ds_challenge_presented` / `payment_3ds_completed`
+* `booking_confirmed` / `booking_failed`
+* `booking_rescheduled` / `booking_cancelled_by_client` / `booking_cancelled_by_business`
+
+**Business ops**
+
+* `workspace_created`
+* `online_profile_published` / `online_profile_unlisted`
+* `client_list_imported`
+* `service_created` / `service_updated`
+* `staff_created` / `staff_role_changed`
+* `availability_updated`
+* `appointment_created_by_staff` / `group_appointment_created`
+* `checkout_started` / `checkout_completed` / `refund_issued`
+* `payment_terminal_ordered` / `tap_to_pay_enabled`
+* `payment_policy_created` / `no_show_fee_configured` / `cancellation_fee_configured`
+* `self_checkout_link_sent` / `qr_payment_initiated`
+
+**Money + attribution**
+
+* `transaction_initiated` / `transaction_succeeded` / `transaction_failed`
+* `wallet_balance_viewed` / `wallet_statement_downloaded`
+* `payout_configured` / `payout_initiated`
+* `marketplace_new_client_fee_assessed` (booking_value, fee_amount, rate_bucket)
+* `marketplace_new_client_fee_deferred` (reason=client_cancelled_online)
+* `client_source_assigned` (marketplace/direct/social/website/referral)
+* `plan_changed` / `plan_cancelled`
+
+---
+
+## APPENDIX
+
+### A1) URL list (all visited URLs)
+
+* [https://www.fresha.com](https://www.fresha.com)
+* [https://www.fresha.com/for-business](https://www.fresha.com/for-business) ([Fresha][10])
+* [https://partners.fresha.com/users/sign-in?lang=en](https://partners.fresha.com/users/sign-in?lang=en) ([partners.fresha.com][3])
+* [https://partners.fresha.com/for-business/sign-up](https://partners.fresha.com/for-business/sign-up) ([partners.fresha.com][11])
+* [https://www.fresha.com/pricing](https://www.fresha.com/pricing) ([Fresha][12])
+* [https://www.fresha.com/en/pricing](https://www.fresha.com/en/pricing) ([Fresha][26])
+* [https://www.fresha.com/payments](https://www.fresha.com/payments) ([Fresha][13])
+* [https://www.fresha.com/help-center](https://www.fresha.com/help-center) ([Fresha][14])
+* [https://www.fresha.com/help-center/knowledge-base](https://www.fresha.com/help-center/knowledge-base) ([Fresha][6])
+* [https://www.fresha.com/help-center/knowledge-base/payments](https://www.fresha.com/help-center/knowledge-base/payments) ([Fresha][4])
+* [https://www.fresha.com/help-center/knowledge-base/wallets](https://www.fresha.com/help-center/knowledge-base/wallets) ([Fresha][15])
+* [https://www.fresha.com/help-center/knowledge-base/billing-and-fees](https://www.fresha.com/help-center/knowledge-base/billing-and-fees) ([Fresha][16])
+* [https://www.fresha.com/help-center/knowledge-base/billing-and-fees/188-marketplace-new-client-fees](https://www.fresha.com/help-center/knowledge-base/billing-and-fees/188-marketplace-new-client-fees) ([Fresha][5])
+* [https://www.fresha.com/help-center/knowledge-base/online-profile/194-create-your-online-profile](https://www.fresha.com/help-center/knowledge-base/online-profile/194-create-your-online-profile) ([Fresha][17])
+* [https://www.fresha.com/help-center/knowledge-base/online-profile/152-add-a-book-button-to-your-website](https://www.fresha.com/help-center/knowledge-base/online-profile/152-add-a-book-button-to-your-website) ([Fresha][2])
+* [https://www.fresha.com/help-center/knowledge-base/online-profile/180-set-up-facebook-and-instagram-bookings](https://www.fresha.com/help-center/knowledge-base/online-profile/180-set-up-facebook-and-instagram-bookings) ([Fresha][18])
+* [https://www.fresha.com/help-center/knowledge-base/payments/615-set-up-payment-policies](https://www.fresha.com/help-center/knowledge-base/payments/615-set-up-payment-policies) ([Fresha][19])
+* [https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees](https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees) ([Fresha][20])
+* [https://www.fresha.com/help-center/knowledge-base/wallets/117-access-business-wallet-statements](https://www.fresha.com/help-center/knowledge-base/wallets/117-access-business-wallet-statements) ([Fresha][21])
+* [https://www.fresha.com/help-center/knowledge-base/billing-and-fees/574-manage-your-fresha-plan](https://www.fresha.com/help-center/knowledge-base/billing-and-fees/574-manage-your-fresha-plan) ([Fresha][8])
+* [https://terms.fresha.com/terms-service](https://terms.fresha.com/terms-service) ([terms.fresha.com][7])
+* [https://terms.fresha.com/partner-terms](https://terms.fresha.com/partner-terms) ([terms.fresha.com][22])
+* Example directory landing: [https://www.fresha.com/lp/en/bt/beauty-salons/in/gb-chorley/adlington](https://www.fresha.com/lp/en/bt/beauty-salons/in/gb-chorley/adlington) ([Fresha][1])
+
+### A2) Non-core pages discovered (blog/legal/press) with brief notes
+
+* Blog explainer on marketplace benefits + fee positioning (non-core but monetization narrative). ([Fresha][27])
+* “For business” vertical content/SEO articles (barber/salon/spa) — mostly acquisition content. ([Fresha][28])
+* Legal: Terms of Service + Partner Terms (core legal foundation, but not product UI). ([terms.fresha.com][7])
+
+### A3) Screenshots references or short quotations (only if needed) to support key claims
+
+* **Marketplace fee deferral & triggers** are explicitly stated in the “Marketplace new client fees” KB article (including “client cancels online → deferred”). ([Fresha][5])
+* **Knowledge Base category list** reveals the SaaS surface area (Calendar, Sales/checkout, Clients, Team, Services, Marketplace, Payments, Wallets, Marketing, Inventory, Memberships, Reports, Settings, Billing). ([Fresha][6])
+
+---
+
+If you want, I can convert this into a **build-ready PRD bundle** (screens per flow + API-ish object schemas + event taxonomy) in the exact structure your engineering/design team uses—tell me your preferred template (e.g., “Notion PRD”, “Linear issues”, “Shape Up pitch”, etc.).
+
+[1]: https://www.fresha.com/lp/en/bt/beauty-salons/in/gb-chorley/adlington?utm_source=chatgpt.com "Best Beauty Salons near me in Adlington, Chorley - Fresha"
+[2]: https://www.fresha.com/help-center/knowledge-base/online-profile/152-add-a-book-button-to-your-website?utm_source=chatgpt.com "Add a book button to your website using Fresha"
+[3]: https://partners.fresha.com/users/sign-in?lang=en&utm_source=chatgpt.com "Fresha - Partner Account"
+[4]: https://www.fresha.com/help-center/knowledge-base/payments "Fresha payments"
+[5]: https://www.fresha.com/help-center/knowledge-base/billing-and-fees/188-marketplace-new-client-fees?utm_source=chatgpt.com "Marketplace new client fees on Fresha"
+[6]: https://www.fresha.com/help-center/knowledge-base "Browse the knowledge base to learn more about Fresha"
+[7]: https://terms.fresha.com/terms-service "Fresha Terms of Service"
+[8]: https://www.fresha.com/help-center/knowledge-base/billing-and-fees/574-manage-your-fresha-plan?utm_source=chatgpt.com "Manage your Fresha plan"
+[9]: https://www.fresha.com/help-center/knowledge-base/billing-and-fees/184-download-fresha-invoices-and-fees?utm_source=chatgpt.com "Download invoices and fees on Fresha"
+[10]: https://www.fresha.com/for-business?utm_source=chatgpt.com "Fresha | Top Salon Software | Salon Management Software | Best Salon ..."
+[11]: https://partners.fresha.com/for-business/sign-up?utm_source=chatgpt.com "Fresha - Partner Account"
+[12]: https://www.fresha.com/pricing?utm_source=chatgpt.com "Fresha | Salon Software and Booking System | Pricing"
+[13]: https://www.fresha.com/payments "Fresha | Best Card Terminals for Small Businesses | Fresha Payments"
+[14]: https://www.fresha.com/help-center?utm_source=chatgpt.com "Learn more about how to use Fresha the #1 Software for Salons and Spas"
+[15]: https://www.fresha.com/help-center/knowledge-base/wallets "Wallets"
+[16]: https://www.fresha.com/help-center/knowledge-base/billing-and-fees?utm_source=chatgpt.com "Billing and fees - Fresha"
+[17]: https://www.fresha.com/help-center/knowledge-base/online-profile/194-create-your-online-profile?utm_source=chatgpt.com "Create your online profile - Fresha"
+[18]: https://www.fresha.com/help-center/knowledge-base/online-profile/180-set-up-facebook-and-instagram-bookings?utm_source=chatgpt.com "Set up Facebook and Instagram bookings on Fresha"
+[19]: https://www.fresha.com/help-center/knowledge-base/payments/615-set-up-payment-policies?utm_source=chatgpt.com "Set up payment policies in Fresha"
+[20]: https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees?utm_source=chatgpt.com "Charge no-show and cancellation fees - Fresha"
+[21]: https://www.fresha.com/help-center/knowledge-base/wallets/117-access-business-wallet-statements?utm_source=chatgpt.com "Access business wallet statements in Fresha"
+[22]: https://terms.fresha.com/partner-terms "Partner Terms of Business"
+[23]: https://www.fresha.com/help-center/knowledge-base/clients/51-import-your-existing-client-list?utm_source=chatgpt.com "Import your existing client list into Fresha"
+[24]: https://www.fresha.com/help-center/knowledge-base/clients/603-add-client-referrals-manually-1?utm_source=chatgpt.com "Add client referrals manually with Fresha"
+[25]: https://www.fresha.com/help-center/knowledge-base/personal-account/227-manage-your-merchant-account?utm_source=chatgpt.com "Manage your merchant account in Fresha"
+[26]: https://www.fresha.com/en/pricing?utm_source=chatgpt.com "Fresha | Salon Software and Booking System | Pricing"
+[27]: https://www.fresha.com/blog/the-benefits-of-an-online-salon-marketplace?utm_source=chatgpt.com "Why you should put your business on an online marketplace"
+[28]: https://www.fresha.com/for-business/barber/how-to-run-a-fully-booked-barbershop-with-fresha?utm_source=chatgpt.com "How to run a fully booked barbershop with Fresha"

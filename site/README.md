@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Advyser Frontend
 
-## Getting Started
+Next.js app for the Advyser advisor marketplace.
 
-First, run the development server:
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
+- [Supabase CLI](https://supabase.com/docs/guides/cli)
+- Access to a Supabase project (URL, anon key, service role key, Postgres URL)
+
+## Environment Setup
+
+1. Copy `.env.example` to `.env.local`.
+2. Fill in real credentials.
+3. Validate env values:
+
+```bash
+npm run env:check
+```
+
+## Phase 5 Bootstrap Flow
+
+Run from this directory (`site/`):
+
+```bash
+npm run setup
+npm run db:migrate
+npm run db:types
+npm run db:seed
+npm run db:verify-seed
+npm run db:verify-phase6
+npm run db:verify-phase7
+npm run db:verify-phase8
+npm run verify:ci
+```
+
+One-shot command:
+
+```bash
+npm run verify:phase5
+```
+
+## Daily Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Command Reference
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run setup`: install dependencies with lockfile.
+- `npm run env:check`: ensure required env vars exist.
+- `npm run db:migrate`: align local migration history to the linked remote project and apply pending migrations.
+- `npm run db:types`: generate TypeScript DB types at `src/types/database.generated.ts`.
+- `npm run db:seed`: seed demo auth users and realistic marketplace flow records.
+- `npm run db:verify-seed`: assert seeded auth/public users and core-flow records are present.
+- `npm run db:verify-phase6`: verify table-wide RLS + cross-tenant access controls.
+- `npm run db:verify-phase7`: verify trust badge policy, consent/audit writes, and review integrity scaffolding.
+- `npm run db:verify-phase8`: verify phase-8 schema/data-layer coverage, generated types, and seeded flow assertions.
+- `npm run verify:ci`: lint + tests + build.
+- `npm run verify:phase5`: env + migrate + typegen + seed + seed verification + CI baseline.
+- `npm run verify:phase6`: env + migrate + seed + seed verification + RLS verification + CI baseline.
+- `npm run verify:phase7`: env + migrate + seed + seed/RLS/trust verification + CI baseline.
+- `npm run verify:phase8`: env + migrate + typegen + seed + seed/RLS/trust/phase8 verification + CI baseline.

@@ -30,7 +30,6 @@ const footerLinks = {
     links: [
       { label: "Join Advyser", href: "/for-advisors" },
       { label: "Pricing", href: "/for-advisors#pricing" },
-      { label: "Advisor Login", href: "/login?type=advisor" },
       { label: "Advisor Resources", href: "/advisor-resources" },
     ],
   },
@@ -183,7 +182,7 @@ export function PublicFooter() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="text-xs text-muted-foreground space-y-2">
             <p>
-              <strong>Why we're an introducer, not an advisor:</strong> We connect you with licensed professionals - we never sell products or earn commissions from advice.
+              <strong>Why we&apos;re an introducer, not an advisor:</strong> We connect you with licensed professionals - we never sell products or earn commissions from advice.
               This means our recommendations are based purely on helping you find the right match, not on what pays us the most.
             </p>
             <p>
@@ -205,7 +204,7 @@ export function PublicFooter() {
               <p className="mt-1">ABN: XX XXX XXX XXX</p>
             </div>
             <p className="text-sm text-muted-foreground text-center md:text-right max-w-xl">
-              We connect, we don't sell. All advisors are independently ASIC-licensed professionals.
+              We connect, we don&apos;t sell. All advisors are independently ASIC-licensed professionals.
             </p>
           </div>
         </div>

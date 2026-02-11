@@ -1,0 +1,1287 @@
+╔═══════════════════════════════════════════════════════════════════════════════════════╗
+║                ADVYSER PLATFORM - MASTER IMPLEMENTATION PLAN                          ║
+║                  Phased Backend Development Roadmap v1.0                              ║
+╠═══════════════════════════════════════════════════════════════════════════════════════╣
+║  Purpose: Detailed, methodological implementation guide for lead engineers            ║
+║  Execution Mode: Multi-agent orchestration per CLAUDE.md guidelines                   ║
+║  Created: 2026-02-02                                                                  ║
+║  Status: ARCHIVED (Superseded by Master-Plan-v2; see Phase 0 completion note)        ║
+║  UI Status: COMPLETE (47 pages, 68 components, V.0-V.2 done)                          ║
+╚═══════════════════════════════════════════════════════════════════════════════════════╝
+
+ARCHIVE UPDATE (2026-02-10)
+- Active master plan: /Users/ceazar/Code Base/advyser/plans/Master-Plan-v2
+- Newly completed Phase 0 artifacts:
+  - /Users/ceazar/Code Base/advyser/plans/phase-0/WEDGE_BRIEF.md
+  - /Users/ceazar/Code Base/advyser/plans/phase-0/KPI_TARGET_SHEET.md
+- Execution state: Phase 0 documentation complete; proceed with Phase 1 in active plan.
+
+════════════════════════════════════════════════════════════════════════════════════════
+                           STRATEGIC CONTEXT
+════════════════════════════════════════════════════════════════════════════════════════
+
+Read this section FIRST to understand what we're building and why.
+
+────────────────────────────────────────────────────────────────────────────────────────
+WINNING THESIS
+────────────────────────────────────────────────────────────────────────────────────────
+
+"Australia's default advice platform: find, verify, and work with any licensed
+financial or property adviser in one place."
+
+Most competitors win EITHER discovery/trust (Adviser Ratings, VouchedFor) OR
+lead generation (Unbiased, SmartAsset). Advyser wins by bundling all three:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ LAYER 1: TRUST       │ ASIC/FAR verification system (not just a link)       │
+│                      │ Cross-license signals (credit + state REA checks)    │
+│                      │ Review integrity + dispute/right-of-reply            │
+│                      │ "Verified" (earned) vs "Promoted" (paid) badges      │
+│                      │ Transparent fees displayed upfront                   │
+├──────────────────────┼──────────────────────────────────────────────────────┤
+│ LAYER 2: CONVERSION  │ Lead accept/decline + SLA tracking                   │
+│                      │ Follow-up automation + response templates            │
+│                      │ Instant booking + add-to-calendar                    │
+│                      │ Real messaging (not just contact form)               │
+├──────────────────────┼──────────────────────────────────────────────────────┤
+│ LAYER 3: WORKFLOW    │ Client workspace (notes/tasks/docs)                  │
+│   (THE MOAT)         │ Compliant copilot drafts with audit trail            │
+│                      │ Advisor analytics (response time, conversion,        │
+│                      │ review momentum) tied to performance                 │
+└──────────────────────┴──────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+CATEGORY DESIGN: THE DEFAULT ADVICE PLATFORM FOR AUSTRALIA
+────────────────────────────────────────────────────────────────────────────────────────
+
+Category Promise (what no one else can credibly claim):
+"Any Australian can get matched to a verified adviser for any money or property
+decision, then complete the advice journey in one compliant workspace."
+
+NON-NEGOTIABLE DIFFERENTIATORS (Build + communicate early)
+• National Trust Ledger: license verification across ASIC FAR, credit licensing,
+  and state real-estate licensing (where applicable), with "last checked" stamps
+• Advice Fit Score: matching that combines intent, complexity, location, and
+  adviser specialization (not just category + postcode)
+• Verified Outcomes: post-engagement reviews + response/right-of-reply tied to
+  real interactions (not open, anonymous listings)
+• The Advice Workspace: a shared timeline for briefs, documents, tasks, and
+  compliance-ready audit trails (turns introductions into retained clients)
+
+DESIGN MANDATE (Make the differentiation obvious)
+• Trust signals are visible above the fold (license badges, "last verified" time)
+• Matching is explainer-led ("why this adviser") not a faceless list
+• The UI communicates regulated confidence, not generic SaaS directory
+• Every advisor action ties to an outcome metric (response time, conversion,
+  review momentum, referral rate)
+
+────────────────────────────────────────────────────────────────────────────────────────
+GO-TO-MARKET ENGINE (How We Become the Default Fast)
+────────────────────────────────────────────────────────────────────────────────────────
+
+SUPPLY WEDGE: "Claim your verified profile" for every FAR-registered adviser
+• Auto-create advisor pages from FAR import -> email claim flow
+• Free listing includes verification badge + basic insights
+• Paid tier unlocks lead controls, response templates, analytics
+
+DEMAND WEDGE: Advice-first consumer entry points
+• "Best adviser for X" landing pages + local SEO (state, city, suburb)
+• Short "Advice Fit" quiz with immediate shortlist + booking
+• Property + finance calculators that always route to verified advisers
+
+NETWORK EFFECTS: Trust + workflow creates retention
+• Advisers improve response metrics -> rank higher -> more quality leads
+• Clients reuse the workspace for follow-ups -> reviews -> better matching
+
+────────────────────────────────────────────────────────────────────────────────────────
+30-DAY $1M REVENUE SPRINT (Aggressive, founder-led)
+────────────────────────────────────────────────────────────────────────────────────────
+
+Goal: $1,000,000 in booked revenue commitments in 30 days (cash or contracts).
+This is a stretch target and assumes strong founder-led sales + warm intros.
+
+Revenue Path (pick 1-2 and go deep):
+• Enterprise pre-sales: 8-12 advisory networks at $80k-$150k annual,
+  paid quarterly or upfront for "verified network + lead workflow"
+• Premium cohort: 200 advisors at $300-$500/month, prepaid for 6-12 months
+• Sponsored categories: banks/lenders underwrite "mortgage + property advice"
+  experiences (category sponsorship + lead fees)
+
+Operating Rhythm (weekly):
+• Week 1: Build target list, narrative deck, outcomes-based pricing, 20 pitches
+• Week 2: Close pilots (letters of intent), onboard first 30-50 advisers
+• Week 3: Publish trust-led landing pages + fit quiz + booking workflow
+• Week 4: Conversion push + case studies + expand enterprise contracts
+
+────────────────────────────────────────────────────────────────────────────────────────
+BENCHMARK COMPETITORS (What to Copy)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────┬─────────────────────────────────────────────────────────┐
+│ ADVISER RATINGS     │ AU regulatory context, FAR sourcing, consumer trust     │
+│ (AU)                │ signals, review integrity with dispute + right-of-reply │
+│ adviserratings.     │ → COPY: FAR integration, review dispute workflow        │
+│ com.au              │                                                         │
+├─────────────────────┼─────────────────────────────────────────────────────────┤
+│ SMARTASSET AMP      │ End-to-end lead gen → outreach tooling → CRM           │
+│ (US)                │ integration. Built-in calling/texting/email nurture    │
+│ getamp.smartasset.  │ → COPY: Response templates, follow-up automation        │
+│ com                 │                                                         │
+├─────────────────────┼─────────────────────────────────────────────────────────┤
+│ UNBIASED            │ Match quiz + adviser-paid lead marketplace. Advisers    │
+│ (UK)                │ can accept/decline based on enquiry value               │
+│ unbiased.co.uk      │ → COPY: Accept/decline flow, SLA tracking               │
+├─────────────────────┼─────────────────────────────────────────────────────────┤
+│ VOUCHEDFOR          │ Reviews as data moat + firm portal analytics. Two-tier: │
+│ (UK)                │ Verified (reputation tools) + Elevation (benchmarking)  │
+│ vouchedfor.co.uk    │ → COPY: Advisor analytics, performance benchmarking     │
+└─────────────────────┴─────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+MONETIZATION MODEL
+────────────────────────────────────────────────────────────────────────────────────────
+
+START WITH: Subscription + capped enquiries (VouchedFor style)
+• Free/basic listing for all FAR-registered advisors
+• Paid "Verified/Pro" subscription: enquiry caps, reputation tools, analytics
+• Fits existing dashboards/billing UI
+
+ADD LATER: Pay-per-accepted lead (Unbiased style)
+• For "overflow" demand and pricing power
+• Advisers set criteria, can accept/decline, charged by enquiry value tier
+
+────────────────────────────────────────────────────────────────────────────────────────
+KEY ASSUMPTIONS TO VALIDATE
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌──────────────────────────────────────┬──────────────────────────────────────┐
+│ Assumption                           │ If False, Then...                    │
+├──────────────────────────────────────┼──────────────────────────────────────┤
+│ Primary buyer is advisers            │ Shift to pay-per-lead or             │
+│ (subscription acceptable)            │ sponsorship bundles                  │
+├──────────────────────────────────────┼──────────────────────────────────────┤
+│ Consumers want booking/messaging     │ Optimize for booking + warm handoff  │
+│ in-platform (not just directory)     │ + off-platform comms                 │
+├──────────────────────────────────────┼──────────────────────────────────────┤
+│ AU compliance positioning is a       │ Reduce copilot guardrails, focus on  │
+│ differentiator                       │ speed over audit trail               │
+├──────────────────────────────────────┼──────────────────────────────────────┤
+│ FAR automation is feasible           │ Start with periodic imports +        │
+│                                      │ last-checked stamps                  │
+└──────────────────────────────────────┴──────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+CURRENT STATE (What Exists Today)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PLATFORM ARCHITECTURE                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Stack: Next.js 16 + TypeScript + Shadcn UI + Tailwind 4                     │
+│ Database: PostgreSQL schema ready (not deployed)                            │
+│ Auth: Demo mode (bypasses real auth for UI testing)                         │
+│ Files: 47 pages, 68 UI components, 15 composite components                  │
+│ Location: /site/src/                                                        │
+│ Design System: LOCKED - Gray (#0A0A0A), DM Sans, 6px radius                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PAGE INVENTORY: PUBLIC (11) | AUTH (5) | CONSUMER (6) | ADVISOR (16) | ADMIN (9)
+
+COPILOT UI (Complete, backend pending):
+• Prompts: meeting-summary, action-items, followup-draft, client-brief-update
+• Guardrails: Outputs are advisor-only drafts, no recommendations, audit trail
+
+KNOWN UI ISSUES (Fix in Phase 4):
+• Stats inconsistent (2,500 vs 10,000 advisors)
+• Demo login exposed, hardcoded "123456" verification code
+• Mobile messages: thread panel hidden
+• Notification bell does nothing
+
+────────────────────────────────────────────────────────────────────────────────────────
+TARGET ARCHITECTURE
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Frontend: Next.js 16 (App Router)                                           │
+│ Backend: Supabase (PostgreSQL + Auth + Realtime + Storage)                  │
+│ AI: Anthropic Claude (Copilot) + OpenAI (embeddings for search)             │
+│ Verification: ASIC FAR API (license verification)                           │
+│ Payments: Stripe (advisor subscriptions)                                    │
+│ Deployment: Vercel + Supabase + Sentry                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TARGET DATABASE (19 tables):
+users, advisors, advisor_verifications, categories, leads, lead_sla_events,
+conversations, messages, bookings, reviews, review_disputes, claims,
+response_templates, advisor_analytics, copilot_runs, copilot_outputs,
+advisor_notes, tasks, documents
+
+────────────────────────────────────────────────────────────────────────────────────────
+COMPETITIVE FEATURE BACKLOG (After Backend Complete)
+────────────────────────────────────────────────────────────────────────────────────────
+
+TRUST LAUNCH (Phase 1 features):
+• ASIC/FAR verification system with status badges
+• Review integrity with dispute + right-of-reply
+• "Verified" vs "Promoted" badge distinction
+
+CONVERSION ENGINE (Phase 2 features):
+• Lead accept/decline + SLA tracking
+• Response templates with variables
+• Add-to-calendar for bookings
+
+WORKFLOW MOAT (Phase 3 features):
+• Advisor analytics dashboard
+• Copilot backend with audit trail
+• Compliance export for ASIC
+
+════════════════════════════════════════════════════════════════════════════════════════
+                           IMPLEMENTATION PHILOSOPHY
+════════════════════════════════════════════════════════════════════════════════════════
+
+This plan follows a strict methodology:
+
+1. PHASES: Major milestones with clear deliverables and deployment gates
+2. WAVES: Parallel workstreams within phases (can run simultaneously)
+3. TASKS: Individual work items with dependencies and acceptance criteria
+4. AGENTS: Multi-agent orchestration pattern for parallel execution
+
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                           MULTI-AGENT ORCHESTRATION RULES                              │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│  CONFLICT ZONES (Never Parallel):                                                       │
+│  • Same file edits (wait for completion)                                               │
+│  • Database migrations (sequential only)                                               │
+│  • Git operations (single agent)                                                       │
+│  • Package.json changes (coordinate)                                                   │
+│  • Environment variable changes                                                        │
+│                                                                                         │
+│  SAFE TO PARALLELIZE:                                                                   │
+│  • Reading/exploring different code areas                                              │
+│  • Editing files in different directories                                              │
+│  • Creating new files (different paths)                                                │
+│  • Running independent tests                                                           │
+│  • API endpoints + UI components (different files)                                     │
+│  • Documentation tasks                                                                 │
+│                                                                                         │
+│  ORCHESTRATOR PATTERN:                                                                  │
+│  1. Orchestrator reads phase/wave requirements                                         │
+│  2. Identifies parallel vs sequential tasks                                            │
+│  3. Spawns worker agents for parallel work                                             │
+│  4. Coordinates merge points                                                           │
+│  5. Validates completion before next wave                                              │
+│                                                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+                           PHASE OVERVIEW
+════════════════════════════════════════════════════════════════════════════════════════
+
+┌────────┬─────────────────────────────────┬───────────┬───────────────────────────────┐
+│ Phase  │           Name                  │  Waves    │         Deliverable           │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   0    │ Foundation Setup                │    2      │ Dev environment ready         │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   1    │ Authentication Core             │    3      │ Secure login working          │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   2    │ Database & Data Layer           │    3      │ Schema deployed, types gen'd  │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   3    │ Core API Endpoints              │    4      │ MVP API complete              │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   4    │ UI Integration                  │    3      │ Mock data replaced            │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   5    │ Advanced Features               │    3      │ Full feature parity           │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   6    │ Security & Compliance           │    2      │ AU compliance ready           │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   7    │ Testing & QA                    │    2      │ Production-ready quality      │
+├────────┼─────────────────────────────────┼───────────┼───────────────────────────────┤
+│   8    │ Deployment & Launch             │    2      │ Live in production            │
+└────────┴─────────────────────────────────┴───────────┴───────────────────────────────┘
+
+Total: 9 Phases, 24 Waves
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                    ██████╗ ██╗  ██╗ █████╗ ███████╗███████╗     ██████╗
+                    ██╔══██╗██║  ██║██╔══██╗██╔════╝██╔════╝    ██╔═══██╗
+                    ██████╔╝███████║███████║███████╗█████╗      ██║   ██║
+                    ██╔═══╝ ██╔══██║██╔══██║╚════██║██╔══╝      ██║   ██║
+                    ██║     ██║  ██║██║  ██║███████║███████╗    ╚██████╔╝
+                    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝     ╚═════╝
+
+                         FOUNDATION SETUP (2 Waves)
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+OBJECTIVE: Establish development environment and infrastructure foundation.
+GATE: Can run `npm run dev` with Supabase connection working.
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 0.1: ENVIRONMENT SETUP (Sequential - Foundation)
+────────────────────────────────────────────────────────────────────────────────────────
+
+These tasks MUST run sequentially - each depends on the previous.
+
+┌─────────┬─────────────────────────────────────────────────────────────────────────────┐
+│  Task   │                              Description                                    │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 0.1.1   │ CREATE SUPABASE PROJECT                                                     │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ Action:                                                               │  │
+│         │ │  1. Go to supabase.com → New Project                                  │  │
+│         │ │  2. Name: "advyser-production" or "advyser-staging"                   │  │
+│         │ │  3. Region: ap-southeast-2 (Sydney)                                   │  │
+│         │ │  4. Generate strong database password (save securely)                 │  │
+│         │ │  5. Wait for project provisioning (~2 minutes)                        │  │
+│         │ │                                                                       │  │
+│         │ │ Output:                                                               │  │
+│         │ │  • Project URL                                                        │  │
+│         │ │  • Anon Key (public)                                                  │  │
+│         │ │  • Service Role Key (KEEP SECRET)                                     │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 0.1.2   │ CREATE .env.local FILE                                                      │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/.env.local (NEVER commit to git)                          │  │
+│         │ │                                                                       │  │
+│         │ │ # Public (exposed to browser)                                        │  │
+│         │ │ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co                     │  │
+│         │ │ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...                │  │
+│         │ │ NEXT_PUBLIC_APP_URL=http://localhost:3000                            │  │
+│         │ │ NEXT_PUBLIC_DEMO_MODE=true  # Set false in production                │  │
+│         │ │                                                                       │  │
+│         │ │ # Server-only (never expose)                                         │  │
+│         │ │ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIs...                    │  │
+│         │ │                                                                       │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+│         │                                                                             │
+│         │ Acceptance: Environment variables load in Next.js                           │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 0.1.3   │ CREATE .env.example FILE                                                    │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/.env.example (commit this)                                │  │
+│         │ │                                                                       │  │
+│         │ │ # Copy this file to .env.local and fill in values                    │  │
+│         │ │                                                                       │  │
+│         │ │ # Supabase (https://supabase.com/dashboard)                          │  │
+│         │ │ NEXT_PUBLIC_SUPABASE_URL=                                            │  │
+│         │ │ NEXT_PUBLIC_SUPABASE_ANON_KEY=                                       │  │
+│         │ │ SUPABASE_SERVICE_ROLE_KEY=                                           │  │
+│         │ │                                                                       │  │
+│         │ │ # App Config                                                         │  │
+│         │ │ NEXT_PUBLIC_APP_URL=http://localhost:3000                            │  │
+│         │ │ NEXT_PUBLIC_DEMO_MODE=true                                           │  │
+│         │ │                                                                       │  │
+│         │ │ # Stripe (Phase 5)                                                   │  │
+│         │ │ # STRIPE_SECRET_KEY=                                                 │  │
+│         │ │ # NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=                                │  │
+│         │ │                                                                       │  │
+│         │ │ # Anthropic (Phase 5 - Copilot)                                      │  │
+│         │ │ # ANTHROPIC_API_KEY=                                                 │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 0.1.4   │ INSTALL SUPABASE CLIENT                                                     │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ Command: cd site && npm install @supabase/supabase-js @supabase/ssr  │  │
+│         │ │                                                                       │  │
+│         │ │ Note: @supabase/ssr is for Next.js App Router SSR support            │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 0.1.5   │ UPDATE .gitignore                                                           │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ Add to site/.gitignore:                                              │  │
+│         │ │                                                                       │  │
+│         │ │ # Environment                                                        │  │
+│         │ │ .env.local                                                           │  │
+│         │ │ .env.*.local                                                         │  │
+│         │ │                                                                       │  │
+│         │ │ # Supabase                                                           │  │
+│         │ │ supabase/.branches                                                   │  │
+│         │ │ supabase/.temp                                                       │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+└─────────┴─────────────────────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 0.2: SUPABASE CLIENT SETUP (Parallel - 3 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+These tasks can run in PARALLEL - they create different files.
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output File         │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 0.2.1   │ AGENT A: Browser Client                       │ lib/supabase/client.ts    │
+│ 0.2.2   │ AGENT B: Server Client                        │ lib/supabase/server.ts    │
+│ 0.2.3   │ AGENT C: Admin Client                         │ lib/supabase/admin.ts     │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+AGENT A - Task 0.2.1: BROWSER CLIENT
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/lib/supabase/client.ts                                              │
+│                                                                                     │
+│ import { createBrowserClient } from '@supabase/ssr'                                │
+│ import type { Database } from '@/types/database'                                   │
+│                                                                                     │
+│ export function createClient() {                                                   │
+│   return createBrowserClient<Database>(                                            │
+│     process.env.NEXT_PUBLIC_SUPABASE_URL!,                                         │
+│     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!                                     │
+│   )                                                                                │
+│ }                                                                                  │
+│                                                                                     │
+│ // Usage: const supabase = createClient()                                          │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+AGENT B - Task 0.2.2: SERVER CLIENT
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/lib/supabase/server.ts                                              │
+│                                                                                     │
+│ import { createServerClient, type CookieOptions } from '@supabase/ssr'             │
+│ import { cookies } from 'next/headers'                                             │
+│ import type { Database } from '@/types/database'                                   │
+│                                                                                     │
+│ export async function createClient() {                                             │
+│   const cookieStore = await cookies()                                              │
+│                                                                                     │
+│   return createServerClient<Database>(                                             │
+│     process.env.NEXT_PUBLIC_SUPABASE_URL!,                                         │
+│     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,                                    │
+│     {                                                                              │
+│       cookies: {                                                                   │
+│         getAll() {                                                                 │
+│           return cookieStore.getAll()                                              │
+│         },                                                                         │
+│         setAll(cookiesToSet) {                                                     │
+│           try {                                                                    │
+│             cookiesToSet.forEach(({ name, value, options }) =>                     │
+│               cookieStore.set(name, value, options)                                │
+│             )                                                                      │
+│           } catch {                                                                │
+│             // Called from Server Component - ignore                               │
+│           }                                                                        │
+│         },                                                                         │
+│       },                                                                           │
+│     }                                                                              │
+│   )                                                                                │
+│ }                                                                                  │
+│                                                                                     │
+│ // Usage in Server Components: const supabase = await createClient()               │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+AGENT C - Task 0.2.3: ADMIN CLIENT
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/lib/supabase/admin.ts                                               │
+│                                                                                     │
+│ import { createClient } from '@supabase/supabase-js'                               │
+│ import type { Database } from '@/types/database'                                   │
+│                                                                                     │
+│ // ONLY use server-side - bypasses RLS                                             │
+│ export function createAdminClient() {                                              │
+│   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {                                    │
+│     throw new Error('SUPABASE_SERVICE_ROLE_KEY not set')                           │
+│   }                                                                                │
+│                                                                                     │
+│   return createClient<Database>(                                                   │
+│     process.env.NEXT_PUBLIC_SUPABASE_URL!,                                         │
+│     process.env.SUPABASE_SERVICE_ROLE_KEY,                                         │
+│     {                                                                              │
+│       auth: {                                                                      │
+│         autoRefreshToken: false,                                                   │
+│         persistSession: false,                                                     │
+│       },                                                                           │
+│     }                                                                              │
+│   )                                                                                │
+│ }                                                                                  │
+│                                                                                     │
+│ // Usage: Background jobs, admin operations, RLS bypass                            │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICATION GATE (Phase 0):
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Run: cd site && npm run dev                                                        │
+│ Check: No errors related to Supabase connection                                    │
+│ Check: Environment variables load correctly                                        │
+│                                                                                     │
+│ If errors, verify:                                                                 │
+│ • .env.local exists and has correct values                                         │
+│ • Supabase project is provisioned and running                                      │
+│ • Package.json has @supabase/supabase-js and @supabase/ssr                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                    ██████╗ ██╗  ██╗ █████╗ ███████╗███████╗     ██╗
+                    ██╔══██╗██║  ██║██╔══██╗██╔════╝██╔════╝    ███║
+                    ██████╔╝███████║███████║███████╗█████╗      ╚██║
+                    ██╔═══╝ ██╔══██║██╔══██║╚════██║██╔══╝       ██║
+                    ██║     ██║  ██║██║  ██║███████║███████╗     ██║
+                    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝     ╚═╝
+
+                       AUTHENTICATION CORE (3 Waves)
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+OBJECTIVE: Replace demo auth with production Supabase Auth.
+GATE: Can signup, login, logout, and protected routes work.
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 1.1: AUTH CONTEXT REPLACEMENT (Sequential - Core)
+────────────────────────────────────────────────────────────────────────────────────────
+
+CRITICAL: This wave modifies core files. Run SINGLE AGENT only.
+
+┌─────────┬─────────────────────────────────────────────────────────────────────────────┐
+│  Task   │                              Description                                    │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.1.1   │ CREATE NEW AUTH CONTEXT                                                     │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/src/lib/auth/auth-context.tsx                             │  │
+│         │ │                                                                       │  │
+│         │ │ Features:                                                            │  │
+│         │ │ • useAuth hook with user, session, isLoading                         │  │
+│         │ │ • signIn(email, password)                                            │  │
+│         │ │ • signUp(email, password, metadata)                                  │  │
+│         │ │ • signOut()                                                          │  │
+│         │ │ • resetPassword(email)                                               │  │
+│         │ │ • Role-based helpers (isAdvisor, isAdmin, isConsumer)                │  │
+│         │ │                                                                       │  │
+│         │ │ Pattern: Use Supabase onAuthStateChange listener                     │  │
+│         │ │ Store role in: auth.users.raw_user_meta_data.role                    │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+│         │                                                                             │
+│         │ Dependencies: Wave 0.2 complete (Supabase clients exist)                    │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.1.2   │ CREATE AUTH UTILITIES                                                       │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/src/lib/auth/utils.ts                                     │  │
+│         │ │                                                                       │  │
+│         │ │ Functions:                                                           │  │
+│         │ │ • getUserRole(user): 'consumer' | 'advisor' | 'admin'               │  │
+│         │ │ • getDefaultRouteForRole(role): string                               │  │
+│         │ │ • validateRedirectUrl(url): boolean                                  │  │
+│         │ │ • isProtectedRoute(pathname): boolean                                │  │
+│         │ │ • getRequiredRoleForRoute(pathname): Role | null                     │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.1.3   │ UPDATE LAYOUT.TSX                                                           │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/src/app/layout.tsx                                        │  │
+│         │ │                                                                       │  │
+│         │ │ Changes:                                                             │  │
+│         │ │ • Replace old AuthProvider import with new one                       │  │
+│         │ │ • Ensure ShortlistProvider is still wrapped                          │  │
+│         │ │                                                                       │  │
+│         │ │ From: import { AuthProvider } from "@/lib/auth-context"              │  │
+│         │ │ To:   import { AuthProvider } from "@/lib/auth/auth-context"         │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.1.4   │ DEPRECATE OLD AUTH FILES                                                    │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ Actions:                                                             │  │
+│         │ │ • Rename site/src/lib/auth-context.tsx → auth-context.old.tsx        │  │
+│         │ │ • Rename site/src/lib/demo-auth.ts → demo-auth.old.ts                │  │
+│         │ │                                                                       │  │
+│         │ │ Note: Don't delete yet - may need for reference during migration     │  │
+│         │ │ Delete after Phase 1 verification complete                           │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+└─────────┴─────────────────────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 1.2: AUTH PAGES UPDATE (Parallel - 4 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+These tasks can run in PARALLEL - they modify different page files.
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output File         │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 1.2.1   │ AGENT A: Login Page                           │ app/login/page.tsx        │
+│ 1.2.2   │ AGENT B: Signup Page                          │ app/signup/page.tsx       │
+│ 1.2.3   │ AGENT C: Verify & Reset Pages                 │ app/verify/, app/reset-*  │
+│ 1.2.4   │ AGENT D: useRequireAuth Hook                  │ lib/auth/hooks.ts         │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+Task 1.2.1 - AGENT A: LOGIN PAGE
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/app/login/page.tsx                                                  │
+│                                                                                     │
+│ Changes:                                                                           │
+│ • Replace demo login logic with supabase.auth.signInWithPassword                  │
+│ • Remove hardcoded demo credentials                                                │
+│ • Add proper error handling (invalid credentials, rate limit, etc.)               │
+│ • Keep UI structure, only change auth logic                                        │
+│ • Conditionally show "Demo Login" if NEXT_PUBLIC_DEMO_MODE=true                   │
+│                                                                                     │
+│ Error messages to handle:                                                          │
+│ • Invalid login credentials                                                        │
+│ • Email not confirmed                                                              │
+│ • Too many requests                                                                │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+Task 1.2.2 - AGENT B: SIGNUP PAGE
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/app/signup/page.tsx                                                 │
+│                                                                                     │
+│ Changes:                                                                           │
+│ • Replace demo signup with supabase.auth.signUp                                   │
+│ • Add role selection (consumer/advisor) stored in user_metadata                   │
+│ • Redirect to verification pending page after signup                              │
+│ • Validate password strength client-side                                          │
+│ • Keep UI structure                                                                │
+│                                                                                     │
+│ Signup call:                                                                       │
+│ await supabase.auth.signUp({                                                      │
+│   email,                                                                           │
+│   password,                                                                        │
+│   options: {                                                                       │
+│     data: { role: 'consumer', full_name: name },                                  │
+│     emailRedirectTo: `${appUrl}/auth/callback`                                    │
+│   }                                                                                │
+│ })                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+Task 1.2.3 - AGENT C: VERIFY & RESET PAGES
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Files:                                                                             │
+│ • site/src/app/verify/page.tsx                                                     │
+│ • site/src/app/forgot-password/page.tsx                                            │
+│ • site/src/app/reset-password/page.tsx                                             │
+│                                                                                     │
+│ Verify page:                                                                       │
+│ • Remove hardcoded "123456" OTP                                                    │
+│ • Show "Check your email" message                                                  │
+│ • Add "Resend verification" button                                                 │
+│ • Handle email verification callback                                               │
+│                                                                                     │
+│ Forgot password:                                                                   │
+│ • Call supabase.auth.resetPasswordForEmail(email)                                 │
+│ • Show success message                                                             │
+│                                                                                     │
+│ Reset password:                                                                    │
+│ • Handle reset token from URL                                                      │
+│ • Call supabase.auth.updateUser({ password })                                     │
+│ • Redirect to login on success                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+Task 1.2.4 - AGENT D: AUTH HOOKS
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/lib/auth/hooks.ts                                                   │
+│                                                                                     │
+│ export function useRequireAuth(options?: {                                         │
+│   allowedRoles?: ('consumer' | 'advisor' | 'admin')[]                              │
+│   redirectTo?: string                                                              │
+│ }) {                                                                               │
+│   const { user, isLoading, role } = useAuth()                                      │
+│   const router = useRouter()                                                       │
+│                                                                                     │
+│   useEffect(() => {                                                                │
+│     if (isLoading) return                                                          │
+│                                                                                     │
+│     if (!user) {                                                                   │
+│       router.push(options?.redirectTo ?? '/login')                                │
+│       return                                                                       │
+│     }                                                                              │
+│                                                                                     │
+│     if (options?.allowedRoles && !options.allowedRoles.includes(role)) {          │
+│       router.push('/unauthorized')                                                 │
+│     }                                                                              │
+│   }, [user, isLoading, role, router, options])                                     │
+│                                                                                     │
+│   return { user, isLoading, role }                                                 │
+│ }                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 1.3: MIDDLEWARE & CALLBACK (Sequential - Critical)
+────────────────────────────────────────────────────────────────────────────────────────
+
+CRITICAL: These files control routing. Run SINGLE AGENT only.
+
+┌─────────┬─────────────────────────────────────────────────────────────────────────────┐
+│  Task   │                              Description                                    │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.3.1   │ CREATE AUTH MIDDLEWARE                                                      │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/src/middleware.ts (root of src/, not app/)                │  │
+│         │ │                                                                       │  │
+│         │ │ import { createServerClient } from '@supabase/ssr'                   │  │
+│         │ │ import { NextResponse, type NextRequest } from 'next/server'         │  │
+│         │ │                                                                       │  │
+│         │ │ const protectedRoutes = {                                            │  │
+│         │ │   '/dashboard': ['consumer', 'advisor', 'admin'],                    │  │
+│         │ │   '/advisor': ['advisor', 'admin'],                                  │  │
+│         │ │   '/admin': ['admin'],                                               │  │
+│         │ │ }                                                                    │  │
+│         │ │                                                                       │  │
+│         │ │ export async function middleware(request: NextRequest) {             │  │
+│         │ │   // Create response to modify                                       │  │
+│         │ │   let response = NextResponse.next({ request })                      │  │
+│         │ │                                                                       │  │
+│         │ │   // Create Supabase client with cookie handling                     │  │
+│         │ │   const supabase = createServerClient(...)                           │  │
+│         │ │                                                                       │  │
+│         │ │   // Refresh session if expired                                      │  │
+│         │ │   const { data: { user } } = await supabase.auth.getUser()          │  │
+│         │ │                                                                       │  │
+│         │ │   // Check if route is protected                                     │  │
+│         │ │   const pathname = request.nextUrl.pathname                          │  │
+│         │ │   // ... implement protection logic                                  │  │
+│         │ │                                                                       │  │
+│         │ │   return response                                                    │  │
+│         │ │ }                                                                    │  │
+│         │ │                                                                       │  │
+│         │ │ export const config = {                                              │  │
+│         │ │   matcher: ['/dashboard/:path*', '/advisor/:path*', '/admin/:path*'] │  │
+│         │ │ }                                                                    │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.3.2   │ CREATE AUTH CALLBACK ROUTE                                                  │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ File: site/src/app/auth/callback/route.ts                            │  │
+│         │ │                                                                       │  │
+│         │ │ import { createClient } from '@/lib/supabase/server'                 │  │
+│         │ │ import { NextResponse } from 'next/server'                           │  │
+│         │ │                                                                       │  │
+│         │ │ export async function GET(request: Request) {                        │  │
+│         │ │   const { searchParams } = new URL(request.url)                      │  │
+│         │ │   const code = searchParams.get('code')                              │  │
+│         │ │   const next = searchParams.get('next') ?? '/dashboard'              │  │
+│         │ │                                                                       │  │
+│         │ │   if (code) {                                                        │  │
+│         │ │     const supabase = await createClient()                            │  │
+│         │ │     const { error } = await supabase.auth.exchangeCodeForSession(    │  │
+│         │ │       code                                                           │  │
+│         │ │     )                                                                │  │
+│         │ │     if (!error) {                                                    │  │
+│         │ │       return NextResponse.redirect(new URL(next, request.url))       │  │
+│         │ │     }                                                                │  │
+│         │ │   }                                                                  │  │
+│         │ │                                                                       │  │
+│         │ │   return NextResponse.redirect(new URL('/login?error=auth',          │  │
+│         │ │     request.url))                                                    │  │
+│         │ │ }                                                                    │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 1.3.3   │ CONFIGURE SUPABASE AUTH SETTINGS                                            │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ In Supabase Dashboard → Authentication → URL Configuration:          │  │
+│         │ │                                                                       │  │
+│         │ │ Site URL: https://your-domain.com (or http://localhost:3000 for dev) │  │
+│         │ │ Redirect URLs:                                                       │  │
+│         │ │   - http://localhost:3000/auth/callback                              │  │
+│         │ │   - https://your-domain.com/auth/callback                            │  │
+│         │ │                                                                       │  │
+│         │ │ Email Templates:                                                     │  │
+│         │ │   - Customize confirmation email                                     │  │
+│         │ │   - Customize password reset email                                   │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+└─────────┴─────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICATION GATE (Phase 1):
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Manual Tests:                                                                      │
+│ [ ] Can create new account via signup                                              │
+│ [ ] Receives verification email                                                    │
+│ [ ] Can login after email verification                                             │
+│ [ ] Session persists on page refresh                                               │
+│ [ ] Can logout and session is cleared                                              │
+│ [ ] Protected routes redirect to login when not authenticated                      │
+│ [ ] Role-based routes enforce correct role                                         │
+│ [ ] Password reset flow works                                                      │
+│                                                                                     │
+│ If all pass: Delete .old.tsx files from Wave 1.1                                   │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                    ██████╗ ██╗  ██╗ █████╗ ███████╗███████╗    ██████╗
+                    ██╔══██╗██║  ██║██╔══██╗██╔════╝██╔════╝    ╚════██╗
+                    ██████╔╝███████║███████║███████╗█████╗       █████╔╝
+                    ██╔═══╝ ██╔══██║██╔══██║╚════██║██╔══╝      ██╔═══╝
+                    ██║     ██║  ██║██║  ██║███████║███████╗    ███████╗
+                    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚══════╝
+
+                      DATABASE & DATA LAYER (3 Waves)
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+OBJECTIVE: Deploy database schema and create typed data access layer.
+GATE: All tables exist, RLS enabled, TypeScript types generated.
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 2.1: CORE SCHEMA MIGRATIONS (Sequential - Database)
+────────────────────────────────────────────────────────────────────────────────────────
+
+CRITICAL: Migrations must run in order. Run SINGLE AGENT only.
+Execute via Supabase SQL Editor or Supabase CLI.
+
+Migration order:
+1. 001_users.sql
+2. 002_advisors.sql
+3. 003_categories.sql
+4. 004_leads.sql
+5. 005_conversations_messages.sql
+6. 006_bookings.sql
+7. 007_reviews.sql
+
+┌─────────┬─────────────────────────────────────────────────────────────────────────────┐
+│  Task   │                              Migration                                      │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 2.1.1   │ 001_USERS.SQL                                                               │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ -- Extends Supabase auth.users                                       │  │
+│         │ │ CREATE TABLE public.profiles (                                       │  │
+│         │ │   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,   │  │
+│         │ │   full_name TEXT,                                                    │  │
+│         │ │   avatar_url TEXT,                                                   │  │
+│         │ │   phone TEXT,                                                        │  │
+│         │ │   created_at TIMESTAMPTZ DEFAULT NOW(),                              │  │
+│         │ │   updated_at TIMESTAMPTZ DEFAULT NOW()                               │  │
+│         │ │ );                                                                   │  │
+│         │ │                                                                       │  │
+│         │ │ -- RLS                                                               │  │
+│         │ │ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;               │  │
+│         │ │                                                                       │  │
+│         │ │ CREATE POLICY "Users can view own profile"                           │  │
+│         │ │   ON public.profiles FOR SELECT                                      │  │
+│         │ │   USING (auth.uid() = id);                                           │  │
+│         │ │                                                                       │  │
+│         │ │ CREATE POLICY "Users can update own profile"                         │  │
+│         │ │   ON public.profiles FOR UPDATE                                      │  │
+│         │ │   USING (auth.uid() = id);                                           │  │
+│         │ │                                                                       │  │
+│         │ │ -- Auto-create profile on signup                                     │  │
+│         │ │ CREATE FUNCTION public.handle_new_user()                             │  │
+│         │ │ RETURNS TRIGGER AS $$                                                │  │
+│         │ │ BEGIN                                                                │  │
+│         │ │   INSERT INTO public.profiles (id, full_name)                        │  │
+│         │ │   VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name');             │  │
+│         │ │   RETURN NEW;                                                        │  │
+│         │ │ END;                                                                 │  │
+│         │ │ $$ LANGUAGE plpgsql SECURITY DEFINER;                                │  │
+│         │ │                                                                       │  │
+│         │ │ CREATE TRIGGER on_auth_user_created                                  │  │
+│         │ │   AFTER INSERT ON auth.users                                         │  │
+│         │ │   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();            │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 2.1.2   │ 002_ADVISORS.SQL                                                            │
+│         │ ┌───────────────────────────────────────────────────────────────────────┐  │
+│         │ │ CREATE TYPE verification_status AS ENUM (                            │  │
+│         │ │   'pending', 'verified', 'rejected', 'revoked'                       │  │
+│         │ │ );                                                                   │  │
+│         │ │                                                                       │  │
+│         │ │ CREATE TABLE public.advisors (                                       │  │
+│         │ │   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),                     │  │
+│         │ │   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,         │  │
+│         │ │   slug TEXT UNIQUE NOT NULL,                                         │  │
+│         │ │   business_name TEXT NOT NULL,                                       │  │
+│         │ │   first_name TEXT,                                                   │  │
+│         │ │   last_name TEXT,                                                    │  │
+│         │ │   bio TEXT,                                                          │  │
+│         │ │   avatar_url TEXT,                                                   │  │
+│         │ │   email TEXT,                                                        │  │
+│         │ │   phone TEXT,                                                        │  │
+│         │ │   website TEXT,                                                      │  │
+│         │ │   location_city TEXT,                                                │  │
+│         │ │   location_state TEXT,                                               │  │
+│         │ │   location_postcode TEXT,                                            │  │
+│         │ │   afsl_number TEXT,                                                  │  │
+│         │ │   far_number TEXT,                                                   │  │
+│         │ │   abn TEXT,                                                          │  │
+│         │ │   specialties TEXT[],                                                │  │
+│         │ │   years_experience INTEGER,                                          │  │
+│         │ │   minimum_investment INTEGER,                                        │  │
+│         │ │   fee_structure JSONB,                                               │  │
+│         │ │   verification_status verification_status DEFAULT 'pending',         │  │
+│         │ │   verified_at TIMESTAMPTZ,                                           │  │
+│         │ │   rating_average DECIMAL(2,1) DEFAULT 0,                             │  │
+│         │ │   review_count INTEGER DEFAULT 0,                                    │  │
+│         │ │   is_featured BOOLEAN DEFAULT FALSE,                                 │  │
+│         │ │   is_active BOOLEAN DEFAULT TRUE,                                    │  │
+│         │ │   created_at TIMESTAMPTZ DEFAULT NOW(),                              │  │
+│         │ │   updated_at TIMESTAMPTZ DEFAULT NOW()                               │  │
+│         │ │ );                                                                   │  │
+│         │ │                                                                       │  │
+│         │ │ -- Indexes                                                           │  │
+│         │ │ CREATE INDEX idx_advisors_slug ON public.advisors(slug);             │  │
+│         │ │ CREATE INDEX idx_advisors_verification                               │  │
+│         │ │   ON public.advisors(verification_status, is_active);                │  │
+│         │ │ CREATE INDEX idx_advisors_location                                   │  │
+│         │ │   ON public.advisors(location_state, location_city);                 │  │
+│         │ │                                                                       │  │
+│         │ │ -- RLS (public read, owner write)                                    │  │
+│         │ │ ALTER TABLE public.advisors ENABLE ROW LEVEL SECURITY;               │  │
+│         │ │                                                                       │  │
+│         │ │ CREATE POLICY "Advisors are publicly viewable"                       │  │
+│         │ │   ON public.advisors FOR SELECT                                      │  │
+│         │ │   USING (is_active = true);                                          │  │
+│         │ │                                                                       │  │
+│         │ │ CREATE POLICY "Advisors can update own profile"                      │  │
+│         │ │   ON public.advisors FOR UPDATE                                      │  │
+│         │ │   USING (auth.uid() = user_id);                                      │  │
+│         │ └───────────────────────────────────────────────────────────────────────┘  │
+├─────────┼─────────────────────────────────────────────────────────────────────────────┤
+│ 2.1.3-7 │ REMAINING MIGRATIONS                                                        │
+│         │ Similar pattern for: categories, leads, conversations, messages,           │
+│         │ bookings, reviews                                                           │
+│         │                                                                             │
+│         │ Key tables (see docs/technical/database-schema for full SQL):              │
+│         │ • categories (id, name, slug, parent_id, icon, description)                │
+│         │ • leads (id, consumer_id, advisor_id, status, message, ...)                │
+│         │ • conversations (id, lead_id, advisor_id, consumer_id, ...)                │
+│         │ • messages (id, conversation_id, sender_id, content, ...)                  │
+│         │ • bookings (id, advisor_id, consumer_id, datetime, type, ...)              │
+│         │ • reviews (id, advisor_id, reviewer_id, rating, content, ...)              │
+└─────────┴─────────────────────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 2.2: EXTENDED SCHEMA + TYPES (Parallel - 2 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output              │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 2.2.1   │ AGENT A: Extended Schema Migrations           │ Supabase DB               │
+│ 2.2.2   │ AGENT B: Generate TypeScript Types            │ types/database.ts         │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+Task 2.2.1 - AGENT A: EXTENDED SCHEMA
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Additional tables for competitive features:                                        │
+│                                                                                     │
+│ • advisor_verifications (FAR check history)                                        │
+│ • lead_sla_events (SLA tracking: created, viewed, responded)                       │
+│ • review_disputes (dispute + right-of-reply)                                       │
+│ • claims (profile claim requests)                                                  │
+│ • response_templates (canned responses)                                            │
+│ • advisor_notes (private client notes)                                             │
+│ • tasks (client action items)                                                      │
+│ • documents (file metadata)                                                        │
+│ • audit_logs (immutable compliance logs)                                           │
+│                                                                                     │
+│ Run after Wave 2.1 core migrations complete.                                       │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+Task 2.2.2 - AGENT B: GENERATE TYPES
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Option 1: Supabase CLI (recommended)                                               │
+│ $ npx supabase gen types typescript --project-id YOUR_PROJECT_ID > \               │
+│   site/src/types/database.ts                                                       │
+│                                                                                     │
+│ Option 2: Supabase Dashboard                                                       │
+│ • Go to Project Settings → API → Generate types                                    │
+│ • Copy output to site/src/types/database.ts                                        │
+│                                                                                     │
+│ After generating, export convenience types:                                        │
+│                                                                                     │
+│ // site/src/types/database.ts (append)                                             │
+│ export type Advisor = Database['public']['Tables']['advisors']['Row']              │
+│ export type Lead = Database['public']['Tables']['leads']['Row']                    │
+│ export type Message = Database['public']['Tables']['messages']['Row']              │
+│ // etc.                                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 2.3: DATA ACCESS LAYER (Parallel - 5 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+These tasks can run in PARALLEL - they create different files.
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output File         │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 2.3.1   │ AGENT A: Advisors DAL                         │ lib/db/advisors.ts        │
+│ 2.3.2   │ AGENT B: Leads DAL                            │ lib/db/leads.ts           │
+│ 2.3.3   │ AGENT C: Messages DAL                         │ lib/db/messages.ts        │
+│ 2.3.4   │ AGENT D: Reviews DAL                          │ lib/db/reviews.ts         │
+│ 2.3.5   │ AGENT E: Bookings DAL                         │ lib/db/bookings.ts        │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+Example DAL Pattern (Task 2.3.1 - Advisors):
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/lib/db/advisors.ts                                                  │
+│                                                                                     │
+│ import { createClient } from '@/lib/supabase/server'                               │
+│ import type { Advisor } from '@/types/database'                                    │
+│                                                                                     │
+│ export type AdvisorSearchParams = {                                                │
+│   query?: string                                                                   │
+│   category?: string                                                                │
+│   location?: string                                                                │
+│   minRating?: number                                                               │
+│   verifiedOnly?: boolean                                                           │
+│   page?: number                                                                    │
+│   limit?: number                                                                   │
+│ }                                                                                  │
+│                                                                                     │
+│ export async function searchAdvisors(params: AdvisorSearchParams) {                │
+│   const supabase = await createClient()                                            │
+│   const { page = 1, limit = 20 } = params                                          │
+│   const offset = (page - 1) * limit                                                │
+│                                                                                     │
+│   let query = supabase                                                             │
+│     .from('advisors')                                                              │
+│     .select('*', { count: 'exact' })                                               │
+│     .eq('is_active', true)                                                         │
+│     .range(offset, offset + limit - 1)                                             │
+│                                                                                     │
+│   if (params.verifiedOnly) {                                                       │
+│     query = query.eq('verification_status', 'verified')                            │
+│   }                                                                                │
+│   // ... more filters                                                              │
+│                                                                                     │
+│   const { data, error, count } = await query                                       │
+│   if (error) throw error                                                           │
+│                                                                                     │
+│   return {                                                                         │
+│     advisors: data as Advisor[],                                                   │
+│     total: count ?? 0,                                                             │
+│     page,                                                                          │
+│     totalPages: Math.ceil((count ?? 0) / limit)                                    │
+│   }                                                                                │
+│ }                                                                                  │
+│                                                                                     │
+│ export async function getAdvisorBySlug(slug: string) { ... }                       │
+│ export async function updateAdvisorProfile(id: string, data: Partial<Advisor>)     │
+│ // etc.                                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICATION GATE (Phase 2):
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Database Checks:                                                                   │
+│ [ ] All tables created in Supabase                                                 │
+│ [ ] RLS enabled on all tables                                                      │
+│ [ ] Indexes created for common queries                                             │
+│ [ ] TypeScript types generated and compiling                                       │
+│                                                                                     │
+│ DAL Checks:                                                                        │
+│ [ ] searchAdvisors returns data                                                    │
+│ [ ] Can create/read/update records through DAL                                     │
+│ [ ] RLS policies correctly restrict access                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                    ██████╗ ██╗  ██╗ █████╗ ███████╗███████╗    ██████╗
+                    ██╔══██╗██║  ██║██╔══██╗██╔════╝██╔════╝    ╚════██╗
+                    ██████╔╝███████║███████║███████╗█████╗       █████╔╝
+                    ██╔═══╝ ██╔══██║██╔══██║╚════██║██╔══╝       ╚═══██╗
+                    ██║     ██║  ██║██║  ██║███████║███████╗    ██████╔╝
+                    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚═════╝
+
+                         CORE API ENDPOINTS (4 Waves)
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+OBJECTIVE: Implement MVP API endpoints for all core functionality.
+GATE: All pages can fetch real data from API.
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 3.1: PUBLIC ENDPOINTS (Parallel - 3 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output Files        │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 3.1.1   │ AGENT A: Advisor Search API                   │ api/advisors/route.ts     │
+│ 3.1.2   │ AGENT B: Advisor Profile API                  │ api/advisors/[slug]/...   │
+│ 3.1.3   │ AGENT C: Categories API                       │ api/categories/route.ts   │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 3.2: AUTH ENDPOINTS (Parallel - 2 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output Files        │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 3.2.1   │ AGENT A: User Profile API                     │ api/user/me/route.ts      │
+│ 3.2.2   │ AGENT B: Auth Actions API                     │ api/auth/*/route.ts       │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 3.3: LEAD & MESSAGING ENDPOINTS (Parallel - 3 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output Files        │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 3.3.1   │ AGENT A: Leads API                            │ api/leads/, api/advisor/  │
+│ 3.3.2   │ AGENT B: Conversations API                    │ api/conversations/...     │
+│ 3.3.3   │ AGENT C: Bookings API                         │ api/bookings/...          │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+────────────────────────────────────────────────────────────────────────────────────────
+WAVE 3.4: ADMIN ENDPOINTS (Parallel - 2 Agents)
+────────────────────────────────────────────────────────────────────────────────────────
+
+┌─────────┬───────────────────────────────────────────────┬───────────────────────────┐
+│  Task   │              Agent Assignment                 │       Output Files        │
+├─────────┼───────────────────────────────────────────────┼───────────────────────────┤
+│ 3.4.1   │ AGENT A: Admin Claims/Reviews                 │ api/admin/claims/...      │
+│ 3.4.2   │ AGENT B: Admin Analytics                      │ api/admin/analytics/...   │
+└─────────┴───────────────────────────────────────────────┴───────────────────────────┘
+
+API Route Pattern (all routes follow this):
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ File: site/src/app/api/[resource]/route.ts                                         │
+│                                                                                     │
+│ import { NextResponse } from 'next/server'                                         │
+│ import { createClient } from '@/lib/supabase/server'                               │
+│ import { z } from 'zod' // For validation                                          │
+│                                                                                     │
+│ // GET handler                                                                     │
+│ export async function GET(request: Request) {                                      │
+│   try {                                                                            │
+│     const supabase = await createClient()                                          │
+│     const { data: { user } } = await supabase.auth.getUser()                      │
+│                                                                                     │
+│     // Check auth if needed                                                        │
+│     if (!user) {                                                                   │
+│       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })        │
+│     }                                                                              │
+│                                                                                     │
+│     // Fetch data                                                                  │
+│     const { data, error } = await supabase.from('table').select('*')              │
+│                                                                                     │
+│     if (error) throw error                                                         │
+│     return NextResponse.json(data)                                                 │
+│   } catch (error) {                                                                │
+│     console.error('API Error:', error)                                             │
+│     return NextResponse.json({ error: 'Internal error' }, { status: 500 })        │
+│   }                                                                                │
+│ }                                                                                  │
+│                                                                                     │
+│ // POST handler with validation                                                    │
+│ const createSchema = z.object({                                                    │
+│   field1: z.string().min(1),                                                       │
+│   field2: z.number().optional(),                                                   │
+│ })                                                                                 │
+│                                                                                     │
+│ export async function POST(request: Request) {                                     │
+│   try {                                                                            │
+│     const body = await request.json()                                              │
+│     const validated = createSchema.parse(body) // Throws on invalid               │
+│     // ... create record                                                           │
+│   } catch (error) {                                                                │
+│     if (error instanceof z.ZodError) {                                             │
+│       return NextResponse.json({ error: error.errors }, { status: 400 })          │
+│     }                                                                              │
+│     // ... handle other errors                                                     │
+│   }                                                                                │
+│ }                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                 PHASES 4-8: SUMMARY (Detailed in Separate Docs)
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+┌────────┬─────────────────────────────────────────────────────────────────────────────┐
+│ Phase  │                              Summary                                        │
+├────────┼─────────────────────────────────────────────────────────────────────────────┤
+│   4    │ UI INTEGRATION (3 Waves)                                                    │
+│        │ • Replace mock data with API calls                                          │
+│        │ • Implement loading states with Suspense                                    │
+│        │ • Connect forms to real endpoints                                           │
+│        │ • Wire up real-time messaging                                               │
+├────────┼─────────────────────────────────────────────────────────────────────────────┤
+│   5    │ ADVANCED FEATURES (3 Waves)                                                 │
+│        │ • Stripe subscription integration                                           │
+│        │ • Copilot AI backend (Anthropic)                                            │
+│        │ • File upload with Supabase Storage                                         │
+│        │ • Email notifications                                                       │
+├────────┼─────────────────────────────────────────────────────────────────────────────┤
+│   6    │ SECURITY & COMPLIANCE (2 Waves)                                             │
+│        │ • Implement rate limiting                                                   │
+│        │ • Add CSRF protection                                                       │
+│        │ • PII encryption at rest                                                    │
+│        │ • Audit logging for AFSL compliance                                         │
+│        │ • General Advice Warning component                                          │
+├────────┼─────────────────────────────────────────────────────────────────────────────┤
+│   7    │ TESTING & QA (2 Waves)                                                      │
+│        │ • Unit tests with Vitest                                                    │
+│        │ • E2E tests with Playwright                                                 │
+│        │ • Performance audit                                                         │
+│        │ • Security audit                                                            │
+├────────┼─────────────────────────────────────────────────────────────────────────────┤
+│   8    │ DEPLOYMENT & LAUNCH (2 Waves)                                               │
+│        │ • Vercel production setup                                                   │
+│        │ • Domain configuration                                                      │
+│        │ • Monitoring setup (Sentry)                                                 │
+│        │ • Launch checklist verification                                             │
+└────────┴─────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                       ORCHESTRATOR QUICK REFERENCE
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+How to Execute This Plan with Multi-Agent Mode:
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                         ORCHESTRATOR CHECKLIST                                      │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│ BEFORE STARTING EACH PHASE:                                                        │
+│ □ Read phase objective and gate criteria                                           │
+│ □ Verify previous phase gate is passed                                             │
+│ □ Identify sequential vs parallel waves                                            │
+│                                                                                     │
+│ FOR EACH WAVE:                                                                      │
+│ □ If Sequential: Assign single agent, wait for completion                          │
+│ □ If Parallel: Spawn multiple agents with clear file assignments                   │
+│ □ Never assign same file to multiple agents                                        │
+│                                                                                     │
+│ AGENT SPAWN PATTERN:                                                                │
+│ "Execute [Wave X.Y] Task [X.Y.Z]: [Description].                                   │
+│  Output file: [path].                                                              │
+│  Dependencies: [list or 'none'].                                                   │
+│  Acceptance: [criteria]."                                                          │
+│                                                                                     │
+│ AFTER EACH WAVE:                                                                    │
+│ □ Verify all agent tasks completed                                                 │
+│ □ Run type check: npx tsc --noEmit                                                 │
+│ □ Run dev server: npm run dev                                                      │
+│ □ Check for errors                                                                 │
+│                                                                                     │
+│ AFTER EACH PHASE:                                                                   │
+│ □ Run verification gate tests                                                      │
+│ □ Document any deviations                                                          │
+│ □ Update progress tracking                                                         │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                           PROGRESS TRACKING
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+┌────────┬──────────────────────────┬──────────┬─────────────────────────────────────┐
+│ Phase  │          Name            │  Status  │              Notes                  │
+├────────┼──────────────────────────┼──────────┼─────────────────────────────────────┤
+│   0    │ Foundation Setup         │ PENDING  │                                     │
+│   1    │ Authentication Core      │ PENDING  │                                     │
+│   2    │ Database & Data Layer    │ PENDING  │                                     │
+│   3    │ Core API Endpoints       │ PENDING  │                                     │
+│   4    │ UI Integration           │ PENDING  │                                     │
+│   5    │ Advanced Features        │ PENDING  │                                     │
+│   6    │ Security & Compliance    │ PENDING  │                                     │
+│   7    │ Testing & QA             │ PENDING  │                                     │
+│   8    │ Deployment & Launch      │ PENDING  │                                     │
+└────────┴──────────────────────────┴──────────┴─────────────────────────────────────┘
+
+Last Updated: 2026-02-02
+Updated By: [Agent ID]
+
+════════════════════════════════════════════════════════════════════════════════════════
+
+                              END OF PLAN
+
+════════════════════════════════════════════════════════════════════════════════════════

@@ -48,6 +48,17 @@ docs/
 ### Operations (`operations/`)
 - [roadmap-v1](operations/roadmap-v1) — Implementation status and roadmap
 
+### Fresha Translation (`fresha/` + `../plans/phase-*`)
+- [FINAL_REPLICA_SPEC_PACK.md](fresha/FINAL_REPLICA_SPEC_PACK.md) — Source Fresha replica research pack
+- [PHASE_1_REPLICA_SPEC.md](../plans/phase-1/PHASE_1_REPLICA_SPEC.md) — Phase 1 translation spec (entities/roles/funnels)
+- [PHASE_1_MVP_SCOPE_STATEMENT.md](../plans/phase-1/PHASE_1_MVP_SCOPE_STATEMENT.md) — MVPv1 in-scope/out-of-scope freeze
+- [ROUTE_DECISION_MATRIX.md](../plans/phase-1/ROUTE_DECISION_MATRIX.md) — Keep/refactor/rebuild/defer/remove route governance
+- [SELECTIVE_REBUILD_EXECUTION_RUNBOOK.md](../plans/phase-1/SELECTIVE_REBUILD_EXECUTION_RUNBOOK.md) — Phase 4-10 execution checklist and cutover controls
+- [PHASE_1_GATE_EVIDENCE.md](../plans/phase-1/PHASE_1_GATE_EVIDENCE.md) — Phase 1 verification gate evidence and pass decision
+- [PHASE_2_MONETIZATION_DECISION_DOC.md](../plans/phase-2/PHASE_2_MONETIZATION_DECISION_DOC.md) — Phase 2 monetization model lock and computed scenarios
+- [PHASE_2_ATTRIBUTION_SPEC.md](../plans/phase-2/PHASE_2_ATTRIBUTION_SPEC.md) — Phase 2 attribution logic and data capture rules
+- [PHASE_2_GATE_EVIDENCE.md](../plans/phase-2/PHASE_2_GATE_EVIDENCE.md) — Phase 2 verification gate evidence and pass decision
+
 ### Archive (`archive/`)
 - [schema-reconciliation-2026-02](archive/schema-reconciliation-2026-02) — Historical schema reconciliation
 

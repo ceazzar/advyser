@@ -6,6 +6,7 @@ import type { UserRole } from "@/types/user"
 import { createClient } from "@/lib/supabase/client"
 import { logger } from "@/lib/logger"
 import { signIn as signInAction, signOut as signOutAction } from "@/lib/auth-actions"
+export { getPostLoginRedirect } from "@/lib/auth-routing"
 
 interface User {
   id: string
@@ -88,18 +89,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: false, error: result.error || "Login failed" }
     }
 
-    // Refresh the client-side session after server action signs in
+    // Server action set auth cookies — browser client reads them automatically
     const supabase = createClient()
+
+    // Validate session with Supabase server (reads token from cookies)
     const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (authUser) {
-      const { data } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", authUser.id)
-        .single()
-      if (data) setUser(mapDbUserToAppUser(data))
+    if (!authUser) {
+      return { success: false, error: "Session could not be established. Please try again." }
     }
 
+    // Fetch user profile from public.users
+    const { data: profile, error: profileError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", authUser.id)
+      .single()
+
+    if (profileError || !profile) {
+      console.error("Profile fetch failed:", profileError?.message)
+      return { success: false, error: "Failed to load user profile. Please try again." }
+    }
+
+    setUser(mapDbUserToAppUser(profile))
     return { success: true }
   }
 
@@ -164,52 +175,4 @@ export function useRequireAuth(allowedRoles?: UserRole[]) {
   }, [user, isLoading, router, pathname, allowedRoles])
 
   return { user, isLoading, isAuthorized: user && (!allowedRoles || allowedRoles.includes(user.role)) }
-}
-
-// Get the appropriate redirect path after login based on user role
-export function getPostLoginRedirect(role: UserRole, requestedRedirect?: string): string {
-  // Default redirects by role
-  const defaultRoutes: Record<UserRole, string> = {
-    consumer: "/dashboard",
-    advisor: "/advisor",
-    admin: "/admin",
-  }
-
-  // Validate and use requested redirect if safe
-  if (requestedRedirect) {
-    try {
-      // Decode URL to catch encoded bypasses like %2F%2F
-      const decodedRedirect = decodeURIComponent(requestedRedirect)
-
-      // Security: Only allow relative paths starting with single slash
-      // Reject absolute URLs, protocol-relative URLs, and path traversal
-      const isSafeRelativePath =
-        decodedRedirect.startsWith("/") &&
-        !decodedRedirect.startsWith("//") &&
-        !decodedRedirect.includes("..") &&
-        !decodedRedirect.includes("\\") &&
-        !decodedRedirect.includes("\n") &&
-        !decodedRedirect.includes("\r")
-
-      if (!isSafeRelativePath) {
-        return defaultRoutes[role]
-      }
-
-      // Check if redirect is valid for this role
-      const rolePathPrefixes: Record<UserRole, string[]> = {
-        consumer: ["/dashboard"],
-        advisor: ["/advisor"],
-        admin: ["/admin", "/dashboard", "/advisor"],
-      }
-      const validPrefixes = rolePathPrefixes[role]
-      if (validPrefixes.some((prefix) => decodedRedirect.startsWith(prefix))) {
-        return decodedRedirect
-      }
-    } catch {
-      // Invalid URL encoding, use default
-      return defaultRoutes[role]
-    }
-  }
-
-  return defaultRoutes[role]
 }

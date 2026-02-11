@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, LogOut } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,7 +11,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -23,7 +22,6 @@ const navLinks = [
 export function PublicHeader() {
   const [isOpen, setIsOpen] = React.useState(false)
   const [isScrolled, setIsScrolled] = React.useState(false)
-  const { user, logout } = useAuth()
   const pathname = usePathname()
 
   // V.1.4.3: Track scroll position for dynamic shadow
@@ -83,7 +81,7 @@ export function PublicHeader() {
           </nav>
         </div>
 
-        {/* Right section: Help, Login/Dashboard, CTA */}
+        {/* Right section: Help + CTA */}
         <div className="hidden items-center lg:flex">
           <Link
             href="/help"
@@ -96,30 +94,6 @@ export function PublicHeader() {
           >
             Help
           </Link>
-          {user ? (
-            <>
-              <Link
-                href={user.role === "advisor" ? "/advisor" : user.role === "admin" ? "/admin" : "/dashboard"}
-                className="flex min-h-11 items-center rounded-lg px-3 py-2 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-900/5 focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
-              >
-                Dashboard
-              </Link>
-              <button
-                onClick={logout}
-                className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-900/5 focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
-              >
-                <LogOut className="size-4" />
-                Log out
-              </button>
-            </>
-          ) : (
-            <Link
-              href="/login"
-              className="flex min-h-11 items-center rounded-lg px-3 py-2 text-base font-semibold text-gray-900 transition-colors hover:bg-gray-900/5 focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none"
-            >
-              Log in
-            </Link>
-          )}
           <Link
             href="/search"
             className="ml-2 inline-flex h-11 min-h-11 items-center justify-center rounded-full bg-primary px-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -166,35 +140,6 @@ export function PublicHeader() {
                   Help
                 </Link>
                 <div className="mt-4 flex flex-col gap-3 border-t pt-6">
-                  {user ? (
-                    <>
-                      <Button variant="outline" asChild className="w-full">
-                        <Link
-                          href={user.role === "advisor" ? "/advisor" : user.role === "admin" ? "/admin" : "/dashboard"}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          Dashboard
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => {
-                          setIsOpen(false)
-                          logout()
-                        }}
-                      >
-                        <LogOut className="size-4 mr-2" />
-                        Log out
-                      </Button>
-                    </>
-                  ) : (
-                    <Button variant="outline" asChild className="w-full">
-                      <Link href="/login" onClick={() => setIsOpen(false)}>
-                        Log in
-                      </Link>
-                    </Button>
-                  )}
                   <Button asChild className="w-full rounded-full">
                     <Link href="/search" onClick={() => setIsOpen(false)}>
                       Find an Advisor
