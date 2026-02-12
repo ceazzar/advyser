@@ -92,11 +92,15 @@ const IDS = {
   availabilityWeekday: "e19d88ea-6a1f-47ec-a8d8-c9af3347f3ce",
   availabilitySaturday: "dd23606d-0a2e-4436-a3a6-38f07d830ee7",
   lead: "d8f94de7-0807-4fca-9f89-62772a29d8db",
+  leadFinancial: "5e4483f1-feb9-44ea-bff9-6bb8e5e70dfb",
+  leadProperty: "ecf39ef8-b8be-4e8f-ab9d-ae8d4474bb04",
   clientRecord: "6d44aa0d-eb22-4f24-baba-034abf940d10",
   conversation: "130205f2-4d50-46e6-9f7b-c7412e13ea37",
   messageConsumer: "9a4f16c8-78f7-4d1a-8c0e-bf4c3f6ef6f4",
   messageAdvisor: "5c71f740-f1fb-45eb-bd8f-a84005b5ec45",
   booking: "2f4efd55-3ab8-40b2-ae1f-c2f6f56fce8f",
+  bookingFinancial: "fd988f36-5117-4e2b-a8f7-b6e108f0a5d0",
+  bookingProperty: "3197f3d9-6003-481f-ad47-cf4538f4d6d7",
   review: "d8b93130-6d6a-4214-bf06-b2de20215e71",
   trustDisclosurePromotion: "5b2001db-f63e-4efb-b284-04d7655d7ef8",
   trustDisclosureVerification: "f1239ce3-70f0-4c67-a5df-203ce84fe2e7",
@@ -584,7 +588,10 @@ async function seedSqlData(userIds) {
         92, 1.3, 96, 4.8, 1, 1, false
       )
       ON CONFLICT (id) DO UPDATE SET
+        business_id = EXCLUDED.business_id,
         advisor_profile_id = EXCLUDED.advisor_profile_id,
+        advisor_type = EXCLUDED.advisor_type,
+        service_mode = EXCLUDED.service_mode,
         headline = EXCLUDED.headline,
         bio = EXCLUDED.bio,
         what_i_help_with = EXCLUDED.what_i_help_with,
@@ -594,6 +601,7 @@ async function seedSqlData(userIds) {
         price_band = EXCLUDED.price_band,
         free_consultation = EXCLUDED.free_consultation,
         client_demographics = EXCLUDED.client_demographics,
+        is_active = EXCLUDED.is_active,
         accepting_status = EXCLUDED.accepting_status,
         availability_mode = EXCLUDED.availability_mode,
         time_to_first_slot_days = EXCLUDED.time_to_first_slot_days,
@@ -604,7 +612,8 @@ async function seedSqlData(userIds) {
         rating_avg = EXCLUDED.rating_avg,
         review_count = EXCLUDED.review_count,
         search_boost = EXCLUDED.search_boost,
-        is_featured = EXCLUDED.is_featured
+        is_featured = EXCLUDED.is_featured,
+        deleted_at = NULL
     `,
       [IDS.listing, IDS.business, IDS.advisorProfile]
     )
@@ -631,7 +640,10 @@ async function seedSqlData(userIds) {
         84, 6.0, 74, 4.6, 8, 1, false
       )
       ON CONFLICT (id) DO UPDATE SET
+        business_id = EXCLUDED.business_id,
         advisor_profile_id = EXCLUDED.advisor_profile_id,
+        advisor_type = EXCLUDED.advisor_type,
+        service_mode = EXCLUDED.service_mode,
         headline = EXCLUDED.headline,
         bio = EXCLUDED.bio,
         what_i_help_with = EXCLUDED.what_i_help_with,
@@ -641,6 +653,7 @@ async function seedSqlData(userIds) {
         price_band = EXCLUDED.price_band,
         free_consultation = EXCLUDED.free_consultation,
         client_demographics = EXCLUDED.client_demographics,
+        is_active = EXCLUDED.is_active,
         accepting_status = EXCLUDED.accepting_status,
         availability_mode = EXCLUDED.availability_mode,
         time_to_first_slot_days = EXCLUDED.time_to_first_slot_days,
@@ -651,7 +664,8 @@ async function seedSqlData(userIds) {
         rating_avg = EXCLUDED.rating_avg,
         review_count = EXCLUDED.review_count,
         search_boost = EXCLUDED.search_boost,
-        is_featured = EXCLUDED.is_featured
+        is_featured = EXCLUDED.is_featured,
+        deleted_at = NULL
     `,
       [IDS.listingFinancial, IDS.businessFinancial, IDS.advisorProfileFinancial]
     )
@@ -678,7 +692,10 @@ async function seedSqlData(userIds) {
         88, 12.0, 52, 4.5, 5, 1, false
       )
       ON CONFLICT (id) DO UPDATE SET
+        business_id = EXCLUDED.business_id,
         advisor_profile_id = EXCLUDED.advisor_profile_id,
+        advisor_type = EXCLUDED.advisor_type,
+        service_mode = EXCLUDED.service_mode,
         headline = EXCLUDED.headline,
         bio = EXCLUDED.bio,
         what_i_help_with = EXCLUDED.what_i_help_with,
@@ -688,6 +705,7 @@ async function seedSqlData(userIds) {
         price_band = EXCLUDED.price_band,
         free_consultation = EXCLUDED.free_consultation,
         client_demographics = EXCLUDED.client_demographics,
+        is_active = EXCLUDED.is_active,
         accepting_status = EXCLUDED.accepting_status,
         availability_mode = EXCLUDED.availability_mode,
         time_to_first_slot_days = EXCLUDED.time_to_first_slot_days,
@@ -698,7 +716,8 @@ async function seedSqlData(userIds) {
         rating_avg = EXCLUDED.rating_avg,
         review_count = EXCLUDED.review_count,
         search_boost = EXCLUDED.search_boost,
-        is_featured = EXCLUDED.is_featured
+        is_featured = EXCLUDED.is_featured,
+        deleted_at = NULL
     `,
       [IDS.listingProperty, IDS.businessProperty, IDS.advisorProfileProperty]
     )
@@ -802,6 +821,78 @@ async function seedSqlData(userIds) {
       [IDS.lead, consumerUserId, IDS.business, IDS.listing, advisorUserId]
     )
 
+    await client.query(
+      `
+      INSERT INTO public.lead (
+        id, consumer_user_id, business_id, listing_id, assigned_to_user_id, assigned_at,
+        problem_summary, goal_tags, timeline, budget_range, preferred_meeting_mode,
+        preferred_times, status, status_changed_at, first_response_at, response_time_minutes
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, NOW(),
+        'Need retirement strategy and portfolio review before transitioning roles next year.',
+        ARRAY['retirement', 'portfolio']::text[], 'Exploring options', '500k-750k',
+        'online', 'Weekday mornings', 'contacted', NOW(), NOW(), 180
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        status = EXCLUDED.status,
+        assigned_to_user_id = EXCLUDED.assigned_to_user_id,
+        assigned_at = EXCLUDED.assigned_at,
+        problem_summary = EXCLUDED.problem_summary,
+        goal_tags = EXCLUDED.goal_tags,
+        timeline = EXCLUDED.timeline,
+        budget_range = EXCLUDED.budget_range,
+        preferred_meeting_mode = EXCLUDED.preferred_meeting_mode,
+        preferred_times = EXCLUDED.preferred_times,
+        status_changed_at = EXCLUDED.status_changed_at,
+        first_response_at = EXCLUDED.first_response_at,
+        response_time_minutes = EXCLUDED.response_time_minutes
+    `,
+      [
+        IDS.leadFinancial,
+        consumerUserId,
+        IDS.businessFinancial,
+        IDS.listingFinancial,
+        advisorTwoUserId,
+      ]
+    )
+
+    await client.query(
+      `
+      INSERT INTO public.lead (
+        id, consumer_user_id, business_id, listing_id, assigned_to_user_id, assigned_at,
+        problem_summary, goal_tags, timeline, budget_range, preferred_meeting_mode,
+        preferred_times, status, status_changed_at, first_response_at, response_time_minutes
+      )
+      VALUES (
+        $1, $2, $3, $4, $5, NOW(),
+        'Looking for buyer advocacy support in Brisbane for an investment property.',
+        ARRAY['investment-property', 'buyer-advocacy']::text[], 'Within 1 month', '800k-950k',
+        'in_person', 'Saturday mornings', 'booked', NOW(), NOW(), 240
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        status = EXCLUDED.status,
+        assigned_to_user_id = EXCLUDED.assigned_to_user_id,
+        assigned_at = EXCLUDED.assigned_at,
+        problem_summary = EXCLUDED.problem_summary,
+        goal_tags = EXCLUDED.goal_tags,
+        timeline = EXCLUDED.timeline,
+        budget_range = EXCLUDED.budget_range,
+        preferred_meeting_mode = EXCLUDED.preferred_meeting_mode,
+        preferred_times = EXCLUDED.preferred_times,
+        status_changed_at = EXCLUDED.status_changed_at,
+        first_response_at = EXCLUDED.first_response_at,
+        response_time_minutes = EXCLUDED.response_time_minutes
+    `,
+      [
+        IDS.leadProperty,
+        consumerUserId,
+        IDS.businessProperty,
+        IDS.listingProperty,
+        advisorThreeUserId,
+      ]
+    )
+
     const clientRecordResult = await client.query(
       `
       INSERT INTO public.client_record (
@@ -902,6 +993,62 @@ async function seedSqlData(userIds) {
         clientRecordId,
         futureIso(3, 9),
         futureIso(3, 10),
+      ]
+    )
+
+    await client.query(
+      `
+      INSERT INTO public.booking (
+        id, business_id, advisor_user_id, lead_id, client_record_id,
+        starts_at, ends_at, timezone, mode, meeting_link, status, advisor_notes
+      )
+      VALUES (
+        $1, $2, $3, $4, NULL, $5, $6, 'Australia/Sydney', 'online',
+        'https://meet.example.com/harbour-financial-intro', 'confirmed',
+        'Prepare retirement cashflow assumptions and risk tolerance checkpoint.'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        starts_at = EXCLUDED.starts_at,
+        ends_at = EXCLUDED.ends_at,
+        status = EXCLUDED.status,
+        meeting_link = EXCLUDED.meeting_link,
+        advisor_notes = EXCLUDED.advisor_notes
+    `,
+      [
+        IDS.bookingFinancial,
+        IDS.businessFinancial,
+        advisorTwoUserId,
+        IDS.leadFinancial,
+        futureIso(5, 23),
+        futureIso(6, 0),
+      ]
+    )
+
+    await client.query(
+      `
+      INSERT INTO public.booking (
+        id, business_id, advisor_user_id, lead_id, client_record_id,
+        starts_at, ends_at, timezone, mode, location_text, status, advisor_notes
+      )
+      VALUES (
+        $1, $2, $3, $4, NULL, $5, $6, 'Australia/Brisbane', 'in_person',
+        'Brisbane CBD office', 'confirmed',
+        'Property brief review and shortlisting workshop.'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        starts_at = EXCLUDED.starts_at,
+        ends_at = EXCLUDED.ends_at,
+        status = EXCLUDED.status,
+        location_text = EXCLUDED.location_text,
+        advisor_notes = EXCLUDED.advisor_notes
+    `,
+      [
+        IDS.bookingProperty,
+        IDS.businessProperty,
+        advisorThreeUserId,
+        IDS.leadProperty,
+        futureIso(7, 0),
+        futureIso(7, 1),
       ]
     )
 

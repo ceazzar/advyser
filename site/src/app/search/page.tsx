@@ -218,15 +218,19 @@ export default function SearchPage() {
 
   React.useEffect(() => {
     const params = new URLSearchParams()
-    params.set("page", String(filters.page))
+    if (filters.page > 1) params.set("page", String(filters.page))
     if (filters.sort !== "rating_desc") params.set("sort", filters.sort)
     if (filters.advisorType !== "all") params.set("advisor_type", filters.advisorType)
     if (filters.specialty !== "all") params.set("specialty", filters.specialty)
     if (filters.state !== "all") params.set("state", filters.state)
     if (filters.minRating > 0) params.set("min_rating", String(filters.minRating))
     if (filters.keyword.trim()) params.set("q", filters.keyword.trim())
-    router.replace(`/search?${params.toString()}`, { scroll: false })
-  }, [filters, router])
+    const nextQuery = params.toString()
+    const currentQuery = searchParams.toString()
+
+    if (nextQuery === currentQuery) return
+    router.replace(nextQuery ? `/search?${nextQuery}` : "/search", { scroll: false })
+  }, [filters, router, searchParams])
 
   React.useEffect(() => {
     const controller = new AbortController()

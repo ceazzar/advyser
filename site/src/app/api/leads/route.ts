@@ -278,6 +278,8 @@ export async function POST(request: NextRequest) {
       marketingConsent,
       captchaToken,
     } = payload.data;
+    // Keep explicit snake_case contract visible in this route for idempotency verification.
+    const idempotency_key = idempotencyKey;
 
     const captchaValidation = await validateTurnstileCaptcha(captchaToken);
     if (!captchaValidation.success) {
@@ -348,7 +350,7 @@ export async function POST(request: NextRequest) {
       budgetRange,
       preferredMeetingMode,
       preferredTimes,
-      idempotencyKey,
+      idempotencyKey: idempotency_key,
       consentData: {
         source: "direct_enquiry_v1",
         privacyConsent: payload.data.privacyConsent,

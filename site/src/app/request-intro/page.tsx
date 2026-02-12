@@ -101,6 +101,9 @@ const states = [
   { value: "nt", label: "Northern Territory" },
 ]
 
+const missingListingMessage =
+  "Please start from matched results or an advisor profile. Please start from an advisor profile so we know who to introduce you to."
+
 export default function RequestIntroPage() {
   const searchParams = useSearchParams()
   const listingId = searchParams.get("listingId") || ""
@@ -207,7 +210,7 @@ export default function RequestIntroPage() {
 
   const handleSubmit = async () => {
     if (targetListingIds.length === 0) {
-      setSubmitError("Please start from matched results or an advisor profile to submit a request.")
+      setSubmitError(missingListingMessage)
       return
     }
 
@@ -224,7 +227,6 @@ export default function RequestIntroPage() {
         return
       }
 
-      const endpoint = isGuidedMode ? "/api/match-requests" : "/api/leads"
       const requestBody = isGuidedMode
         ? {
             listingIds: targetListingIds,
@@ -259,13 +261,21 @@ export default function RequestIntroPage() {
             marketingConsent: formData.marketingConsent,
           }
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      })
+      const response = isGuidedMode
+        ? await fetch("/api/match-requests", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+          })
+        : await fetch("/api/leads", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+          })
 
       const payload = await response.json()
       if (!response.ok || !payload?.success) {
@@ -377,7 +387,7 @@ export default function RequestIntroPage() {
           {targetListingIds.length === 0 && (
             <Card className="mb-6 border-amber-200 bg-amber-50">
               <CardContent className="p-4 text-sm text-amber-900">
-                Start this form from matched results or an advisor profile to submit your request.
+                {missingListingMessage}
               </CardContent>
             </Card>
           )}
