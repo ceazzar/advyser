@@ -1,649 +1,379 @@
 "use client"
 
-/**
- * 3-Question Guided Quiz
- * Helps users who aren't sure what type of advisor they need
- *
- * Flow:
- * 1. What's your main financial goal?
- * 2. How soon do you need help?
- * 3. What's your situation?
- * 4. Results -> Recommended advisor type + CTA to /search
- *
- * Uses CSS transitions for compatibility (framer-motion blocked).
- */
-
 import {
   ArrowLeft,
   ArrowRight,
-  Briefcase,
-  Building2,
-  Calendar,
-  CheckCircle2,
-  Clock,
   Compass,
-  CreditCard,
-  HelpCircle,
-  Home,
-  Landmark,
+  Loader2,
+  MapPin,
   Search,
-  Shield,
-  TrendingUp,
-  User,
-  Users,
-  Zap,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect,useState } from "react"
+import { useState } from "react"
 
+import { PublicLayout } from "@/components/layouts/public-layout"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { cn } from "@/lib/utils"
 
-// Types
-type GoalValue =
-  | "investments"
-  | "retirement"
-  | "property"
-  | "debt"
-  | "insurance"
-  | "other"
-type UrgencyValue = "urgent" | "month" | "exploring" | "future"
-type SituationValue = "individual" | "couple" | "business" | "smsf"
+type QuizGoal = "investments" | "retirement" | "property" | "debt" | "insurance" | "other"
+type QuizUrgency = "urgent" | "month" | "exploring" | "future"
+type QuizSituation = "individual" | "couple" | "business" | "smsf"
 
-interface QuizAnswers {
-  goal?: GoalValue
-  urgency?: UrgencyValue
-  situation?: SituationValue
+type RecommendationItem = {
+  listingId: string
+  score: number
+  reasons: Array<{ text: string; strength: "strong" | "moderate" }>
+  listing: {
+    id: string
+    name: string
+    headline: string | null
+    advisorType: string
+    location: string
+    rating: number | null
+    reviewCount: number
+    responseTimeHours: number | null
+    responseRate: number | null
+    verified: boolean
+    specialties: string[]
+  }
 }
 
-// Advisor category mapping based on answers
-type AdvisorCategory =
-  | "financial-planner"
-  | "mortgage-broker"
-  | "accountant"
-  | "insurance-advisor"
-  | "wealth-manager"
+type RecommendationResponse = {
+  success: boolean
+  data?: { items: RecommendationItem[] }
+  error?: { message?: string }
+}
 
-interface CategoryInfo {
-  name: string
+const GOAL_OPTIONS: Array<{ value: QuizGoal; label: string }> = [
+  { value: "investments", label: "Growing wealth / investments" },
+  { value: "retirement", label: "Retirement planning" },
+  { value: "property", label: "Property goals" },
+  { value: "debt", label: "Debt and cashflow" },
+  { value: "insurance", label: "Insurance and protection" },
+  { value: "other", label: "Not sure yet" },
+]
+
+const URGENCY_OPTIONS: Array<{ value: QuizUrgency; label: string }> = [
+  { value: "urgent", label: "Urgent (as soon as possible)" },
+  { value: "month", label: "Within 1 month" },
+  { value: "exploring", label: "Exploring options" },
+  { value: "future", label: "Planning ahead" },
+]
+
+const SITUATION_OPTIONS: Array<{ value: QuizSituation; label: string }> = [
+  { value: "individual", label: "Individual" },
+  { value: "couple", label: "Couple / family" },
+  { value: "business", label: "Business owner" },
+  { value: "smsf", label: "SMSF trustee" },
+]
+
+function formatAdvisorType(value: string): string {
+  return value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
+function QuestionCard({
+  title,
+  description,
+  options,
+  value,
+  onChange,
+}: {
+  title: string
   description: string
-  searchParam: string
-}
-
-const ADVISOR_CATEGORIES: Record<AdvisorCategory, CategoryInfo> = {
-  "financial-planner": {
-    name: "Financial Planner",
-    description:
-      "A licensed financial planner can help you create a comprehensive plan for your financial future, including investments, super, and retirement.",
-    searchParam: "financial-planner",
-  },
-  "mortgage-broker": {
-    name: "Mortgage Broker",
-    description:
-      "A mortgage broker can help you navigate the property market, compare loans, and find the best deal for your situation.",
-    searchParam: "mortgage-broker",
-  },
-  accountant: {
-    name: "Accountant",
-    description:
-      "An accountant can help with tax planning, business structures, and financial record-keeping to maximise your financial position.",
-    searchParam: "accountant",
-  },
-  "insurance-advisor": {
-    name: "Insurance Advisor",
-    description:
-      "An insurance advisor can assess your protection needs and find the right cover for you and your family.",
-    searchParam: "insurance-advisor",
-  },
-  "wealth-manager": {
-    name: "Wealth Manager",
-    description:
-      "A wealth manager provides sophisticated investment strategies and portfolio management for growing and preserving your assets.",
-    searchParam: "wealth-manager",
-  },
-}
-
-// Determine recommended advisor category based on answers
-function getRecommendedCategory(answers: QuizAnswers): AdvisorCategory {
-  const { goal, situation } = answers
-
-  // SMSF trustees typically need specialized financial planners
-  if (situation === "smsf") {
-    return "financial-planner"
-  }
-
-  // Business owners often need accountants
-  if (situation === "business") {
-    if (goal === "property") return "mortgage-broker"
-    if (goal === "insurance") return "insurance-advisor"
-    return "accountant"
-  }
-
-  // Goal-based recommendations
-  switch (goal) {
-    case "investments":
-      return "wealth-manager"
-    case "retirement":
-      return "financial-planner"
-    case "property":
-      return "mortgage-broker"
-    case "debt":
-      return "mortgage-broker" // Debt consolidation, refinancing
-    case "insurance":
-      return "insurance-advisor"
-    case "other":
-    default:
-      return "financial-planner" // Default to comprehensive advice
-  }
-}
-
-// Quiz step configuration
-const QUIZ_STEPS = [
-  {
-    id: "goal" as const,
-    question: "What's your main financial goal?",
-    description: "Select the area you'd like help with",
-    options: [
-      {
-        value: "investments" as GoalValue,
-        label: "Growing wealth / investments",
-        icon: TrendingUp,
-      },
-      {
-        value: "retirement" as GoalValue,
-        label: "Planning for retirement",
-        icon: Landmark,
-      },
-      {
-        value: "property" as GoalValue,
-        label: "Buying property",
-        icon: Home,
-      },
-      {
-        value: "debt" as GoalValue,
-        label: "Managing debt",
-        icon: CreditCard,
-      },
-      {
-        value: "insurance" as GoalValue,
-        label: "Protecting my family (insurance)",
-        icon: Shield,
-      },
-      {
-        value: "other" as GoalValue,
-        label: "Other / Not sure",
-        icon: HelpCircle,
-      },
-    ],
-  },
-  {
-    id: "urgency" as const,
-    question: "How soon do you need help?",
-    description: "This helps us prioritise your matches",
-    options: [
-      {
-        value: "urgent" as UrgencyValue,
-        label: "Right now - urgent",
-        icon: Zap,
-      },
-      {
-        value: "month" as UrgencyValue,
-        label: "Within the next month",
-        icon: Calendar,
-      },
-      {
-        value: "exploring" as UrgencyValue,
-        label: "Just exploring options",
-        icon: Compass,
-      },
-      {
-        value: "future" as UrgencyValue,
-        label: "Planning for the future",
-        icon: Clock,
-      },
-    ],
-  },
-  {
-    id: "situation" as const,
-    question: "What's your situation?",
-    description: "This helps us match you with the right expertise",
-    options: [
-      {
-        value: "individual" as SituationValue,
-        label: "Individual / Personal",
-        icon: User,
-      },
-      {
-        value: "couple" as SituationValue,
-        label: "Couple / Family",
-        icon: Users,
-      },
-      {
-        value: "business" as SituationValue,
-        label: "Business owner",
-        icon: Briefcase,
-      },
-      {
-        value: "smsf" as SituationValue,
-        label: "SMSF trustee",
-        icon: Building2,
-      },
-    ],
-  },
-] as const
-
-type StepId = (typeof QUIZ_STEPS)[number]["id"]
-
-// Option card component - large, tappable cards
-function OptionCard({
-  option,
-  isSelected,
-  onSelect,
-}: {
-  option: {
-    value: string
-    label: string
-    icon: React.ComponentType<{ className?: string }>
-  }
-  isSelected: boolean
-  onSelect: () => void
+  options: Array<{ value: string; label: string }>
+  value: string
+  onChange: (value: string) => void
 }) {
-  const Icon = option.icon
-
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={cn(
-        "group relative w-full p-4 sm:p-5 rounded-xl border-2 text-left",
-        "transition-all duration-200 ease-out",
-        "hover:border-primary/50 hover:shadow-md",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2",
-        "active:scale-[0.98] active:transition-none",
-        isSelected
-          ? "border-primary bg-primary/5 shadow-sm"
-          : "border-border bg-background hover:bg-muted/30"
-      )}
-    >
-      <div className="flex items-center gap-4">
-        {/* Icon container */}
-        <div
-          className={cn(
-            "flex items-center justify-center size-12 rounded-lg transition-colors duration-200",
-            isSelected
-              ? "bg-primary/10 text-primary"
-              : "bg-muted text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary/70"
-          )}
-        >
-          <Icon className="size-6" />
-        </div>
-
-        {/* Label */}
-        <span
-          className={cn(
-            "text-base sm:text-lg font-medium transition-colors flex-1",
-            isSelected
-              ? "text-foreground"
-              : "text-muted-foreground group-hover:text-foreground"
-          )}
-        >
-          {option.label}
-        </span>
-
-        {/* Selection indicator */}
-        <div
-          className={cn(
-            "flex items-center justify-center size-6 rounded-full border-2 transition-all duration-200",
-            isSelected
-              ? "border-primary bg-primary"
-              : "border-border bg-background group-hover:border-primary/50"
-          )}
-        >
-          {isSelected && (
-            <CheckCircle2 className="size-4 text-white animate-in zoom-in-50 duration-150" />
-          )}
-        </div>
-      </div>
-    </button>
-  )
-}
-
-// Results component with advisor recommendation
-function QuizResults({
-  answers,
-  onRestart,
-}: {
-  answers: QuizAnswers
-  onRestart: () => void
-}) {
-  const router = useRouter()
-  const [isVisible, setIsVisible] = useState(false)
-
-  const recommendedCategory = getRecommendedCategory(answers)
-  const categoryInfo = ADVISOR_CATEGORIES[recommendedCategory]
-
-  useEffect(() => {
-    requestAnimationFrame(() => setIsVisible(true))
-  }, [])
-
-  const handleFindAdvisor = useCallback(() => {
-    const params = new URLSearchParams()
-    params.set("category", categoryInfo.searchParam)
-
-    // Add urgency for sorting/filtering if relevant
-    if (answers.urgency === "urgent") {
-      params.set("availability", "immediate")
-    }
-
-    // Add situation for filtering
-    if (answers.situation) {
-      params.set("specialisation", answers.situation)
-    }
-
-    router.push(`/search?${params.toString()}`)
-  }, [router, categoryInfo.searchParam, answers])
-
-  // Get display labels for the summary
-  const getGoalLabel = (goal?: GoalValue) => {
-    const step = QUIZ_STEPS.find((s) => s.id === "goal")
-    return step?.options.find((o) => o.value === goal)?.label || "Not specified"
-  }
-
-  const getUrgencyLabel = (urgency?: UrgencyValue) => {
-    const step = QUIZ_STEPS.find((s) => s.id === "urgency")
-    return (
-      step?.options.find((o) => o.value === urgency)?.label || "Not specified"
-    )
-  }
-
-  const getSituationLabel = (situation?: SituationValue) => {
-    const step = QUIZ_STEPS.find((s) => s.id === "situation")
-    return (
-      step?.options.find((o) => o.value === situation)?.label || "Not specified"
-    )
-  }
-
-  return (
-    <div
-      className={cn(
-        "transition-all duration-500 ease-out",
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      )}
-    >
-      {/* Success header */}
-      <div className="text-center mb-8">
-        <div className="mb-4 inline-flex size-16 items-center justify-center rounded-full bg-green-100">
-          <CheckCircle2 className="size-8 text-green-600" />
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3">
-          Based on your answers, we recommend a
-        </h2>
-        <p className="text-3xl sm:text-4xl font-bold text-primary">
-          {categoryInfo.name}
-        </p>
-      </div>
-
-      {/* Category description */}
-      <div className="mb-8 p-5 bg-muted/50 rounded-xl border border-border">
-        <p className="text-muted-foreground leading-relaxed">
-          {categoryInfo.description}
-        </p>
-      </div>
-
-      {/* Summary of answers */}
-      <div className="mb-8 space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Your answers
-        </h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between py-2 border-b border-border/50">
-            <span className="text-muted-foreground">Financial goal</span>
-            <span className="font-medium text-foreground">
-              {getGoalLabel(answers.goal)}
-            </span>
+    <div>
+      <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">{title}</h1>
+      <p className="text-muted-foreground mb-6">{description}</p>
+      <RadioGroup value={value} onValueChange={onChange} className="space-y-3">
+        {options.map((option) => (
+          <div key={option.value}>
+            <RadioGroupItem id={option.value} value={option.value} className="peer sr-only" />
+            <label
+              htmlFor={option.value}
+              className={cn(
+                "flex cursor-pointer rounded-lg border-2 p-4 transition-colors",
+                value === option.value
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/40"
+              )}
+            >
+              {option.label}
+            </label>
           </div>
-          <div className="flex justify-between py-2 border-b border-border/50">
-            <span className="text-muted-foreground">Timeline</span>
-            <span className="font-medium text-foreground">
-              {getUrgencyLabel(answers.urgency)}
-            </span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span className="text-muted-foreground">Situation</span>
-            <span className="font-medium text-foreground">
-              {getSituationLabel(answers.situation)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* CTA buttons */}
-      <div className="space-y-3">
-        <Button size="lg" className="w-full" onClick={handleFindAdvisor}>
-          <Search className="size-4 mr-2" />
-          Find a {categoryInfo.name}
-        </Button>
-        <Button variant="ghost" size="lg" className="w-full" onClick={onRestart}>
-          Start over
-        </Button>
-      </div>
+        ))}
+      </RadioGroup>
     </div>
   )
 }
 
-// Animated step wrapper using CSS transitions
-function AnimatedStep({
-  children,
-  direction,
-  stepKey,
-}: {
-  children: React.ReactNode
-  direction: "forward" | "backward"
-  stepKey: number
-}) {
-  return (
-    <div
-      key={stepKey}
-      className={cn(
-        "animate-in fade-in-0 duration-300 ease-out",
-        direction === "forward" ? "slide-in-from-right-12" : "slide-in-from-left-12"
-      )}
-    >
-      {children}
-    </div>
-  )
-}
-
-// Progress dots indicator
-function ProgressDots({
-  currentStep,
-  totalSteps,
-}: {
-  currentStep: number
-  totalSteps: number
-}) {
-  return (
-    <div className="flex items-center justify-center gap-2">
-      {Array.from({ length: totalSteps }).map((_, index) => (
-        <div
-          key={index}
-          className={cn(
-            "transition-all duration-300",
-            index === currentStep
-              ? "w-8 h-2 bg-primary rounded-full"
-              : index < currentStep
-                ? "w-2 h-2 bg-primary rounded-full"
-                : "w-2 h-2 bg-border rounded-full"
-          )}
-        />
-      ))}
-    </div>
-  )
-}
-
-// Main quiz component
 export default function QuizPage() {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [answers, setAnswers] = useState<QuizAnswers>({})
-  const [isComplete, setIsComplete] = useState(false)
-  const [direction, setDirection] = useState<"forward" | "backward">("forward")
+  const router = useRouter()
+  const [step, setStep] = useState(1)
+  const [goal, setGoal] = useState<QuizGoal | "">("")
+  const [urgency, setUrgency] = useState<QuizUrgency | "">("")
+  const [situation, setSituation] = useState<QuizSituation | "">("")
+  const [location, setLocation] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [recommendations, setRecommendations] = useState<RecommendationItem[] | null>(null)
 
-  const totalSteps = QUIZ_STEPS.length
-  const progress = ((currentStep + 1) / totalSteps) * 100
-  const currentStepData = QUIZ_STEPS[currentStep]
-  const currentAnswer = answers[currentStepData?.id as StepId]
+  const canContinue =
+    (step === 1 && !!goal) ||
+    (step === 2 && !!urgency) ||
+    (step === 3 && !!situation) ||
+    step === 4
 
-  const handleSelect = (value: string) => {
-    if (currentStepData) {
-      setAnswers((prev) => ({
-        ...prev,
-        [currentStepData.id]: value,
-      }))
+  async function submitForRecommendations() {
+    if (!goal || !urgency || !situation) return
+
+    try {
+      setError(null)
+      setIsLoading(true)
+      const response = await fetch("/api/match/recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal,
+          urgency,
+          situation,
+          location: location.trim() || undefined,
+          limit: 5,
+        }),
+      })
+
+      const payload = (await response.json()) as RecommendationResponse
+      if (!response.ok || !payload.success || !payload.data) {
+        throw new Error(payload.error?.message || "Unable to generate matches")
+      }
+
+      setRecommendations(payload.data.items)
+      setStep(5)
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to generate recommendations right now."
+      )
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      setDirection("forward")
-      setCurrentStep((prev) => prev + 1)
-    } else {
-      setIsComplete(true)
-    }
-  }
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setDirection("backward")
-      setCurrentStep((prev) => prev - 1)
-    }
-  }
-
-  const handleRestart = () => {
-    setCurrentStep(0)
-    setAnswers({})
-    setIsComplete(false)
-    setDirection("forward")
-  }
+  const topThreeIds = (recommendations || []).slice(0, 3).map((item) => item.listingId)
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-xl px-4 py-8 sm:py-16">
-        {/* Header - always visible */}
-        <div className="mb-8 text-center">
-          <Link
-            href="/"
-            className="inline-block text-xl font-bold text-foreground mb-6 hover:text-primary transition-colors"
-          >
-            Advyser
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
-            Find your ideal advisor
-          </h1>
-          <p className="text-muted-foreground">
-            Not sure what you need? Answer 3 quick questions.
-          </p>
-        </div>
+    <PublicLayout>
+      <section className="py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="mb-6 flex items-center justify-between">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" />
+              Back to Home
+            </Link>
+            <span className="text-sm text-muted-foreground">
+              Step {Math.min(step, 4)} of 4
+            </span>
+          </div>
 
-        {!isComplete && (
-          <>
-            {/* Progress indicator */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-muted-foreground">
-                  Step {currentStep + 1} of {totalSteps}
-                </span>
-                <ProgressDots currentStep={currentStep} totalSteps={totalSteps} />
-              </div>
-              <Progress value={progress} className="h-1.5" />
-            </div>
-          </>
-        )}
+          <Progress
+            value={Math.min((Math.min(step, 4) / 4) * 100, 100)}
+            className="mb-8"
+            aria-label="Quiz completion progress"
+          />
 
-        {/* Quiz content */}
-        <div className="relative overflow-hidden">
-          {isComplete ? (
-            <QuizResults answers={answers} onRestart={handleRestart} />
-          ) : (
-            <AnimatedStep direction={direction} stepKey={currentStep}>
-              {/* Question */}
-              <div className="mb-6 text-center sm:text-left">
-                <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
-                  {currentStepData.question}
-                </h2>
-                <p className="text-muted-foreground">
-                  {currentStepData.description}
-                </p>
-              </div>
+          <Card>
+            <CardContent className="p-6 md:p-8 space-y-8">
+              {step === 1 && (
+                <QuestionCard
+                  title="What is your main financial goal?"
+                  description="We use this to choose the right advisor type."
+                  options={GOAL_OPTIONS}
+                  value={goal}
+                  onChange={(value) => setGoal(value as QuizGoal)}
+                />
+              )}
 
-              {/* Options - large tappable cards */}
-              <div className="space-y-3 mb-8">
-                {currentStepData.options.map((option) => (
-                  <OptionCard
-                    key={option.value}
-                    option={option}
-                    isSelected={currentAnswer === option.value}
-                    onSelect={() => handleSelect(option.value)}
-                  />
-                ))}
-              </div>
+              {step === 2 && (
+                <QuestionCard
+                  title="How soon do you need help?"
+                  description="Urgency helps us prioritize availability."
+                  options={URGENCY_OPTIONS}
+                  value={urgency}
+                  onChange={(value) => setUrgency(value as QuizUrgency)}
+                />
+              )}
 
-              {/* Navigation buttons */}
-              <div className="flex items-center gap-3">
-                {currentStep > 0 && (
+              {step === 3 && (
+                <QuestionCard
+                  title="Which best describes your situation?"
+                  description="This helps us match relevant specialist experience."
+                  options={SITUATION_OPTIONS}
+                  value={situation}
+                  onChange={(value) => setSituation(value as QuizSituation)}
+                />
+              )}
+
+              {step === 4 && (
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                    Where are you located?
+                  </h1>
+                  <p className="text-muted-foreground mb-6">
+                    Optional. Add your suburb/state so we can improve location matching.
+                  </p>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input
+                      value={location}
+                      onChange={(event) => setLocation(event.target.value)}
+                      placeholder="e.g., Melbourne, VIC"
+                      className="pl-9"
+                    />
+                  </div>
+                  {error && (
+                    <p className="mt-3 text-sm text-destructive">{error}</p>
+                  )}
+                </div>
+              )}
+
+              {step === 5 && (
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                    Your recommended advisors
+                  </h1>
+                  <p className="text-muted-foreground mb-6">
+                    Ranked using your goals, urgency, situation, and location.
+                  </p>
+
+                  <div className="space-y-4">
+                    {(recommendations || []).slice(0, 5).map((item) => (
+                      <Card key={item.listingId} className="border-border/70">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg">{item.listing.name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {formatAdvisorType(item.listing.advisorType)} • {item.listing.location}
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="border-border bg-background text-foreground">
+                              Match score: {item.score.toFixed(1)}
+                            </Badge>
+                            {item.listing.verified && <Badge status="verified">Verified</Badge>}
+                            <Badge className="border-border bg-background text-foreground">
+                              Rating {(item.listing.rating ?? 0).toFixed(1)} ({item.listing.reviewCount})
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {item.listing.headline || "No headline available yet."}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {item.reasons.map((reason) => (
+                              <Badge
+                                key={reason.text}
+                                className={
+                                  reason.strength === "strong"
+                                    ? "bg-slate-900 text-white border-slate-900"
+                                    : "border-border bg-background text-foreground"
+                                }
+                              >
+                                {reason.text}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="pt-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => router.push(`/advisors/${item.listingId}`)}
+                            >
+                              View profile
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2">
+                {step > 1 && step < 5 ? (
                   <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={handleBack}
-                    className="flex-1 sm:flex-none sm:w-auto"
+                    variant="ghost"
+                    onClick={() => setStep((current) => Math.max(1, current - 1))}
                   >
-                    <ArrowLeft className="size-4 mr-2" />
+                    <ArrowLeft className="mr-2 size-4" />
                     Back
                   </Button>
+                ) : (
+                  <div />
                 )}
-                <Button
-                  size="lg"
-                  onClick={handleNext}
-                  disabled={!currentAnswer}
-                  className={cn("flex-1", currentStep === 0 && "w-full")}
-                >
-                  {currentStep === totalSteps - 1 ? (
-                    "See my recommendation"
-                  ) : (
-                    <>
-                      Continue
-                      <ArrowRight className="size-4 ml-2" />
-                    </>
-                  )}
-                </Button>
+
+                {step < 4 && (
+                  <Button
+                    onClick={() => setStep((current) => current + 1)}
+                    disabled={!canContinue}
+                  >
+                    Continue
+                    <ArrowRight className="ml-2 size-4" />
+                  </Button>
+                )}
+
+                {step === 4 && (
+                  <Button onClick={submitForRecommendations} disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Finding matches...
+                      </>
+                    ) : (
+                      <>
+                        <Compass className="mr-2 size-4" />
+                        Show recommendations
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
-            </AnimatedStep>
+            </CardContent>
+          </Card>
+
+          {step === 5 && (
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Button
+                className="sm:flex-1"
+                disabled={topThreeIds.length === 0}
+                onClick={() =>
+                  router.push(`/request-intro?listingIds=${encodeURIComponent(topThreeIds.join(","))}`)
+                }
+              >
+                Request intros from top matches
+              </Button>
+              <Button
+                variant="outline"
+                className="sm:flex-1"
+                onClick={() => router.push("/search")}
+              >
+                <Search className="mr-2 size-4" />
+                Browse full directory
+              </Button>
+            </div>
           )}
         </div>
-
-        {/* Skip option - only during quiz */}
-        {!isComplete && (
-          <div className="mt-8 text-center">
-            <Link
-              href="/search"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
-            >
-              Skip quiz and browse all advisors
-            </Link>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-border text-center">
-          <p className="text-xs text-muted-foreground">
-            Your answers help us match you with the right type of professional.
-            <br />
-            All advisors on Advyser are verified and licensed in Australia.
-          </p>
-        </div>
-      </div>
-    </main>
+      </section>
+    </PublicLayout>
   )
 }

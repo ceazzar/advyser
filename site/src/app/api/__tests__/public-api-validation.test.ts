@@ -1,11 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { listingsQuerySchema, publicLeadRequestSchema, uuidParamSchema } from "@/lib/schemas";
+import {
+  listingsQuerySchema,
+  matchRecommendationRequestSchema,
+  matchRequestBatchSchema,
+  publicLeadRequestSchema,
+  uuidParamSchema,
+} from "@/lib/schemas";
 
 describe("public API validation", () => {
-  it("sanitizes listings query text that previously caused PostgREST 500s", () => {
-    const parsed = listingsQuerySchema.parse({ q: "a,b.(test)", page: "1", pageSize: "20" });
-    expect(parsed.q).toBe("a b test");
+  it("rejects unsafe listings query text that previously caused PostgREST 500s", () => {
+    const result = listingsQuerySchema.safeParse({ q: "a,b.(test)", page: "1", pageSize: "20" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts sanitized listings query text", () => {
+    const parsed = listingsQuerySchema.parse({ q: "retirement planner", page: "1", pageSize: "20" });
+    expect(parsed.q).toBe("retirement planner");
     expect(parsed.page).toBe(1);
     expect(parsed.pageSize).toBe(20);
   });
@@ -38,5 +49,33 @@ describe("public API validation", () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it("accepts valid match recommendation payload", () => {
+    const result = matchRecommendationRequestSchema.safeParse({
+      goal: "property",
+      urgency: "urgent",
+      situation: "couple",
+      location: "Melbourne, VIC",
+      limit: 3,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts valid match request batch payload", () => {
+    const result = matchRequestBatchSchema.safeParse({
+      listingIds: [
+        "11111111-1111-4111-8111-111111111111",
+        "22222222-2222-4222-8222-222222222222",
+      ],
+      problemSummary: "I need help comparing refinancing options and structuring our next steps.",
+      timeline: "next_month",
+      email: "person@example.com",
+      privacyConsent: true,
+      captchaToken: "abcdefghijklmnopqrstuvwxyz1234567890",
+    });
+
+    expect(result.success).toBe(true);
   });
 });

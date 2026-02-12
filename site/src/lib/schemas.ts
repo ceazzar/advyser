@@ -308,20 +308,31 @@ export type UuidParam = z.infer<typeof uuidParamSchema>
  * Public listings query schema
  */
 export const listingsQuerySchema = z.object({
-  advisor_type: z.string().optional(),
-  specialty: z.string().optional(),
+  advisor_type: z.enum(["financial_adviser", "mortgage_broker", "buyers_agent", "property_adviser"]).optional(),
+  specialty: z.string().trim().min(1).max(100).optional(),
   state: z.string().regex(/^[A-Z]{2,3}$/).optional(),
   postcode: z.string().regex(/^[0-9]{4}$/).optional(),
+  suburb: z
+    .string()
+    .trim()
+    .max(80)
+    .regex(/^[\p{L}\p{N}\s'-]+$/u, "Suburb contains invalid characters")
+    .optional(),
   verified: z.enum(["true", "false"]).optional(),
-  accepting: z.enum(["taking_clients", "waitlist", "not_taking"]).optional(),
+  accepting: z
+    .enum(["taking_clients", "waitlist", "not_accepting", "not_taking"])
+    .transform((value) => (value === "not_taking" ? "not_accepting" : value))
+    .optional(),
   service_mode: z.enum(["online", "in_person", "both"]).optional(),
   min_rating: z.coerce.number().min(1).max(5).optional(),
   fee_model: z.string().optional(),
   q: z
     .string()
     .trim()
+    .min(1)
     .max(120)
-    .transform((value) => value.replace(/[,.()]/g, " ").replace(/\s+/g, " ").trim())
+    .regex(/^[\p{L}\p{N}\s'-]+$/u, "Search query contains unsupported characters")
+    .transform((value) => value.replace(/\s+/g, " ").trim())
     .optional(),
   sort: z.enum(["rating_desc", "reviews_desc", "newest"]).default("rating_desc"),
   page: z.coerce.number().int().positive().default(1),
@@ -356,7 +367,53 @@ export const publicLeadRequestSchema = z.object({
     .optional()
     .or(z.literal("")),
   privacyConsent: z.boolean().refine((value) => value, "Privacy consent is required"),
+  marketingConsent: z.boolean().optional(),
   captchaToken: z.string().trim().min(20).optional(),
 })
 
 export type PublicLeadRequestData = z.infer<typeof publicLeadRequestSchema>
+
+/**
+ * Match recommendations payload schema
+ */
+export const matchRecommendationRequestSchema = z.object({
+  goal: z.enum(["investments", "retirement", "property", "debt", "insurance", "other"]),
+  urgency: z.enum(["urgent", "month", "exploring", "future"]),
+  situation: z.enum(["individual", "couple", "business", "smsf"]),
+  location: z.string().trim().min(2).max(120).optional(),
+  limit: z.coerce.number().int().min(1).max(10).default(5),
+})
+
+export type MatchRecommendationRequestData = z.infer<typeof matchRecommendationRequestSchema>
+
+/**
+ * Batch guided match request payload schema
+ */
+export const matchRequestBatchSchema = z.object({
+  listingIds: z.array(z.string().uuid("Listing ID must be a valid UUID")).min(1).max(3),
+  problemSummary: z
+    .string()
+    .trim()
+    .min(20, "Please describe your request in at least 20 characters")
+    .max(2000, "Problem summary is too long"),
+  goalTags: z.array(z.string().trim().min(1).max(50)).max(8).optional(),
+  timeline: z.enum(["asap", "next_month", "next_3_months", "exploring"]).optional(),
+  budgetRange: z.string().trim().max(50).optional(),
+  preferredMeetingMode: z.enum(["online", "in_person", "both"]).optional(),
+  preferredTimes: z.string().trim().max(500).optional(),
+  idempotencyKey: z.string().uuid().optional(),
+  firstName: z.string().trim().max(100).optional(),
+  lastName: z.string().trim().max(100).optional(),
+  email: z.string().trim().regex(emailRegex, "A valid email is required"),
+  phone: z
+    .string()
+    .trim()
+    .regex(auPhoneRegex, "Please enter a valid Australian phone number")
+    .optional()
+    .or(z.literal("")),
+  privacyConsent: z.boolean().refine((value) => value, "Privacy consent is required"),
+  marketingConsent: z.boolean().optional(),
+  captchaToken: z.string().trim().min(20).optional(),
+})
+
+export type MatchRequestBatchData = z.infer<typeof matchRequestBatchSchema>

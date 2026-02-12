@@ -78,8 +78,8 @@ const categories = [
 const howItWorksSteps = [
   {
     number: 1,
-    title: "Answer 5 quick questions",
-    description: "Tell us your goals, budget, and preferences. Takes under 2 minutes — no account required.",
+    title: "Answer 4 quick questions",
+    description: "Tell us your goals, urgency, and situation. Takes under 2 minutes with no account required.",
   },
   {
     number: 2,
@@ -98,8 +98,11 @@ export default function HomePage() {
 
   const handleSearch = (query: { category?: string; location?: string; keyword?: string }) => {
     const params = new URLSearchParams()
-    if (query.category) params.set("category", query.category)
-    if (query.location) params.set("location", query.location)
+    if (query.category) params.set("advisor_type", query.category)
+    if (query.location) {
+      const stateMatch = query.location.toUpperCase().match(/\b(NSW|VIC|QLD|WA|SA|TAS|ACT|NT)\b/)
+      if (stateMatch?.[1]) params.set("state", stateMatch[1])
+    }
     if (query.keyword) params.set("q", query.keyword)
     router.push(`/search?${params.toString()}`)
   }
@@ -124,12 +127,10 @@ export default function HomePage() {
           <HeroSearchBar
             onSearch={handleSearch}
             categories={[
-              { value: "retirement-planning", label: "Retirement Planning" },
-              { value: "wealth-management", label: "Wealth Management" },
-              { value: "insurance-risk", label: "Insurance & Risk" },
-              { value: "property-investment", label: "Property Investment" },
-              { value: "tax-planning", label: "Tax Planning" },
-              { value: "estate-planning", label: "Estate Planning" },
+              { value: "financial_adviser", label: "Financial Adviser" },
+              { value: "mortgage_broker", label: "Mortgage Broker" },
+              { value: "buyers_agent", label: "Buyers Agent" },
+              { value: "property_adviser", label: "Property Adviser" },
             ]}
           />
 
@@ -256,8 +257,8 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Button size="lg" className="rounded-full px-8" asChild>
-              <Link href="/search">
-                Find an Advisor
+              <Link href="/quiz">
+                Start Guided Match
                 <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
@@ -291,8 +292,8 @@ export default function HomePage() {
               className="bg-white text-gray-900 hover:bg-white/90 rounded-full px-8"
               asChild
             >
-              <Link href="/search">
-                Find an Advisor
+              <Link href="/quiz">
+                Start Guided Match
               </Link>
             </Button>
             <Button
@@ -301,8 +302,8 @@ export default function HomePage() {
               className="border-white text-white hover:bg-white/10 rounded-full px-8"
               asChild
             >
-              <Link href="/how-it-works">
-                Learn How It Works
+              <Link href="/search">
+                Search Directory
               </Link>
             </Button>
           </div>

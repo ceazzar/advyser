@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { checkRateLimit, leadRatelimit, rateLimitHeaders } from "@/lib/ratelimit";
 import { publicLeadRequestSchema } from "@/lib/schemas";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { validatePublicPostOrigin, validateTurnstileCaptcha } from "@/lib/security/public-request";
+import { createPublicLead, resolvePublicLeadIdentity } from "@/lib/services/public-lead-intake";
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
@@ -232,24 +233,16 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const origin = request.headers.get("origin");
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-    if (origin && siteUrl) {
-      const allowedOrigin = new URL(siteUrl).origin;
-      if (origin !== allowedOrigin) {
-        return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: {
-              code: "FORBIDDEN_ORIGIN",
-              message: "Request origin is not allowed.",
-              statusCode: 403,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          { status: 403 }
-        );
-      }
+    const originValidation = validatePublicPostOrigin(request);
+    if (!originValidation.success) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: originValidation.error,
+          timestamp: new Date().toISOString(),
+        },
+        { status: originValidation.error.statusCode }
+      );
     }
 
     const payload = publicLeadRequestSchema.safeParse(await request.json());
@@ -282,53 +275,20 @@ export async function POST(request: NextRequest) {
       lastName,
       email,
       phone,
+      marketingConsent,
       captchaToken,
     } = payload.data;
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-    if (turnstileSecret) {
-      if (!captchaToken) {
-        return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: {
-              code: "CAPTCHA_REQUIRED",
-              message: "Captcha verification is required.",
-              statusCode: 400,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
-
-      const verificationBody = new URLSearchParams({
-        secret: turnstileSecret,
-        response: captchaToken,
-      });
-      const captchaResponse = await fetch(
-        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+    const captchaValidation = await validateTurnstileCaptcha(captchaToken);
+    if (!captchaValidation.success) {
+      return NextResponse.json<ApiResponse<null>>(
         {
-          method: "POST",
-          body: verificationBody,
-        }
+          success: false,
+          error: captchaValidation.error,
+          timestamp: new Date().toISOString(),
+        },
+        { status: captchaValidation.error.statusCode }
       );
-      const captchaResult = (await captchaResponse.json()) as { success?: boolean };
-      if (!captchaResult.success) {
-        return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: {
-              code: "CAPTCHA_FAILED",
-              message: "Captcha validation failed. Please try again.",
-              statusCode: 400,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
     }
 
     const supabase = await createClient();
@@ -336,122 +296,30 @@ export async function POST(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    let actor: Awaited<ReturnType<typeof createClient>> | ReturnType<typeof createAdminClient> =
-      supabase;
-    let consumerUserId = user?.id;
-    let rateLimitIdentifier = user?.id || "";
+    const identity = await resolvePublicLeadIdentity({
+      userId: user?.id,
+      firstName,
+      lastName,
+      email,
+      phone: phone || undefined,
+    });
 
-    if (!user) {
-      const admin = createAdminClient();
-      actor = admin;
-
-      const { data: existingConsumer, error: lookupError } = await admin
-        .from("users")
-        .select("id")
-        .eq("email", normalizedEmail)
-        .maybeSingle();
-
-      if (lookupError) {
-        return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: {
-              code: "DATABASE_ERROR",
-              message: "Unable to verify consumer profile.",
-              statusCode: 500,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          { status: 500 }
-        );
-      }
-
-      if (existingConsumer?.id) {
-        consumerUserId = existingConsumer.id;
-      } else {
-        const displayName = [firstName, lastName]
-          .filter((value) => typeof value === "string" && value.trim().length > 0)
-          .join(" ")
-          .trim();
-
-        const generatedPassword = `${crypto.randomUUID()}A1a!`;
-        const { data: createdAuth, error: createAuthError } = await admin.auth.admin.createUser({
-          email: normalizedEmail,
-          password: generatedPassword,
-          email_confirm: true,
-          user_metadata: {
-            first_name: firstName || null,
-            last_name: lastName || null,
-            display_name: displayName || null,
-          },
-        });
-
-        if (createAuthError || !createdAuth.user?.id) {
-          return NextResponse.json<ApiResponse<null>>(
-            {
-              success: false,
-              error: {
-                code: "IDENTITY_PROVISIONING_FAILED",
-                message: "Unable to provision a secure consumer identity for this request.",
-                statusCode: 500,
-              },
-              timestamp: new Date().toISOString(),
-            },
-            { status: 500 }
-          );
-        }
-
-        const { data: createdConsumer, error: createConsumerError } = await admin
-          .from("users")
-          .upsert({
-            id: createdAuth.user.id,
-            email: normalizedEmail,
-            role: "consumer",
-            first_name: firstName?.trim() || null,
-            last_name: lastName?.trim() || null,
-            display_name: displayName || null,
-            phone: phone?.trim() || null,
-          })
-          .select("id")
-          .single();
-
-        if (createConsumerError || !createdConsumer?.id) {
-          return NextResponse.json<ApiResponse<null>>(
-            {
-              success: false,
-              error: {
-                code: "DATABASE_ERROR",
-                message: "Unable to create consumer profile for request.",
-                statusCode: 500,
-              },
-              timestamp: new Date().toISOString(),
-            },
-            { status: 500 }
-          );
-        }
-
-        consumerUserId = createdConsumer.id;
-      }
-
-      rateLimitIdentifier = `guest:${normalizedEmail}`;
-    }
-
-    if (!consumerUserId) {
+    if ("error" in identity) {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
           error: {
-            code: "UNAUTHORIZED",
-            message: "Unable to determine consumer identity for this request.",
-            statusCode: 400,
+            code: identity.error.code,
+            message: identity.error.message,
+            statusCode: 500,
           },
           timestamp: new Date().toISOString(),
         },
-        { status: 400 }
+        { status: 500 }
       );
     }
 
-    const rateLimitResult = await checkRateLimit(leadRatelimit, rateLimitIdentifier);
+    const rateLimitResult = await checkRateLimit(leadRatelimit, identity.rateLimitIdentifier);
     if (!rateLimitResult.success) {
       return NextResponse.json<ApiResponse<null>>(
         {
@@ -470,38 +338,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check idempotency
-    if (idempotencyKey) {
-      const { data: existing } = await actor
-        .from("lead")
-        .select("id")
-        .eq("idempotency_key", idempotencyKey)
-        .maybeSingle();
+    const leadResult = await createPublicLead({
+      actor: identity.actor,
+      consumerUserId: identity.consumerUserId,
+      listingId,
+      problemSummary,
+      goalTags,
+      timeline,
+      budgetRange,
+      preferredMeetingMode,
+      preferredTimes,
+      idempotencyKey,
+      consentData: {
+        source: "direct_enquiry_v1",
+        privacyConsent: payload.data.privacyConsent,
+        marketingConsent: marketingConsent || false,
+      },
+    });
 
-      if (existing) {
-        return NextResponse.json<ApiResponse<{ leadId: string }>>({
-          success: true,
-          data: { leadId: existing.id },
-          timestamp: new Date().toISOString(),
-        });
-      }
-    }
-
-    // Get listing to find business_id
-    const { data: listing, error: listingError } = await actor
-      .from("listing")
-      .select("id, business_id")
-      .eq("id", listingId)
-      .eq("is_active", true)
-      .single();
-
-    if (listingError || !listing) {
+    if (leadResult.kind === "not_found") {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
           error: {
             code: "NOT_FOUND",
-            message: "Advisor listing not found",
+            message: leadResult.message,
             statusCode: 404,
           },
           timestamp: new Date().toISOString(),
@@ -510,23 +371,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for existing active lead
-    const { data: existingLead } = await actor
-      .from("lead")
-      .select("id")
-      .eq("consumer_user_id", consumerUserId)
-      .eq("business_id", listing.business_id)
-      .not("status", "eq", "declined")
-      .not("status", "eq", "converted")
-      .maybeSingle();
-
-    if (existingLead) {
+    if (leadResult.kind === "duplicate") {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
           error: {
             code: "DUPLICATE",
-            message: "You already have an active request with this advisor",
+            message: leadResult.message,
             statusCode: 409,
           },
           timestamp: new Date().toISOString(),
@@ -535,32 +386,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create lead
-    const { data: lead, error: createError } = await actor
-      .from("lead")
-      .insert({
-        consumer_user_id: consumerUserId,
-        business_id: listing.business_id,
-        listing_id: listingId,
-        problem_summary: problemSummary.trim(),
-        goal_tags: goalTags,
-        timeline,
-        budget_range: budgetRange,
-        preferred_meeting_mode: preferredMeetingMode,
-        preferred_times: preferredTimes,
-        idempotency_key: idempotencyKey,
-        status: "new",
-      })
-      .select("id")
-      .single();
-
-    if (createError) {
+    if (leadResult.kind === "error") {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
           error: {
-            code: "DATABASE_ERROR",
-            message: "Failed to create request",
+            code: leadResult.code,
+            message: leadResult.message,
             statusCode: 500,
           },
           timestamp: new Date().toISOString(),
@@ -572,10 +404,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json<ApiResponse<{ leadId: string }>>(
       {
         success: true,
-        data: { leadId: lead.id },
+        data: { leadId: leadResult.leadId },
         timestamp: new Date().toISOString(),
       },
-      { status: 201 }
+      { status: leadResult.kind === "created" ? 201 : 200 }
     );
   } catch {
     return NextResponse.json<ApiResponse<null>>(

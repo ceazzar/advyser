@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { CATEGORY_TO_SPECIALTY } from "@/lib/constants/marketplace-taxonomy"
 
 // Category metadata
 const categoryData: Record<string, {
@@ -264,8 +265,14 @@ export default function CategoryPage({
           pageSize: "24",
           sort: "rating_desc",
         })
-        if (queryTerms) {
+        const categoryFilter = CATEGORY_TO_SPECIALTY[resolvedParams.type]
+        if (categoryFilter?.specialtySlug) {
+          params.set("specialty", categoryFilter.specialtySlug)
+        } else if (queryTerms) {
           params.set("q", queryTerms)
+        }
+        if (categoryFilter?.advisorType) {
+          params.set("advisor_type", categoryFilter.advisorType)
         }
 
         const response = await fetch(`/api/listings?${params.toString()}`, {

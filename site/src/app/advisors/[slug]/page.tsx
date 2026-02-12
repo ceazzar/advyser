@@ -1,12 +1,14 @@
 "use client"
 
 import {
+  Activity,
   BadgeCheck,
   Calendar,
   ExternalLink,
   Mail,
   MapPin,
   Phone,
+  Shield,
   Star,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -18,7 +20,7 @@ import { PublicLayout } from "@/components/layouts/public-layout"
 import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
 type ListingDetail = {
@@ -26,6 +28,9 @@ type ListingDetail = {
   name: string
   headline: string | null
   bio: string | null
+  whatIHelpWith: string | null
+  whoIDontWorkWith: string | null
+  approachToAdvice: string | null
   avatar: string | null
   yearsExperience: number | null
   businessName: string | null
@@ -37,11 +42,22 @@ type ListingDetail = {
     state: string | null
   } | null
   advisorType: string
+  serviceMode: string
   feeModel: string | null
+  minimumInvestment: number | null
   freeConsultation: boolean
   responseTimeHours: number | null
+  responseRate: number | null
   verified: boolean
   verificationLevel: string
+  profileCompletenessScore: number | null
+  clientDemographics: string[]
+  trustDisclosures: Array<{
+    id: string
+    disclosureKind: string
+    headline: string
+    disclosureText: string
+  }>
   rating: number | null
   reviewCount: number
   credentials: Array<{
@@ -72,6 +88,11 @@ type ListingDetail = {
     body: string | null
     createdAt: string
     consumerDisplayName: string | null
+    reviewReply: {
+      body: string
+      publishedAt: string | null
+      responderName: string | null
+    } | null
   }>
 }
 
@@ -124,6 +145,10 @@ function formatAdvisorType(advisorType: string): string {
 function formatFeeModel(feeModel: string | null): string {
   if (!feeModel) return "Fee model not disclosed"
   return feeModel.replaceAll("_", " ")
+}
+
+function formatServiceMode(serviceMode: string): string {
+  return serviceMode.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 export default function AdvisorProfilePage({
@@ -344,6 +369,27 @@ export default function AdvisorProfilePage({
                       : "Response times vary by advisor"}
                   </p>
 
+                  <div className="mt-4 rounded-lg border border-border p-3 space-y-2 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Response rate</span>
+                      <span className="font-medium">
+                        {listing.responseRate !== null ? `${listing.responseRate}%` : "Not disclosed"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Service mode</span>
+                      <span className="font-medium">{formatServiceMode(listing.serviceMode)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Min investment</span>
+                      <span className="font-medium">
+                        {listing.minimumInvestment !== null
+                          ? `AUD ${listing.minimumInvestment.toLocaleString()}`
+                          : "Not disclosed"}
+                      </span>
+                    </div>
+                  </div>
+
                   <Separator className="my-6" />
 
                   <div className="space-y-3 text-sm">
@@ -386,7 +432,104 @@ export default function AdvisorProfilePage({
             <p className="text-muted-foreground leading-relaxed">
               {listing.bio || "This advisor has not added a public bio yet."}
             </p>
+            {listing.approachToAdvice && (
+              <p className="text-muted-foreground leading-relaxed mt-3">
+                <span className="font-medium text-foreground">Approach:</span>{" "}
+                {listing.approachToAdvice}
+              </p>
+            )}
           </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-1">
+                  <Activity className="size-3.5" />
+                  Profile completeness
+                </p>
+                <p className="text-xl font-semibold">
+                  {listing.profileCompletenessScore !== null
+                    ? `${listing.profileCompletenessScore}%`
+                    : "N/A"}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                  Advisor type
+                </p>
+                <p className="text-xl font-semibold">{formatAdvisorType(listing.advisorType)}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                  Experience
+                </p>
+                <p className="text-xl font-semibold">
+                  {listing.yearsExperience !== null
+                    ? `${listing.yearsExperience} years`
+                    : "Not disclosed"}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Best fit</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                {listing.whatIHelpWith || "No fit details provided yet."}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Not ideal for</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground">
+                {listing.whoIDontWorkWith || "No exclusions disclosed."}
+              </CardContent>
+            </Card>
+          </div>
+
+          {listing.trustDisclosures.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Trust & Transparency</h2>
+              <div className="grid gap-4">
+                {listing.trustDisclosures.map((disclosure) => (
+                  <Card key={disclosure.id}>
+                    <CardContent className="p-5">
+                      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2 flex items-center gap-1">
+                        <Shield className="size-3.5" />
+                        {disclosure.disclosureKind.replaceAll("_", " ")}
+                      </p>
+                      <p className="font-semibold text-foreground mb-1">{disclosure.headline}</p>
+                      <p className="text-sm text-muted-foreground">{disclosure.disclosureText}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {listing.clientDemographics.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-4">Client Types</h2>
+              <div className="flex flex-wrap gap-2">
+                {listing.clientDemographics.map((demographic) => (
+                  <Badge
+                    key={demographic}
+                    className="border border-border bg-background text-foreground"
+                  >
+                    {demographic.replaceAll("-", " ")}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-4">Specialties</h2>
@@ -459,6 +602,20 @@ export default function AdvisorProfilePage({
                       <p className="text-muted-foreground">
                         {review.body || "Review details are not available."}
                       </p>
+                      {review.reviewReply && (
+                        <div className="mt-4 rounded-lg border border-border bg-muted/30 p-3">
+                          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">
+                            Advisor reply
+                          </p>
+                          <p className="text-sm text-foreground">{review.reviewReply.body}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {review.reviewReply.responderName || "Advisor"}{" "}
+                            {review.reviewReply.publishedAt
+                              ? `• ${formatDate(review.reviewReply.publishedAt)}`
+                              : ""}
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))

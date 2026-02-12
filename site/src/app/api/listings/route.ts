@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { checkRateLimit, rateLimitHeaders,searchRatelimit } from "@/lib/ratelimit";
+import { checkRateLimit, rateLimitHeaders, searchRatelimit } from "@/lib/ratelimit";
 import { listingsQuerySchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
@@ -11,6 +11,7 @@ export interface ListingSearchResult {
   credentials: string[];
   avatar: string | null;
   specialties: string[];
+  specialtySlugs: string[];
   rating: number | null;
   reviewCount: number;
   location: {
@@ -24,15 +25,108 @@ export interface ListingSearchResult {
   acceptingStatus: string;
   freeConsultation: boolean;
   responseTimeHours: number | null;
+  responseRate: number | null;
+  profileCompletenessScore: number | null;
   feeModel: string | null;
   priceBand: string | null;
   serviceMode: string;
+  advisorType: string;
 }
+
+type ListingRow = {
+  id: string;
+  headline: string | null;
+  bio: string | null;
+  advisor_type: string;
+  service_mode: string;
+  fee_model: string | null;
+  price_band: string | null;
+  verification_level: string;
+  rating_avg: number | null;
+  review_count: number | null;
+  accepting_status: string;
+  free_consultation: boolean | null;
+  response_time_hours: number | null;
+  response_rate: number | null;
+  profile_completeness_score: number | null;
+  search_boost: number | null;
+  created_at: string;
+  advisor_profile: {
+    display_name?: string;
+    avatar_url?: string;
+  } | null;
+  business: {
+    trading_name?: string;
+    location?: {
+      suburb?: string;
+      state?: string;
+      postcode?: string;
+    } | null;
+  } | null;
+  listing_specialty: Array<{
+    specialty: {
+      name?: string;
+      slug?: string;
+    } | null;
+  }> | null;
+  listing_service_area: Array<{
+    state?: string | null;
+    postcode?: string | null;
+    is_nationwide?: boolean | null;
+    location?: {
+      suburb?: string | null;
+      state?: string | null;
+      postcode?: string | null;
+    } | null;
+  }> | null;
+};
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (!forwarded) return "anonymous";
   return forwarded.split(",")[0]?.trim() || "anonymous";
+}
+
+function normalize(value: string | null | undefined): string {
+  return (value || "").trim().toLowerCase();
+}
+
+function hasLocationMatch(
+  listing: ListingRow,
+  filters: { state?: string; postcode?: string; suburb?: string }
+): boolean {
+  const businessLocation = listing.business?.location;
+  const serviceAreas = listing.listing_service_area || [];
+
+  const suburbs = [businessLocation?.suburb, ...serviceAreas.map((area) => area.location?.suburb)].map(normalize);
+  const states = [businessLocation?.state, ...serviceAreas.map((area) => area.state || area.location?.state)].map(normalize);
+  const postcodes = [businessLocation?.postcode, ...serviceAreas.map((area) => area.postcode || area.location?.postcode)].map(normalize);
+
+  if (filters.state && !states.includes(normalize(filters.state))) return false;
+  if (filters.postcode && !postcodes.includes(normalize(filters.postcode))) return false;
+  if (filters.suburb && !suburbs.some((suburb) => suburb.includes(normalize(filters.suburb!)))) return false;
+
+  return true;
+}
+
+function matchesSearchQuery(listing: ListingRow, query: string): boolean {
+  const q = normalize(query);
+  if (!q) return true;
+
+  const specialtyNames = (listing.listing_specialty || [])
+    .map((entry) => normalize(entry.specialty?.name))
+    .filter(Boolean);
+  const haystack = [
+    normalize(listing.headline),
+    normalize(listing.bio),
+    normalize(listing.advisor_profile?.display_name),
+    normalize(listing.business?.trading_name),
+    ...specialtyNames,
+  ]
+    .join(" ")
+    .trim();
+
+  return haystack.includes(q);
 }
 
 const PUBLIC_CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
@@ -96,6 +190,7 @@ export async function GET(request: NextRequest) {
       specialty,
       state,
       postcode,
+      suburb,
       verified,
       accepting,
       service_mode: serviceMode,
@@ -109,7 +204,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    let dbQuery = supabase
+    const { data: listings, error } = await supabase
       .from("listing")
       .select(
         `
@@ -126,10 +221,13 @@ export async function GET(request: NextRequest) {
         accepting_status,
         free_consultation,
         response_time_hours,
+        response_rate,
+        profile_completeness_score,
+        search_boost,
+        created_at,
         advisor_profile!inner (
           display_name,
-          avatar_url,
-          years_experience
+          avatar_url
         ),
         business!inner (
           trading_name,
@@ -144,56 +242,21 @@ export async function GET(request: NextRequest) {
             name,
             slug
           )
+        ),
+        listing_service_area (
+          state,
+          postcode,
+          is_nationwide,
+          location:location_id (
+            suburb,
+            state,
+            postcode
+          )
         )
       `
       )
       .eq("is_active", true)
       .is("deleted_at", null);
-
-    if (advisorType) {
-      dbQuery = dbQuery.eq("advisor_type", advisorType);
-    }
-
-    if (verified === "true") {
-      dbQuery = dbQuery.in("verification_level", ["licence_verified", "identity_verified"]);
-    }
-
-    if (accepting) {
-      dbQuery = dbQuery.eq("accepting_status", accepting);
-    }
-
-    if (serviceMode && serviceMode !== "both") {
-      dbQuery = dbQuery.or(`service_mode.eq.${serviceMode},service_mode.eq.both`);
-    }
-
-    if (typeof minRating === "number") {
-      dbQuery = dbQuery.gte("rating_avg", minRating);
-    }
-
-    if (feeModel) {
-      dbQuery = dbQuery.eq("fee_model", feeModel);
-    }
-
-    if (query) {
-      dbQuery = dbQuery.or(`headline.ilike.%${query}%,bio.ilike.%${query}%`);
-    }
-
-    switch (sort) {
-      case "reviews_desc":
-        dbQuery = dbQuery.order("review_count", { ascending: false, nullsFirst: false });
-        break;
-      case "newest":
-        dbQuery = dbQuery.order("created_at", { ascending: false });
-        break;
-      case "rating_desc":
-      default:
-        dbQuery = dbQuery
-          .order("search_boost", { ascending: false, nullsFirst: false })
-          .order("rating_avg", { ascending: false, nullsFirst: false });
-        break;
-    }
-
-    const { data: listings, error } = await dbQuery;
 
     if (error) {
       return NextResponse.json<ApiResponse<null>>(
@@ -216,27 +279,48 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let filteredListings = listings || [];
+    let filteredListings = (listings || []) as unknown as ListingRow[];
 
-    if (specialty) {
-      filteredListings = filteredListings.filter((listing: Record<string, unknown>) => {
-        const specialties = listing.listing_specialty as Array<{ specialty: { slug: string } }> | null;
-        return specialties?.some((item) => item.specialty?.slug === specialty);
-      });
-    }
+    filteredListings = filteredListings.filter((listing) => {
+      if (advisorType && listing.advisor_type !== advisorType) return false;
+      if (verified === "true" && !["licence_verified", "identity_verified"].includes(listing.verification_level)) {
+        return false;
+      }
+      if (accepting && listing.accepting_status !== accepting) return false;
+      if (serviceMode && serviceMode !== "both") {
+        if (!(listing.service_mode === serviceMode || listing.service_mode === "both")) return false;
+      }
+      if (typeof minRating === "number" && (listing.rating_avg ?? 0) < minRating) return false;
+      if (feeModel && listing.fee_model !== feeModel) return false;
+      if (specialty) {
+        const slugs = (listing.listing_specialty || [])
+          .map((entry) => entry.specialty?.slug)
+          .filter(Boolean)
+          .map((slug) => normalize(slug!));
+        if (!slugs.includes(normalize(specialty))) return false;
+      }
+      if ((state || postcode || suburb) && !hasLocationMatch(listing, { state, postcode, suburb })) {
+        return false;
+      }
+      if (query && !matchesSearchQuery(listing, query)) return false;
+      return true;
+    });
 
-    if (state) {
-      filteredListings = filteredListings.filter((listing: Record<string, unknown>) => {
-        const business = listing.business as { location?: { state?: string } } | null;
-        return business?.location?.state === state;
-      });
-    }
-
-    if (postcode) {
-      filteredListings = filteredListings.filter((listing: Record<string, unknown>) => {
-        const business = listing.business as { location?: { postcode?: string } } | null;
-        return business?.location?.postcode === postcode;
-      });
+    switch (sort) {
+      case "reviews_desc":
+        filteredListings.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
+        break;
+      case "newest":
+        filteredListings.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+        break;
+      case "rating_desc":
+      default:
+        filteredListings.sort((a, b) => {
+          const boostDiff = (b.search_boost || 0) - (a.search_boost || 0);
+          if (boostDiff !== 0) return boostDiff;
+          return (b.rating_avg || 0) - (a.rating_avg || 0);
+        });
+        break;
     }
 
     const totalItems = filteredListings.length;
@@ -244,47 +328,49 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * pageSize;
     const pagedListings = filteredListings.slice(offset, offset + pageSize);
 
-    const items: ListingSearchResult[] = pagedListings.map((listing: Record<string, unknown>) => {
-      const advisorProfile = listing.advisor_profile as {
-        display_name?: string;
-        avatar_url?: string;
-      } | null;
-      const business = listing.business as {
-        trading_name?: string;
-        location?: { suburb?: string; state?: string; postcode?: string } | null;
-      } | null;
-      const specialtiesList = listing.listing_specialty as Array<{ specialty: { name: string } }> | null;
+    const items: ListingSearchResult[] = pagedListings.map((listing) => {
+      const specialties = (listing.listing_specialty || [])
+        .map((entry) => entry.specialty?.name)
+        .filter(Boolean) as string[];
+      const specialtySlugs = (listing.listing_specialty || [])
+        .map((entry) => entry.specialty?.slug)
+        .filter(Boolean) as string[];
 
-      const credentialStrings =
-        (listing.verification_level as string) === "licence_verified" ||
-        (listing.verification_level as string) === "identity_verified"
-          ? ["Verified"]
-          : [];
+      const verifiedListing = ["licence_verified", "identity_verified"].includes(
+        listing.verification_level
+      );
 
       return {
-        id: listing.id as string,
-        name: advisorProfile?.display_name || business?.trading_name || "Unknown",
-        credentials: credentialStrings,
-        avatar: advisorProfile?.avatar_url || null,
-        specialties: specialtiesList?.map((item) => item.specialty?.name).filter(Boolean) as string[] || [],
-        rating: listing.rating_avg as number | null,
-        reviewCount: (listing.review_count as number) || 0,
-        location: business?.location
+        id: listing.id,
+        name:
+          listing.advisor_profile?.display_name ||
+          listing.business?.trading_name ||
+          "Unknown",
+        credentials: verifiedListing ? ["Verified"] : [],
+        avatar: listing.advisor_profile?.avatar_url || null,
+        specialties,
+        specialtySlugs,
+        rating: listing.rating_avg,
+        reviewCount: listing.review_count || 0,
+        location: listing.business?.location
           ? {
-              suburb: business.location.suburb || null,
-              state: business.location.state || null,
-              postcode: business.location.postcode || null,
+              suburb: listing.business.location.suburb || null,
+              state: listing.business.location.state || null,
+              postcode: listing.business.location.postcode || null,
             }
           : null,
-        bio: listing.bio as string | null,
-        verified: ["licence_verified", "identity_verified"].includes(listing.verification_level as string),
-        verificationLevel: listing.verification_level as string,
-        acceptingStatus: listing.accepting_status as string,
-        freeConsultation: (listing.free_consultation as boolean) || false,
-        responseTimeHours: listing.response_time_hours as number | null,
-        feeModel: listing.fee_model as string | null,
-        priceBand: listing.price_band as string | null,
-        serviceMode: listing.service_mode as string,
+        bio: listing.bio,
+        verified: verifiedListing,
+        verificationLevel: listing.verification_level,
+        acceptingStatus: listing.accepting_status,
+        freeConsultation: listing.free_consultation || false,
+        responseTimeHours: listing.response_time_hours,
+        responseRate: listing.response_rate,
+        profileCompletenessScore: listing.profile_completeness_score,
+        feeModel: listing.fee_model,
+        priceBand: listing.price_band,
+        serviceMode: listing.service_mode,
+        advisorType: listing.advisor_type,
       };
     });
 
@@ -331,3 +417,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

@@ -46,11 +46,20 @@ export interface ListingDetail {
   // Availability
   acceptingStatus: string;
   responseTimeHours: number | null;
+  responseRate: number | null;
 
   // Trust signals
   verified: boolean;
   verificationLevel: string;
   lastVerifiedAt: string | null;
+  profileCompletenessScore: number | null;
+  clientDemographics: string[];
+  trustDisclosures: {
+    id: string;
+    disclosureKind: string;
+    headline: string;
+    disclosureText: string;
+  }[];
 
   // Ratings
   rating: number | null;
@@ -103,6 +112,11 @@ export interface ListingDetail {
     body: string | null;
     createdAt: string;
     consumerDisplayName: string | null;
+    reviewReply: {
+      body: string;
+      publishedAt: string | null;
+      responderName: string | null;
+    } | null;
   }[];
 }
 
@@ -172,6 +186,9 @@ export async function GET(
         free_consultation,
         accepting_status,
         response_time_hours,
+        response_rate,
+        profile_completeness_score,
+        client_demographics,
         verification_level,
         rating_avg,
         review_count,
@@ -296,6 +313,37 @@ export async function GET(
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(3);
+
+    const reviewIds = (reviews || []).map((review) => review.id);
+    const { data: reviewReplies } = reviewIds.length
+      ? await admin
+          .from("review_reply")
+          .select(
+            `
+            review_id,
+            reply_text,
+            published_at,
+            responder:responder_user_id (
+              display_name
+            )
+          `
+          )
+          .in("review_id", reviewIds)
+          .eq("status", "published")
+          .is("deleted_at", null)
+      : { data: [] as Array<{
+            review_id: string;
+            reply_text: string;
+            published_at: string | null;
+            responder: { display_name?: string } | null;
+          }> };
+
+    const { data: trustDisclosureRows } = await supabase
+      .from("trust_disclosure")
+      .select("id, disclosure_kind, headline, disclosure_text")
+      .eq("listing_id", id)
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
 
     // Type assertions for nested data - use unknown first then cast
     const advisorProfile = listing.advisor_profile as unknown as {
@@ -427,10 +475,20 @@ export async function GET(
 
       acceptingStatus: listing.accepting_status,
       responseTimeHours: listing.response_time_hours,
+      responseRate: listing.response_rate,
 
       verified: ["licence_verified", "identity_verified"].includes(listing.verification_level),
       verificationLevel: listing.verification_level,
       lastVerifiedAt: null,
+      profileCompletenessScore: listing.profile_completeness_score,
+      clientDemographics: listing.client_demographics || [],
+      trustDisclosures:
+        trustDisclosureRows?.map((disclosure) => ({
+          id: disclosure.id,
+          disclosureKind: disclosure.disclosure_kind,
+          headline: disclosure.headline,
+          disclosureText: disclosure.disclosure_text,
+        })) || [],
 
       rating: listing.rating_avg,
       reviewCount: listing.review_count || 0,
@@ -491,6 +549,8 @@ export async function GET(
       recentReviews:
         reviews?.map((r) => {
           const consumer = r.consumer as { display_name?: string } | null;
+          const reply = (reviewReplies || []).find((entry) => entry.review_id === r.id);
+          const responder = reply?.responder as { display_name?: string } | null;
           return {
             id: r.id,
             rating: r.rating,
@@ -498,6 +558,13 @@ export async function GET(
             body: r.body,
             createdAt: r.created_at,
             consumerDisplayName: consumer?.display_name || "Anonymous",
+            reviewReply: reply
+              ? {
+                  body: reply.reply_text,
+                  publishedAt: reply.published_at || null,
+                  responderName: responder?.display_name || null,
+                }
+              : null,
           };
         }) || [],
     };

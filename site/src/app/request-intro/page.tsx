@@ -11,7 +11,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
@@ -67,8 +67,8 @@ const adviceTypes = [
 
 const timelines = [
   { value: "asap", label: "As soon as possible" },
-  { value: "1-month", label: "Within 1 month" },
-  { value: "3-months", label: "Within 3 months" },
+  { value: "next_month", label: "Within 1 month" },
+  { value: "next_3_months", label: "Within 3 months" },
   { value: "exploring", label: "Just exploring options" },
 ]
 
@@ -104,10 +104,19 @@ const states = [
 export default function RequestIntroPage() {
   const searchParams = useSearchParams()
   const listingId = searchParams.get("listingId") || ""
+  const listingIds = (searchParams.get("listingIds") || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0)
+    .slice(0, 3)
+  const isGuidedMode = listingIds.length > 0
+  const targetListingIds = isGuidedMode ? listingIds : listingId ? [listingId] : []
+
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [selectedListings, setSelectedListings] = useState<Array<{ id: string; name: string }>>([])
 
   const [formData, setFormData] = useState<FormData>({
     adviceType: [],
@@ -125,6 +134,35 @@ export default function RequestIntroPage() {
     marketingConsent: false,
   })
 
+  useEffect(() => {
+    if (targetListingIds.length === 0) {
+      setSelectedListings([])
+      return
+    }
+
+    const controller = new AbortController()
+    async function loadSelectedListings() {
+      const results = await Promise.all(
+        targetListingIds.map(async (id) => {
+          const response = await fetch(`/api/listings/${id}`, {
+            signal: controller.signal,
+            cache: "no-store",
+          })
+          const payload = (await response.json()) as {
+            success: boolean
+            data?: { id: string; name: string }
+          }
+          if (!response.ok || !payload.success || !payload.data) return null
+          return { id: payload.data.id, name: payload.data.name }
+        })
+      )
+      setSelectedListings(results.filter(Boolean) as Array<{ id: string; name: string }>)
+    }
+
+    void loadSelectedListings()
+    return () => controller.abort()
+  }, [targetListingIds.join(",")])
+
   const updateFormData = (field: keyof FormData, value: FormData[keyof FormData]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -141,7 +179,11 @@ export default function RequestIntroPage() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.adviceType.length > 0 && formData.timeline
+        return (
+          formData.adviceType.length > 0 &&
+          !!formData.timeline &&
+          formData.primaryGoal.trim().length >= 20
+        )
       case 2:
         return formData.firstName && formData.lastName && formData.email && formData.location
       case 3:
@@ -164,8 +206,8 @@ export default function RequestIntroPage() {
   }
 
   const handleSubmit = async () => {
-    if (!listingId) {
-      setSubmitError("Please start from an advisor profile so we know who to introduce you to.")
+    if (targetListingIds.length === 0) {
+      setSubmitError("Please start from matched results or an advisor profile to submit a request.")
       return
     }
 
@@ -177,27 +219,52 @@ export default function RequestIntroPage() {
         .filter((value) => value.trim().length > 0)
         .join("\n\n")
 
-      const response = await fetch("/api/leads", {
+      if (problemSummary.trim().length < 20) {
+        setSubmitError("Please include at least 20 characters about your situation.")
+        return
+      }
+
+      const endpoint = isGuidedMode ? "/api/match-requests" : "/api/leads"
+      const requestBody = isGuidedMode
+        ? {
+            listingIds: targetListingIds,
+            problemSummary,
+            goalTags: formData.adviceType,
+            timeline: formData.timeline || null,
+            budgetRange: formData.investableAssets || null,
+            preferredMeetingMode: null,
+            preferredTimes: formData.location ? `Preferred state: ${formData.location.toUpperCase()}` : null,
+            idempotencyKey: crypto.randomUUID(),
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            privacyConsent: formData.privacyConsent,
+            marketingConsent: formData.marketingConsent,
+          }
+        : {
+            listingId: targetListingIds[0],
+            problemSummary,
+            goalTags: formData.adviceType,
+            timeline: formData.timeline || null,
+            budgetRange: formData.investableAssets || null,
+            preferredMeetingMode: null,
+            preferredTimes: formData.location ? `Preferred state: ${formData.location.toUpperCase()}` : null,
+            idempotencyKey: crypto.randomUUID(),
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            privacyConsent: formData.privacyConsent,
+            marketingConsent: formData.marketingConsent,
+          }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          listingId,
-          problemSummary: problemSummary || null,
-          goalTags: formData.adviceType,
-          timeline: formData.timeline || null,
-          budgetRange: formData.investableAssets || null,
-          preferredMeetingMode: null,
-          preferredTimes: formData.location ? `Preferred state: ${formData.location.toUpperCase()}` : null,
-          idempotencyKey: crypto.randomUUID(),
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          privacyConsent: formData.privacyConsent,
-          marketingConsent: formData.marketingConsent,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const payload = await response.json()
@@ -230,7 +297,11 @@ export default function RequestIntroPage() {
             </h1>
 
             <p className="text-lg text-muted-foreground mb-8">
-              Thank you, {formData.firstName}! We&apos;ve received your request and are matching you with suitable advisors. You&apos;ll hear from us within 24 hours.
+              Thank you, {formData.firstName}! We&apos;ve received your request and
+              {isGuidedMode
+                ? " shared it with your selected matched advisors."
+                : " sent it directly to the advisor you selected."}{" "}
+              You&apos;ll hear from us within 24 hours.
             </p>
 
             <Card className="text-left mb-8">
@@ -248,7 +319,11 @@ export default function RequestIntroPage() {
                     <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium shrink-0">2</div>
                     <div>
                       <p className="font-medium">Advisors reach out</p>
-                      <p className="text-sm text-muted-foreground">Up to 3 matched advisors will contact you to introduce themselves.</p>
+                      <p className="text-sm text-muted-foreground">
+                        {isGuidedMode
+                          ? "Up to 3 matched advisors will contact you to introduce themselves."
+                          : "The selected advisor will contact you to introduce themselves."}
+                      </p>
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -299,10 +374,34 @@ export default function RequestIntroPage() {
 
       <section className="py-12 lg:py-16">
         <div className="max-w-4xl mx-auto px-6">
-          {!listingId && (
+          {targetListingIds.length === 0 && (
             <Card className="mb-6 border-amber-200 bg-amber-50">
               <CardContent className="p-4 text-sm text-amber-900">
-                Start this form from an advisor profile to submit to a specific advisor.
+                Start this form from matched results or an advisor profile to submit your request.
+              </CardContent>
+            </Card>
+          )}
+          {targetListingIds.length > 0 && (
+            <Card className="mb-6 border-primary/20 bg-primary/5">
+              <CardContent className="p-4">
+                <p className="text-sm font-medium text-foreground mb-2">
+                  {isGuidedMode
+                    ? "Submitting to matched advisors"
+                    : "Submitting to selected advisor"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(selectedListings.length > 0
+                    ? selectedListings
+                    : targetListingIds.map((id) => ({ id, name: "Loading advisor..." }))
+                  ).map((listing) => (
+                    <span
+                      key={listing.id}
+                      className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1 text-xs text-foreground"
+                    >
+                      {listing.name}
+                    </span>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -353,15 +452,18 @@ export default function RequestIntroPage() {
                     {/* Primary Goal */}
                     <div>
                       <Label htmlFor="primaryGoal" className="text-base mb-2 block">
-                        What&apos;s your primary financial goal? (optional)
+                        Describe what you need help with (minimum 20 characters) *
                       </Label>
                       <Textarea
                         id="primaryGoal"
-                        placeholder="e.g., I want to retire comfortably in 10 years..."
+                        placeholder="e.g., I want to compare refinancing options and reduce repayments over the next 12 months."
                         value={formData.primaryGoal}
                         onChange={(e) => updateFormData("primaryGoal", e.target.value)}
                         className="min-h-[100px]"
                       />
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {formData.primaryGoal.trim().length}/20 minimum
+                      </p>
                     </div>
 
                     {/* Timeline */}

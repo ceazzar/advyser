@@ -32,6 +32,7 @@
     "verify:phase8": "npm run env:check && npm run db:migrate && npm run db:types && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run db:verify-phase7 && npm run db:verify-phase8 && npm run verify:ci",
     "verify:phase9": "npm run env:check && npm run db:migrate && npm run db:types && npm run db:seed && npm run db:verify-seed && npm run db:verify-phase6 && npm run db:verify-phase7 && npm run db:verify-phase8 && npm run db:verify-phase9 && npm run verify:ci",
     "verify:phase10": "npm run verify:phase9 && npm run verify:phase10-ui",
+    "verify:phase11": "npm run verify:phase10 && npm run test:run && playwright test e2e/tests/mvp1-public.spec.ts e2e/tests/mvp1-accessibility.spec.ts",
     "prepare": "husky"
   },
   "dependencies": {
