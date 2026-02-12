@@ -1,9 +1,7 @@
 "use client"
 
+import { DollarSign, ShieldCheck,Users } from "lucide-react"
 import * as React from "react"
-import { DollarSign, Users, ShieldCheck } from "lucide-react"
-
-import { cn } from "@/lib/utils"
 
 /**
  * Icon Optical Sizing:
@@ -11,6 +9,7 @@ import { cn } from "@/lib/utils"
  * These icons are contained in large circles for emphasis, no optical correction needed.
  */
 import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 export interface TransparencyBlockProps {
   className?: string

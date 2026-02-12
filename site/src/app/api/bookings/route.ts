@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
@@ -184,7 +185,7 @@ async function getBusinessBookings(
 
   if (error) {
     console.error("Business bookings query error:", error);
-    return { items: [], totalItems: 0 };
+    throw new Error(`Failed to fetch business bookings: ${error.message}`);
   }
 
   const items: BookingSummary[] = (bookings || []).map((booking) => {
@@ -261,7 +262,7 @@ async function getConsumerBookings(
         avatar_url
       ),
       business:business_id (
-        name
+        trading_name
       )
     `,
       { count: "exact" }
@@ -280,7 +281,7 @@ async function getConsumerBookings(
 
   if (error) {
     console.error("Consumer bookings query error:", error);
-    return { items: [], totalItems: 0 };
+    throw new Error(`Failed to fetch consumer bookings: ${error.message}`);
   }
 
   const items: BookingSummary[] = (bookings || []).map((booking) => {
@@ -291,11 +292,11 @@ async function getConsumerBookings(
     } | null;
 
     const business = booking.business as unknown as {
-      name?: string;
+      trading_name?: string;
     } | null;
 
     // Use advisor info if available, otherwise fall back to business name
-    const displayName = advisor?.display_name || business?.name || "Advisor";
+    const displayName = advisor?.display_name || business?.trading_name || "Advisor";
 
     return {
       id: booking.id,

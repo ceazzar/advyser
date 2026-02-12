@@ -1,11 +1,11 @@
 "use client"
 
+import { Activity, Clock, DollarSign, MapPin, Star, Target, UserCheck, Users, Users2,Zap } from "lucide-react"
 import * as React from "react"
-import { MapPin, Star, Clock, DollarSign, Users, Activity, Target, UserCheck, Zap, Users2 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
-
+import { FavoriteButton } from "@/components/composite/favorite-button"
+import { VerificationBadge } from "@/components/composite/verification-badge"
+import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 /**
  * Icon Optical Sizing Guide
  * -------------------------
@@ -28,8 +28,7 @@ import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/u
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { VerificationBadge } from "@/components/composite/verification-badge"
-import { FavoriteButton } from "@/components/composite/favorite-button"
+import { cn } from "@/lib/utils"
 
 /** V.1.1.5: Review snippet for advisor card */
 export interface ReviewSnippet {

@@ -1,9 +1,7 @@
 "use client"
 
+import { Clock, MapPin, Search, TrendingUp } from "lucide-react"
 import * as React from "react"
-import { Search, MapPin, TrendingUp, Clock, X } from "lucide-react"
-
-import { cn } from "@/lib/utils"
 
 /**
  * Icon Optical Sizing:
@@ -14,24 +12,25 @@ import { cn } from "@/lib/utils"
  */
 import { Button } from "@/components/ui/button"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+} from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 
 // ============================================================================
 // Mock Data
@@ -333,6 +332,7 @@ function HeroSearchBar({ onSearch, categories = defaultCategories, className }: 
         <div className="flex-shrink-0 md:min-w-[180px]">
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger
+              aria-label="Advice category"
               className={cn(
                 "h-12 md:h-14 px-4 md:px-6",
                 "border-0 bg-transparent",
@@ -363,16 +363,13 @@ function HeroSearchBar({ onSearch, categories = defaultCategories, className }: 
         {/* Location Input with Autocomplete */}
         <div className="flex-shrink-0 md:min-w-[180px]">
           <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-            <PopoverTrigger asChild>
+            <PopoverAnchor asChild>
               <div className="relative">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground pointer-events-none z-10" />
                 <input
                   ref={locationInputRef}
                   type="text"
-                  role="combobox"
-                  aria-expanded={locationOpen}
-                  aria-haspopup="listbox"
-                  aria-autocomplete="list"
+                  aria-label="Location"
                   value={location}
                   onChange={(e) => {
                     setLocation(e.target.value)
@@ -392,9 +389,9 @@ function HeroSearchBar({ onSearch, categories = defaultCategories, className }: 
                   autoComplete="off"
                 />
               </div>
-            </PopoverTrigger>
+            </PopoverAnchor>
             <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0"
+              className="w-[min(90vw,320px)] p-0"
               align="start"
               sideOffset={8}
               onOpenAutoFocus={(e) => e.preventDefault()}
@@ -440,16 +437,13 @@ function HeroSearchBar({ onSearch, categories = defaultCategories, className }: 
         {/* Keyword Search Input with Trending/Recent */}
         <div className="flex-1">
           <Popover open={keywordOpen && !keyword.trim()} onOpenChange={setKeywordOpen}>
-            <PopoverTrigger asChild>
+            <PopoverAnchor asChild>
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground pointer-events-none z-10" />
                 <input
                   ref={keywordInputRef}
                   type="text"
-                  role="combobox"
-                  aria-expanded={keywordOpen && !keyword.trim()}
-                  aria-haspopup="listbox"
-                  aria-autocomplete="list"
+                  aria-label="Search keywords"
                   value={keyword}
                   onChange={(e) => {
                     setKeyword(e.target.value)
@@ -473,9 +467,9 @@ function HeroSearchBar({ onSearch, categories = defaultCategories, className }: 
                   autoComplete="off"
                 />
               </div>
-            </PopoverTrigger>
+            </PopoverAnchor>
             <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] min-w-[320px] p-0"
+              className="w-[min(90vw,360px)] p-0"
               align="start"
               sideOffset={8}
               onOpenAutoFocus={(e) => e.preventDefault()}

@@ -1,25 +1,25 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  Shield,
-  Users,
   Clock,
+  Shield,
   Sparkles,
+  Users,
 } from "lucide-react"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { useState } from "react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FormProgress } from "@/components/ui/form-progress"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
@@ -28,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { FormProgress } from "@/components/ui/form-progress"
+import { Textarea } from "@/components/ui/textarea"
 
 // Multi-step form state
 interface FormData {
@@ -337,10 +337,14 @@ export default function RequestIntroPage() {
                             onClick={() => toggleAdviceType(type.value)}
                           >
                             <Checkbox
+                              id={`advice-${type.value}`}
+                              aria-label={type.label}
                               checked={formData.adviceType.includes(type.value)}
                               onCheckedChange={() => toggleAdviceType(type.value)}
                             />
-                            <span className="font-medium">{type.label}</span>
+                            <Label htmlFor={`advice-${type.value}`} className="font-medium cursor-pointer">
+                              {type.label}
+                            </Label>
                           </div>
                         ))}
                       </div>
@@ -462,7 +466,7 @@ export default function RequestIntroPage() {
                         value={formData.location}
                         onValueChange={(value) => updateFormData("location", value)}
                       >
-                        <SelectTrigger id="location">
+                        <SelectTrigger id="location" aria-label="State or territory">
                           <SelectValue placeholder="Select your state" />
                         </SelectTrigger>
                         <SelectContent>
@@ -530,7 +534,7 @@ export default function RequestIntroPage() {
                         value={formData.employmentStatus}
                         onValueChange={(value) => updateFormData("employmentStatus", value)}
                       >
-                        <SelectTrigger id="employmentStatus">
+                        <SelectTrigger id="employmentStatus" aria-label="Employment status">
                           <SelectValue placeholder="Select your status" />
                         </SelectTrigger>
                         <SelectContent>

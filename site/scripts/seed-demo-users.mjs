@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js"
-import pg from "pg"
 import { dirname, resolve } from "path"
+import pg from "pg"
 import { fileURLToPath } from "url"
+
 import {
   getDefaultEnvFiles,
   getMissingKeys,

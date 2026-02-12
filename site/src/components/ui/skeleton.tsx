@@ -130,4 +130,4 @@ function SkeletonCard({
   )
 }
 
-export { Skeleton, SkeletonText, SkeletonAvatar, SkeletonCard }
+export { Skeleton, SkeletonAvatar, SkeletonCard,SkeletonText }

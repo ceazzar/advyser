@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { beforeEach,describe, expect, it, vi } from "vitest"
+
 import { PublicHeader } from "../public-header"
 
 // Mock next/navigation
@@ -26,13 +27,12 @@ vi.mock("next/link", () => ({
   ),
 }))
 
-// Mock auth context
+// Mock auth context (legacy test helper for public-only mode)
 const mockUser = vi.fn(() => null)
-const mockLogout = vi.fn()
 vi.mock("@/lib/auth-context", () => ({
   useAuth: () => ({
     user: mockUser(),
-    logout: mockLogout,
+    logout: vi.fn(),
   }),
 }))
 
@@ -132,107 +132,32 @@ describe("PublicHeader", () => {
     })
   })
 
-  describe("Authentication state - logged out", () => {
-    beforeEach(() => {
+  describe("Public-only header behavior", () => {
+    it("does not render login/logout or dashboard controls when logged out", () => {
       mockUser.mockReturnValue(null)
-    })
-
-    it("renders Log in link when user is not authenticated", () => {
-      render(<PublicHeader />)
-
-      const loginLinks = screen.getAllByRole("link", { name: "Log in" })
-      expect(loginLinks.length).toBeGreaterThan(0)
-    })
-
-    it("Log in link has correct href", () => {
-      render(<PublicHeader />)
-
-      const loginLinks = screen.getAllByRole("link", { name: "Log in" })
-      expect(loginLinks[0]).toHaveAttribute("href", "/login")
-    })
-  })
-
-  describe("Authentication state - logged in as consumer", () => {
-    beforeEach(() => {
-      mockUser.mockReturnValue({
-        id: "123",
-        email: "test@example.com",
-        role: "consumer",
-        displayName: "Test User",
-      })
-    })
-
-    it("renders Dashboard link when user is authenticated", () => {
-      render(<PublicHeader />)
-
-      const dashboardLinks = screen.getAllByRole("link", { name: "Dashboard" })
-      expect(dashboardLinks.length).toBeGreaterThan(0)
-    })
-
-    it("Dashboard link points to consumer dashboard for consumer role", () => {
-      render(<PublicHeader />)
-
-      const dashboardLinks = screen.getAllByRole("link", { name: "Dashboard" })
-      expect(dashboardLinks[0]).toHaveAttribute("href", "/dashboard")
-    })
-
-    it("renders Log out button when user is authenticated", () => {
-      render(<PublicHeader />)
-
-      const logoutButtons = screen.getAllByRole("button", { name: /log out/i })
-      expect(logoutButtons.length).toBeGreaterThan(0)
-    })
-
-    it("Log out button calls logout function when clicked", async () => {
-      const user = userEvent.setup()
-      render(<PublicHeader />)
-
-      const logoutButtons = screen.getAllByRole("button", { name: /log out/i })
-      await user.click(logoutButtons[0])
-
-      expect(mockLogout).toHaveBeenCalledTimes(1)
-    })
-
-    it("does not render Log in link when user is authenticated", () => {
       render(<PublicHeader />)
 
       expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument()
-    })
-  })
-
-  describe("Authentication state - logged in as advisor", () => {
-    beforeEach(() => {
-      mockUser.mockReturnValue({
-        id: "456",
-        email: "advisor@example.com",
-        role: "advisor",
-        displayName: "Test Advisor",
-      })
+      expect(screen.queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: /log out/i })).not.toBeInTheDocument()
     })
 
-    it("Dashboard link points to advisor dashboard for advisor role", () => {
-      render(<PublicHeader />)
+    it("does not render login/logout or dashboard controls when authenticated", () => {
+      const authStates = [
+        { id: "123", email: "test@example.com", role: "consumer", displayName: "Test User" },
+        { id: "456", email: "advisor@example.com", role: "advisor", displayName: "Test Advisor" },
+        { id: "789", email: "admin@example.com", role: "admin", displayName: "Test Admin" },
+      ]
 
-      const dashboardLinks = screen.getAllByRole("link", { name: "Dashboard" })
-      expect(dashboardLinks[0]).toHaveAttribute("href", "/advisor")
-    })
-  })
+      for (const authState of authStates) {
+        mockUser.mockReturnValue(authState)
+        const { unmount } = render(<PublicHeader />)
 
-  describe("Authentication state - logged in as admin", () => {
-    beforeEach(() => {
-      mockUser.mockReturnValue({
-        id: "789",
-        email: "admin@example.com",
-        role: "admin",
-        displayName: "Test Admin",
-      })
-    })
-
-    it("Dashboard link points to admin dashboard for admin role", () => {
-      render(<PublicHeader />)
-
-      const dashboardLinks = screen.getAllByRole("link", { name: "Dashboard" })
-      expect(dashboardLinks[0]).toHaveAttribute("href", "/admin")
+        expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument()
+        expect(screen.queryByRole("button", { name: /log out/i })).not.toBeInTheDocument()
+        unmount()
+      }
     })
   })
 

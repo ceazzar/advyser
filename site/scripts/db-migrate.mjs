@@ -1,15 +1,16 @@
+import { spawnSync } from "child_process"
 import {
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   renameSync,
   unlinkSync,
   writeFileSync,
 } from "fs"
 import { basename, dirname, resolve } from "path"
 import { fileURLToPath } from "url"
-import { spawnSync } from "child_process"
+
 import {
   getDefaultEnvFiles,
   getMissingKeys,

@@ -1,31 +1,32 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
 import {
-  Search,
-  BookOpen,
-  FileText,
-  Calculator,
-  Video,
   ArrowRight,
-  Clock,
-  TrendingUp,
-  PiggyBank,
-  Shield,
-  Home,
+  BookOpen,
   Briefcase,
-  Heart,
+  Calculator,
   ChevronRight,
+  Clock,
+  FileText,
+  Heart,
+  Home,
+  PiggyBank,
+  Search,
+  Shield,
+  TrendingUp,
+  Video,
 } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useState } from "react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription,CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { publicBusiness } from "@/lib/public-business"
 
 // Resource types
 type ResourceType = "article" | "guide" | "calculator" | "video"
@@ -70,7 +71,7 @@ const resources: Resource[] = [
     category: "retirement",
     readTime: "15 min read",
     featured: true,
-    href: "/resources/retirement-planning-guide",
+    href: "/contact",
   },
   {
     id: "2",
@@ -79,7 +80,7 @@ const resources: Resource[] = [
     type: "calculator",
     category: "retirement",
     featured: true,
-    href: "/resources/super-calculator",
+    href: "/contact",
   },
   {
     id: "3",
@@ -88,7 +89,7 @@ const resources: Resource[] = [
     type: "article",
     category: "investing",
     readTime: "8 min read",
-    href: "/resources/investment-risk-guide",
+    href: "/contact",
   },
   {
     id: "4",
@@ -98,7 +99,7 @@ const resources: Resource[] = [
     category: "insurance",
     readTime: "12 min read",
     featured: true,
-    href: "/resources/life-insurance-guide",
+    href: "/contact",
   },
   {
     id: "5",
@@ -107,7 +108,7 @@ const resources: Resource[] = [
     type: "article",
     category: "property",
     readTime: "10 min read",
-    href: "/resources/first-home-vs-investment",
+    href: "/contact",
   },
   {
     id: "6",
@@ -116,7 +117,7 @@ const resources: Resource[] = [
     type: "article",
     category: "tax",
     readTime: "6 min read",
-    href: "/resources/tax-deductions-guide",
+    href: "/contact",
   },
   {
     id: "7",
@@ -125,7 +126,7 @@ const resources: Resource[] = [
     type: "guide",
     category: "estate",
     readTime: "8 min read",
-    href: "/resources/estate-planning-checklist",
+    href: "/contact",
   },
   {
     id: "8",
@@ -133,7 +134,7 @@ const resources: Resource[] = [
     description: "See how different asset allocations could affect your long-term returns based on historical data.",
     type: "calculator",
     category: "investing",
-    href: "/resources/portfolio-calculator",
+    href: "/contact",
   },
   {
     id: "9",
@@ -142,7 +143,7 @@ const resources: Resource[] = [
     type: "article",
     category: "retirement",
     readTime: "9 min read",
-    href: "/resources/smsf-vs-retail-super",
+    href: "/contact",
   },
   {
     id: "10",
@@ -151,7 +152,7 @@ const resources: Resource[] = [
     type: "article",
     category: "property",
     readTime: "7 min read",
-    href: "/resources/negative-gearing-explained",
+    href: "/contact",
   },
   {
     id: "11",
@@ -160,7 +161,7 @@ const resources: Resource[] = [
     type: "guide",
     category: "investing",
     readTime: "10 min read",
-    href: "/resources/choosing-financial-advisor",
+    href: "/contact",
   },
   {
     id: "12",
@@ -168,7 +169,7 @@ const resources: Resource[] = [
     description: "Calculate how much income protection cover you need based on your income, expenses, and existing coverage.",
     type: "calculator",
     category: "insurance",
-    href: "/resources/income-protection-calculator",
+    href: "/contact",
   },
 ]
 
@@ -263,9 +264,28 @@ function FeaturedResourceCard({ resource }: { resource: Resource }) {
 }
 
 export default function ResourcesPage() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeCategory, setActiveCategory] = useState("all")
-  const [activeType, setActiveType] = useState("all")
+  const typeParam = searchParams.get("type")
+  const activeType =
+    typeParam === "article" || typeParam === "guide" || typeParam === "calculator" || typeParam === "video"
+      ? typeParam
+      : "all"
+
+  const handleTypeChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value === "all") {
+      params.delete("type")
+    } else {
+      params.set("type", value)
+    }
+
+    const queryString = params.toString()
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname, { scroll: false })
+  }
 
   // Filter resources
   const filteredResources = resources.filter((resource) => {
@@ -358,7 +378,7 @@ export default function ResourcesPage() {
                     ].map((type) => (
                       <button
                         key={type.value}
-                        onClick={() => setActiveType(type.value)}
+                        onClick={() => handleTypeChange(type.value)}
                         className={`
                           w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-left
                           ${activeType === type.value
@@ -417,17 +437,12 @@ export default function ResourcesPage() {
               <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
                 Join thousands of Australians who receive our weekly newsletter with practical financial tips, market updates, and new resources.
               </p>
-              <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1"
-                />
-                <Button>
-                  Subscribe
+              <Button asChild>
+                <a href={`mailto:${publicBusiness.supportEmail}?subject=Resource%20updates`}>
+                  Request updates by email
                   <ArrowRight className="ml-2 size-4" />
-                </Button>
-              </form>
+                </a>
+              </Button>
               <p className="text-xs text-muted-foreground mt-4">
                 No spam, unsubscribe anytime. Read our{" "}
                 <Link href="/privacy" className="text-primary hover:underline">

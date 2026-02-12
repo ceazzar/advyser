@@ -1,12 +1,12 @@
 "use client"
 
-import * as React from "react"
+import { Calendar,FileText, LayoutDashboard, MessageSquare } from "lucide-react"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, FileText, MessageSquare, Calendar } from "lucide-react"
+import * as React from "react"
 
 import { ConsumerHeader } from "@/components/layout/consumer-header"
-import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav"
 import { DashboardFooter } from "@/components/layout/dashboard-footer"
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav"
 import { useAuth } from "@/lib/auth-context"
 
 const mobileNavItems = [

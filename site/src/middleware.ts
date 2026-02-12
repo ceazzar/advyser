@@ -1,4 +1,5 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest,NextResponse } from "next/server";
+
 import { pathHasPrefix } from "@/lib/mvp-mode";
 
 const DISABLED_ROUTE_PREFIXES = [
@@ -18,17 +19,26 @@ const DISABLED_ROUTE_PREFIXES = [
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const requestId = request.headers.get("x-request-id") || crypto.randomUUID();
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-request-id", requestId);
 
   if (DISABLED_ROUTE_PREFIXES.some((prefix) => pathHasPrefix(pathname, prefix))) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/";
     redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    const response = NextResponse.redirect(redirectUrl);
+    response.headers.set("x-request-id", requestId);
+    return response;
   }
 
-  return NextResponse.next({
-    request,
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
   });
+  response.headers.set("x-request-id", requestId);
+  return response;
 }
 
 export const config = {

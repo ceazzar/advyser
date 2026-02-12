@@ -13,32 +13,33 @@
  * Uses CSS transitions for compatibility (framer-motion blocked).
  */
 
-import { useState, useCallback, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { cn } from "@/lib/utils"
 import {
   ArrowLeft,
   ArrowRight,
-  Search,
-  TrendingUp,
-  Landmark,
-  Home,
-  CreditCard,
-  Shield,
-  HelpCircle,
-  Zap,
-  Calendar,
-  Compass,
-  Clock,
-  User,
-  Users,
   Briefcase,
   Building2,
+  Calendar,
   CheckCircle2,
+  Clock,
+  Compass,
+  CreditCard,
+  HelpCircle,
+  Home,
+  Landmark,
+  Search,
+  Shield,
+  TrendingUp,
+  User,
+  Users,
+  Zap,
 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useCallback, useEffect,useState } from "react"
+
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
 
 // Types
 type GoalValue =

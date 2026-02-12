@@ -1,35 +1,35 @@
 "use client"
 
-import * as React from "react"
-import { useRouter, usePathname } from "next/navigation"
 import {
-  LayoutDashboard,
-  Users,
-  MessageSquare,
-  Calendar,
-  UserCheck,
-  FileCheck,
+  ArrowRight,
+  BarChart3,
   Building2,
-  Star,
+  Calendar,
+  Clock,
+  FileCheck,
   FileWarning,
   FolderTree,
-  BarChart3,
-  Settings,
-  Search,
+  LayoutDashboard,
+  MessageSquare,
   Plus,
-  Clock,
-  ArrowRight,
+  Search,
+  Settings,
+  Star,
+  UserCheck,
+  Users,
 } from "lucide-react"
+import { usePathname,useRouter } from "next/navigation"
+import * as React from "react"
 
 import {
   CommandDialog,
-  CommandInput,
-  CommandList,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
-  CommandShortcut,
+  CommandList,
   CommandSeparator,
+  CommandShortcut,
 } from "@/components/ui/command"
 import { useAuth } from "@/lib/auth-context"
 import { logger } from "@/lib/logger"

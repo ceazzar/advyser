@@ -3,7 +3,7 @@
  * Australian financial advisor types with AFSL/ASIC compliance fields
  */
 
-import type { User, Profile } from './user'
+import type { Profile,User } from './user'
 
 /**
  * Verification status for credentials

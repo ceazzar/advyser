@@ -1,9 +1,10 @@
 "use client"
 
-import * as React from "react"
-import { Check, CheckCheck } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { format } from "date-fns"
+import { Check, CheckCheck } from "lucide-react"
+import * as React from "react"
+
+import { cn } from "@/lib/utils"
 
 export type MessageDeliveryStatus = "sending" | "sent" | "delivered" | "read"
 

@@ -1,9 +1,7 @@
 "use client"
 
+import { BadgeCheck, Heart, Lock,Shield, Users } from "lucide-react"
 import * as React from "react"
-import { Users, Heart, Shield, BadgeCheck, Lock } from "lucide-react"
-
-import { cn } from "@/lib/utils"
 
 /**
  * Icon Optical Sizing:
@@ -12,12 +10,12 @@ import { cn } from "@/lib/utils"
  * These icons are contained in circles, so optical correction is less critical.
  */
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
 export interface TrustStripProps {
   advisorCount?: number
   clientCount?: number
   showSecurityBadges?: boolean
-  showPartnerLogos?: boolean
   className?: string
 }
 
@@ -57,15 +55,10 @@ function SecurityBadge({ icon, label }: SecurityBadgeProps) {
   )
 }
 
-function PartnerLogoPlaceholder({ name }: { name: string }) {
-  return (
-    <div className="flex items-center justify-center h-8 px-4 rounded bg-muted/50 border border-border/50">
-      <span className="text-xs font-medium text-muted-foreground">{name}</span>
-    </div>
-  )
-}
-
 function formatNumber(num: number): string {
+  if (num <= 0) {
+    return "Live"
+  }
   if (num >= 1000000) {
     return `${(num / 1000000).toFixed(1)}M+`
   }
@@ -76,10 +69,9 @@ function formatNumber(num: number): string {
 }
 
 function TrustStrip({
-  advisorCount = 2500,
-  clientCount = 50000,
+  advisorCount = 0,
+  clientCount = 0,
   showSecurityBadges = true,
-  showPartnerLogos = true,
   className,
 }: TrustStripProps) {
   return (
@@ -96,7 +88,7 @@ function TrustStrip({
             <StatItem
               icon={<Users className="size-5" />}
               value={formatNumber(advisorCount)}
-              label="Trusted advisors"
+              label="Advisors listed"
             />
 
             <Separator
@@ -107,7 +99,7 @@ function TrustStrip({
             <StatItem
               icon={<Heart className="size-5" />}
               value={formatNumber(clientCount)}
-              label="Happy clients"
+              label="New introductions"
             />
           </div>
 
@@ -126,33 +118,12 @@ function TrustStrip({
                 />
                 <SecurityBadge
                   icon={<BadgeCheck className="size-4" />}
-                  label="Verified"
+                  label="Advisor credentials checked"
                 />
                 <SecurityBadge
                   icon={<Shield className="size-4" />}
-                  label="ASIC Regulated"
+                  label="Privacy protected"
                 />
-              </div>
-            </>
-          )}
-
-          {/* Partner Logos */}
-          {showPartnerLogos && (
-            <>
-              <Separator
-                orientation="vertical"
-                className="hidden lg:block h-10"
-              />
-
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  Featured in:
-                </span>
-                <div className="flex items-center gap-3">
-                  <PartnerLogoPlaceholder name="Forbes" />
-                  <PartnerLogoPlaceholder name="WSJ" />
-                  <PartnerLogoPlaceholder name="Bloomberg" />
-                </div>
               </div>
             </>
           )}

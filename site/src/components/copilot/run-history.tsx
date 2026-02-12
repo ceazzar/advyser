@@ -1,10 +1,8 @@
 "use client"
 
+import { ChevronRight, Clock, FileText, RotateCcw,Trash2 } from "lucide-react"
 import * as React from "react"
-import { Clock, Trash2, FileText, ChevronRight, RotateCcw } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +14,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export interface CopilotRun {
   id: string

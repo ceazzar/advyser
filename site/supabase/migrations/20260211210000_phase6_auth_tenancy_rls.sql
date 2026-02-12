@@ -170,6 +170,98 @@ BEGIN
     SELECT schemaname, tablename, policyname
     FROM pg_policies
     WHERE schemaname = 'public'
+      AND (
+        policyname LIKE '%\_admin\_all' ESCAPE '\'
+        OR policyname = ANY (ARRAY[
+          'users_self_select',
+          'users_self_update',
+          'users_self_profile_update',
+          'users_admin_role_manage',
+          'location_public_read',
+          'business_public_read',
+          'listing_public_read',
+          'listing_service_area_public_read',
+          'advisor_profile_public_read',
+          'specialty_public_read',
+          'service_offering_public_read',
+          'listing_specialty_public_read',
+          'listing_service_offering_public_read',
+          'advisor_availability_public_read',
+          'qualification_public_read',
+          'advisor_qualification_public_read',
+          'subscription_plan_public_read',
+          'advisor_business_role_self_or_business_admin_read',
+          'advisor_business_role_business_admin_manage',
+          'business_member_read',
+          'business_member_update',
+          'listing_business_manage',
+          'listing_service_area_business_manage',
+          'listing_specialty_business_manage',
+          'listing_service_offering_business_manage',
+          'advisor_availability_business_manage',
+          'advisor_profile_owner_or_business_manage',
+          'advisor_qualification_owner_or_business_manage',
+          'credential_owner_or_business_manage',
+          'file_upload_owner_read',
+          'file_upload_owner_insert',
+          'file_upload_owner_update',
+          'file_upload_owner_delete',
+          'lead_consumer_read',
+          'lead_consumer_insert',
+          'lead_business_read',
+          'lead_business_update',
+          'client_record_consumer_read',
+          'client_record_business_manage',
+          'conversation_consumer_read',
+          'conversation_consumer_update',
+          'conversation_consumer_insert',
+          'conversation_business_manage',
+          'message_participant_read',
+          'message_participant_insert',
+          'message_sender_update',
+          'message_sender_delete',
+          'message_read_receipt_participant_read',
+          'message_read_receipt_owner_insert',
+          'message_read_receipt_owner_delete',
+          'message_attachment_participant_read',
+          'message_attachment_participant_insert',
+          'message_attachment_participant_delete',
+          'booking_consumer_read',
+          'booking_business_manage',
+          'review_public_published_read',
+          'review_consumer_read',
+          'review_consumer_insert',
+          'review_consumer_update',
+          'review_business_read',
+          'user_shortlist_owner_read',
+          'user_shortlist_owner_insert',
+          'user_shortlist_owner_delete',
+          'claim_request_requester_insert',
+          'claim_request_requester_or_business_read',
+          'claim_request_evidence_requester_or_business_read',
+          'claim_request_evidence_requester_insert',
+          'advisor_note_participant_manage',
+          'advisor_note_revision_participant_manage',
+          'advisor_note_business_member_read',
+          'advisor_note_business_member_insert',
+          'advisor_note_business_member_update',
+          'advisor_note_business_member_delete',
+          'advisor_note_revision_business_member_read',
+          'advisor_note_revision_business_member_insert',
+          'advisor_note_revision_business_member_update',
+          'advisor_note_revision_business_member_delete',
+          'task_owner_or_client_record_member_manage',
+          'copilot_run_business_or_advisor_manage',
+          'copilot_input_artifact_participant_manage',
+          'copilot_output_participant_manage',
+          'subscription_business_manage',
+          'invoice_business_manage',
+          'payment_method_business_manage',
+          'notification_owner_manage',
+          'audit_event_actor_read',
+          'audit_event_actor_insert'
+        ])
+      )
   LOOP
     EXECUTE format(
       'DROP POLICY IF EXISTS %I ON %I.%I',
@@ -230,12 +322,30 @@ FOR SELECT
 TO authenticated
 USING (auth.uid() = id);
 
-CREATE POLICY users_self_update
+REVOKE UPDATE ON TABLE public.users FROM authenticated;
+GRANT UPDATE (first_name, last_name, display_name, avatar_url, phone, updated_at) ON TABLE public.users TO authenticated;
+GRANT UPDATE (role) ON TABLE public.users TO authenticated;
+
+CREATE POLICY users_self_profile_update
 ON public.users
 FOR UPDATE
 TO authenticated
 USING (auth.uid() = id)
-WITH CHECK (auth.uid() = id);
+WITH CHECK (
+  auth.uid() = id
+  AND role = (
+    SELECT u.role
+    FROM public.users u
+    WHERE u.id = auth.uid()
+  )
+);
+
+CREATE POLICY users_admin_role_manage
+ON public.users
+FOR UPDATE
+TO authenticated
+USING (public.is_admin())
+WITH CHECK (public.is_admin());
 
 -- Public marketplace catalog.
 CREATE POLICY location_public_read
@@ -716,43 +826,130 @@ WITH CHECK (
 );
 
 -- Advisor workspace artifacts.
-CREATE POLICY advisor_note_participant_manage
+CREATE POLICY advisor_note_business_member_read
 ON public.advisor_note
-FOR ALL
+FOR SELECT
 TO authenticated
 USING (
-  author_user_id = auth.uid()
-  OR public.is_client_record_participant(client_record_id)
-)
-WITH CHECK (
-  author_user_id = auth.uid()
-  OR public.is_client_record_participant(client_record_id)
+  EXISTS (
+    SELECT 1
+    FROM public.client_record cr
+    WHERE cr.id = client_record_id
+      AND public.is_business_member(cr.business_id)
+  )
 );
 
-CREATE POLICY advisor_note_revision_participant_manage
+CREATE POLICY advisor_note_business_member_insert
+ON public.advisor_note
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  author_user_id = auth.uid()
+  AND EXISTS (
+    SELECT 1
+    FROM public.client_record cr
+    WHERE cr.id = client_record_id
+      AND public.is_business_member(cr.business_id)
+  )
+);
+
+CREATE POLICY advisor_note_business_member_update
+ON public.advisor_note
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.client_record cr
+    WHERE cr.id = client_record_id
+      AND public.is_business_member(cr.business_id)
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM public.client_record cr
+    WHERE cr.id = client_record_id
+      AND public.is_business_member(cr.business_id)
+  )
+);
+
+CREATE POLICY advisor_note_business_member_delete
+ON public.advisor_note
+FOR DELETE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.client_record cr
+    WHERE cr.id = client_record_id
+      AND public.is_business_member(cr.business_id)
+  )
+);
+
+CREATE POLICY advisor_note_revision_business_member_read
 ON public.advisor_note_revision
-FOR ALL
+FOR SELECT
 TO authenticated
 USING (
   EXISTS (
     SELECT 1
     FROM public.advisor_note an
+    JOIN public.client_record cr ON cr.id = an.client_record_id
     WHERE an.id = advisor_note_id
-      AND (
-        an.author_user_id = auth.uid()
-        OR public.is_client_record_participant(an.client_record_id)
-      )
+      AND public.is_business_member(cr.business_id)
+  )
+);
+
+CREATE POLICY advisor_note_revision_business_member_insert
+ON public.advisor_note_revision
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  created_by_user_id = auth.uid()
+  AND EXISTS (
+    SELECT 1
+    FROM public.advisor_note an
+    JOIN public.client_record cr ON cr.id = an.client_record_id
+    WHERE an.id = advisor_note_id
+      AND public.is_business_member(cr.business_id)
+  )
+);
+
+CREATE POLICY advisor_note_revision_business_member_update
+ON public.advisor_note_revision
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.advisor_note an
+    JOIN public.client_record cr ON cr.id = an.client_record_id
+    WHERE an.id = advisor_note_id
+      AND public.is_business_member(cr.business_id)
   )
 )
 WITH CHECK (
   EXISTS (
     SELECT 1
     FROM public.advisor_note an
+    JOIN public.client_record cr ON cr.id = an.client_record_id
     WHERE an.id = advisor_note_id
-      AND (
-        an.author_user_id = auth.uid()
-        OR public.is_client_record_participant(an.client_record_id)
-      )
+      AND public.is_business_member(cr.business_id)
+  )
+);
+
+CREATE POLICY advisor_note_revision_business_member_delete
+ON public.advisor_note_revision
+FOR DELETE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.advisor_note an
+    JOIN public.client_record cr ON cr.id = an.client_record_id
+    WHERE an.id = advisor_note_id
+      AND public.is_business_member(cr.business_id)
   )
 );
 

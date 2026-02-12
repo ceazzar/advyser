@@ -60,8 +60,8 @@ Open `http://localhost:3000`.
 - `npm run db:verify-phase6`: verify table-wide RLS + cross-tenant access controls.
 - `npm run db:verify-phase7`: verify trust badge policy, consent/audit writes, and review integrity scaffolding.
 - `npm run db:verify-phase8`: verify phase-8 schema/data-layer coverage, generated types, and seeded flow assertions.
-- `npm run db:verify-phase9`: verify phase-9 API route contracts, lifecycle transition coverage, and DB function presence.
-- `npm run verify:phase10-ui`: verify phase-10 UI critical routes use live APIs and contain no blocked mock patterns.
+- `npm run db:verify-phase9`: verify phase-9 API route contracts, lifecycle transition coverage, DB function presence, runtime query contracts, and live HTTP listings contracts (defaults to `http://localhost:3000` when reachable).
+- `npm run verify:phase10-ui`: verify phase-10 UI critical routes use live APIs, contain no blocked mock patterns, pass runtime fixture checks, and pass live HTTP funnel checks (defaults to `http://localhost:3000` when reachable).
 - `npm run verify:ci`: lint + tests + build.
 - `npm run verify:phase5`: env + migrate + typegen + seed + seed verification + CI baseline.
 - `npm run verify:phase6`: env + migrate + seed + seed verification + RLS verification + CI baseline.
@@ -69,3 +69,6 @@ Open `http://localhost:3000`.
 - `npm run verify:phase8`: env + migrate + typegen + seed + seed/RLS/trust/phase8 verification + CI baseline.
 - `npm run verify:phase9`: env + migrate + typegen + seed + phase6/7/8/9 verification + CI baseline.
 - `npm run verify:phase10`: phase9 verification + phase10 UI integration verification.
+
+Optional:
+- set `PHASE_VERIFY_BASE_URL` (or `VERIFY_BASE_URL`) to target a non-default app URL for phase9/phase10 HTTP checks.

@@ -1,7 +1,7 @@
 # Phase 6 Gate Evidence
 
 ## Document control
-- Version: v1.0
+- Version: v1.1
 - Date: 2026-02-11
 - Phase: 6 (Authentication + Tenancy + RLS)
 - Plan reference: `/Users/ceazar/Code Base/advyser/plans/Master-Plan-v2.md`
@@ -18,19 +18,18 @@ From Phase 6 gate:
 - Migration artifacts:
   - `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211210000_phase6_auth_tenancy_rls.sql`
   - `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211213000_phase6_rls_policy_fix.sql`
+  - `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211234000_phase6_security_hardening.sql`
 - Verification command:
   - `npm run db:verify-phase6`
 - Verification output snapshot:
-  - `{"tables_checked":39,"rls_enabled_all_tables":true,"policy_presence_all_tables":true,...}`
+  - `{"tables_checked":43,"rls_enabled_all_tables":true,"policy_presence_all_tables":true,...}`
 
 ### 2. Server-side permissions mirror role guards: PASS ✅
-- Middleware role-path enforcement:
-  - `/Users/ceazar/Code Base/advyser/site/src/middleware.ts`
 - Shared role redirect/path policy:
   - `/Users/ceazar/Code Base/advyser/site/src/lib/auth-routing.ts`
 - Unit tests:
   - `/Users/ceazar/Code Base/advyser/site/src/lib/auth-routing.test.ts`
-  - `vitest` pass included in `verify:phase6`.
+  - segment-boundary checks covered (`/dashboardevil`, `/advisory`, `/admin-tools`).
 
 ### 3. Cross-tenant protection assertions: PASS ✅
 - Verification command:
@@ -39,8 +38,12 @@ From Phase 6 gate:
   - outsider cannot read another tenant lead
   - outsider cannot read another tenant conversation
   - outsider cannot insert lead for a different consumer
-  - advisor business-member access succeeds for assigned tenant data
-  - admin access succeeds for protected records
+  - consumer cannot read foreign claim by deterministic ID
+  - requester can read own claim by deterministic ID
+  - admin can read foreign claim by deterministic ID
+  - consumer cannot read or insert advisor internal notes
+  - consumer cannot self-promote `public.users.role` to `admin`
+  - advisor business-member access succeeds for protected records
   - anon catalog read works only for intended public surfaces
 
 ### End-to-end phase gate run: PASS ✅
@@ -50,11 +53,16 @@ From Phase 6 gate:
   - env validation, migration push, seed, seed verification, phase6 RLS verification, lint, tests, build.
 
 ## Quality review notes
-- Focus areas reviewed: policy coverage breadth, migration idempotence, role-path consistency, and cross-tenant negative tests.
-- Blocking findings: none.
+- Review-driven blockers remediated:
+  - self role escalation closed via restricted `users` update grants/policies and role-mutation guard trigger.
+  - advisor-note consumer access removed via business-member-only advisor note/revision policies.
+  - verifier blind spots closed with deterministic claim/note fixtures and strict allow/deny assertions.
+  - route-prefix confusion closed with segment-boundary path checks.
+  - migration policy reset behavior narrowed to migration-owned policy names.
 - Residual non-blocking debt:
   - Existing app lint warnings remain (0 lint errors).
   - Next.js middleware deprecation warning (`middleware` -> `proxy`) noted for future phase.
+  - Build warns when Upstash packages are absent; runtime fallback logs and continues.
 
 ## Completion decision
 - Phase 6 gate status: `PASS ✅` (`PHASE_GATE_COMPLETE`)

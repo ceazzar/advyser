@@ -1,20 +1,19 @@
 "use client"
 
-import * as React from "react"
 import { format } from "date-fns"
-import { Video, Phone, MapPin, Clock, Calendar } from "lucide-react"
+import { Calendar,Clock, MapPin, Phone, Video } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
-
+import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 /**
  * Icon Optical Sizing:
  * - Stroke icons inline with text: size-[18px] for optical parity with filled icons
  * - Small inline icons (meeting type): size-3.5 (14px) for compact display
  */
 import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export interface BookingCardProps {
   id: string

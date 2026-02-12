@@ -1,18 +1,17 @@
 "use client"
 
-import * as React from "react"
-import Link from "next/link"
 import { X } from "lucide-react"
+import Link from "next/link"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
-
+import { Avatar, AvatarFallback, AvatarGroup, AvatarImage, getInitials } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 /**
  * Icon Optical Sizing:
  * - X icon in Clear button: size-4 (16px) standard button icon
  */
 import { useShortlist } from "@/lib/shortlist-context"
-import { Avatar, AvatarImage, AvatarFallback, AvatarGroup, getInitials } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export interface AdvisorInfo {
   id: string

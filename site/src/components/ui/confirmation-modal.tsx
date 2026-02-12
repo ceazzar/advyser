@@ -1,9 +1,8 @@
 "use client"
 
+import { AlertCircle, AlertTriangle, Info } from "lucide-react"
 import * as React from "react"
-import { AlertTriangle, AlertCircle, Info } from "lucide-react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
 
 type IconVariant = "warning" | "danger" | "info"
 

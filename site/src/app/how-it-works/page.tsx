@@ -1,31 +1,31 @@
 "use client"
 
-import Link from "next/link"
 import {
-  Search,
-  Users,
-  MessageSquare,
-  CheckCircle2,
   ArrowRight,
-  Shield,
+  BadgeCheck,
+  CheckCircle2,
   Clock,
   DollarSign,
-  BadgeCheck,
-  Star,
-  Quote,
   HelpCircle,
+  MessageSquare,
+  Quote,
+  Search,
+  Shield,
+  Star,
+  Users,
 } from "lucide-react"
+import Link from "next/link"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Avatar, AvatarFallback, getInitials } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 
 // Process steps with detailed info
 const steps = [

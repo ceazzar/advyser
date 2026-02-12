@@ -1,8 +1,8 @@
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 interface LeadCardSkeletonProps {
   className?: string

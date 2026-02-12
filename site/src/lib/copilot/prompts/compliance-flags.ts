@@ -8,8 +8,9 @@
  * @version 1.0.0
  */
 
-import type { ComplianceFlags, ComplianceFlag, WordingSuggestion } from '@/types/copilot'
-import { buildSystemPrompt, PROMPT_VERSION, FORBIDDEN_PHRASES_LIST } from './_shared_rules'
+import type { ComplianceFlag, ComplianceFlags, WordingSuggestion } from '@/types/copilot'
+
+import { buildSystemPrompt, FORBIDDEN_PHRASES_LIST,PROMPT_VERSION } from './_shared_rules'
 
 // =============================================================================
 // INPUT TYPES

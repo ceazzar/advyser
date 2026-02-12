@@ -1,10 +1,11 @@
 "use client"
 
+import { Paperclip, Send, Smile } from "lucide-react"
 import * as React from "react"
-import { Send, Paperclip, Smile } from "lucide-react"
-import { cn } from "@/lib/utils"
+
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 export interface MessageInputProps {
   onSend?: (message: string) => void

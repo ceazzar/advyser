@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { Heart } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
+import { Heart } from "lucide-react"
+import * as React from "react"
 
 import { cn } from "@/lib/utils"
 

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { checkRateLimit, rateLimitHeaders,searchRatelimit } from "@/lib/ratelimit";
+import { listingsQuerySchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
-import { checkRateLimit, searchRatelimit, rateLimitHeaders } from "@/lib/ratelimit";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
-/**
- * Listing search result type
- */
 export interface ListingSearchResult {
   id: string;
   name: string;
@@ -30,32 +29,19 @@ export interface ListingSearchResult {
   serviceMode: string;
 }
 
-/**
- * GET /api/listings
- *
- * Search and filter advisor listings.
- *
- * Query Parameters:
- * - advisor_type: Filter by type (financial_adviser, mortgage_broker, etc.)
- * - specialty: Filter by specialty slug
- * - state: Filter by AU state (NSW, VIC, etc.)
- * - postcode: Filter by postcode
- * - verified: Only verified advisors (true/false)
- * - accepting: Availability filter (taking_clients, waitlist, not_taking)
- * - service_mode: online | in_person | both
- * - min_rating: Minimum star rating (1-5)
- * - fee_model: Filter by fee model
- * - q: Text search (name, bio, specialties)
- * - sort: Sort order (rating_desc, reviews_desc, newest)
- * - page: Page number (default: 1)
- * - pageSize: Items per page (default: 20, max: 50)
- */
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (!forwarded) return "anonymous";
+  return forwarded.split(",")[0]?.trim() || "anonymous";
+}
+
+const PUBLIC_CACHE_CONTROL = "public, s-maxage=60, stale-while-revalidate=300";
+
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Rate limiting
-    const ip = request.headers.get("x-forwarded-for") || "anonymous";
+    const ip = getClientIp(request);
     const rateLimitResult = await checkRateLimit(searchRatelimit, ip);
 
     if (!rateLimitResult.success) {
@@ -71,31 +57,58 @@ export async function GET(request: NextRequest) {
         },
         {
           status: 429,
-          headers: rateLimitHeaders(rateLimitResult.remaining, rateLimitResult.reset),
+          headers: {
+            ...rateLimitHeaders(rateLimitResult.remaining, rateLimitResult.reset),
+            "Cache-Control": "no-store",
+          },
         }
       );
     }
 
-    // Parse query parameters
-    const searchParams = request.nextUrl.searchParams;
-    const advisorType = searchParams.get("advisor_type");
-    const specialty = searchParams.get("specialty");
-    const state = searchParams.get("state");
-    const postcode = searchParams.get("postcode");
-    const verified = searchParams.get("verified");
-    const accepting = searchParams.get("accepting");
-    const serviceMode = searchParams.get("service_mode");
-    const minRating = searchParams.get("min_rating");
-    const feeModel = searchParams.get("fee_model");
-    const query = searchParams.get("q");
-    const sort = searchParams.get("sort") || "rating_desc";
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "20", 10)));
+    const parsedQuery = listingsQuerySchema.safeParse(
+      Object.fromEntries(request.nextUrl.searchParams.entries())
+    );
 
-    // Create Supabase client
+    if (!parsedQuery.success) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: {
+            code: "INVALID_QUERY",
+            message: "One or more query parameters are invalid.",
+            details: parsedQuery.error.flatten().fieldErrors,
+            statusCode: 400,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        {
+          status: 400,
+          headers: {
+            ...rateLimitHeaders(rateLimitResult.remaining, rateLimitResult.reset),
+            "Cache-Control": "no-store",
+          },
+        }
+      );
+    }
+
+    const {
+      advisor_type: advisorType,
+      specialty,
+      state,
+      postcode,
+      verified,
+      accepting,
+      service_mode: serviceMode,
+      min_rating: minRating,
+      fee_model: feeModel,
+      q: query,
+      sort,
+      page,
+      pageSize,
+    } = parsedQuery.data;
+
     const supabase = await createClient();
 
-    // Build query
     let dbQuery = supabase
       .from("listing")
       .select(
@@ -131,19 +144,12 @@ export async function GET(request: NextRequest) {
             name,
             slug
           )
-        ),
-        credential (
-          afsl_number,
-          asic_rep_number,
-          verification_status
         )
-      `,
-        { count: "exact" }
+      `
       )
       .eq("is_active", true)
       .is("deleted_at", null);
 
-    // Apply filters
     if (advisorType) {
       dbQuery = dbQuery.eq("advisor_type", advisorType);
     }
@@ -160,25 +166,18 @@ export async function GET(request: NextRequest) {
       dbQuery = dbQuery.or(`service_mode.eq.${serviceMode},service_mode.eq.both`);
     }
 
-    if (minRating) {
-      const rating = parseFloat(minRating);
-      if (!isNaN(rating)) {
-        dbQuery = dbQuery.gte("rating_avg", rating);
-      }
+    if (typeof minRating === "number") {
+      dbQuery = dbQuery.gte("rating_avg", minRating);
     }
 
     if (feeModel) {
       dbQuery = dbQuery.eq("fee_model", feeModel);
     }
 
-    // Text search (if search_vector exists, use full-text; otherwise use ilike)
     if (query) {
-      dbQuery = dbQuery.or(
-        `headline.ilike.%${query}%,bio.ilike.%${query}%`
-      );
+      dbQuery = dbQuery.or(`headline.ilike.%${query}%,bio.ilike.%${query}%`);
     }
 
-    // Sorting
     switch (sort) {
       case "reviews_desc":
         dbQuery = dbQuery.order("review_count", { ascending: false, nullsFirst: false });
@@ -194,15 +193,9 @@ export async function GET(request: NextRequest) {
         break;
     }
 
-    // Pagination
-    const offset = (page - 1) * pageSize;
-    dbQuery = dbQuery.range(offset, offset + pageSize - 1);
-
-    // Execute query
-    const { data: listings, error, count } = await dbQuery;
+    const { data: listings, error } = await dbQuery;
 
     if (error) {
-      console.error("Listings query error:", error);
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
@@ -213,20 +206,25 @@ export async function GET(request: NextRequest) {
           },
           timestamp: new Date().toISOString(),
         },
-        { status: 500 }
+        {
+          status: 500,
+          headers: {
+            ...rateLimitHeaders(rateLimitResult.remaining, rateLimitResult.reset),
+            "Cache-Control": "no-store",
+          },
+        }
       );
     }
 
-    // Filter by specialty (post-query since it's a junction table)
     let filteredListings = listings || [];
+
     if (specialty) {
       filteredListings = filteredListings.filter((listing: Record<string, unknown>) => {
         const specialties = listing.listing_specialty as Array<{ specialty: { slug: string } }> | null;
-        return specialties?.some((s) => s.specialty?.slug === specialty);
+        return specialties?.some((item) => item.specialty?.slug === specialty);
       });
     }
 
-    // Filter by location (post-query for nested relation)
     if (state) {
       filteredListings = filteredListings.filter((listing: Record<string, unknown>) => {
         const business = listing.business as { location?: { state?: string } } | null;
@@ -241,25 +239,34 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Transform to API response shape
-    const items: ListingSearchResult[] = filteredListings.map((listing: Record<string, unknown>) => {
-      const advisorProfile = listing.advisor_profile as { display_name?: string; avatar_url?: string } | null;
-      const business = listing.business as { trading_name?: string; location?: { suburb?: string; state?: string; postcode?: string } | null } | null;
-      const specialtiesList = listing.listing_specialty as Array<{ specialty: { name: string } }> | null;
-      const credentials = listing.credential as Array<{ afsl_number?: string; verification_status?: string }> | null;
+    const totalItems = filteredListings.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const offset = (page - 1) * pageSize;
+    const pagedListings = filteredListings.slice(offset, offset + pageSize);
 
-      // Build credentials string array
-      const credentialStrings: string[] = [];
-      if (credentials?.some((c) => c.verification_status === "verified")) {
-        credentialStrings.push("CFP"); // Placeholder - should come from qualifications table
-      }
+    const items: ListingSearchResult[] = pagedListings.map((listing: Record<string, unknown>) => {
+      const advisorProfile = listing.advisor_profile as {
+        display_name?: string;
+        avatar_url?: string;
+      } | null;
+      const business = listing.business as {
+        trading_name?: string;
+        location?: { suburb?: string; state?: string; postcode?: string } | null;
+      } | null;
+      const specialtiesList = listing.listing_specialty as Array<{ specialty: { name: string } }> | null;
+
+      const credentialStrings =
+        (listing.verification_level as string) === "licence_verified" ||
+        (listing.verification_level as string) === "identity_verified"
+          ? ["Verified"]
+          : [];
 
       return {
         id: listing.id as string,
         name: advisorProfile?.display_name || business?.trading_name || "Unknown",
         credentials: credentialStrings,
         avatar: advisorProfile?.avatar_url || null,
-        specialties: specialtiesList?.map((s) => s.specialty?.name).filter(Boolean) as string[] || [],
+        specialties: specialtiesList?.map((item) => item.specialty?.name).filter(Boolean) as string[] || [],
         rating: listing.rating_avg as number | null,
         reviewCount: (listing.review_count as number) || 0,
         location: business?.location
@@ -270,9 +277,7 @@ export async function GET(request: NextRequest) {
             }
           : null,
         bio: listing.bio as string | null,
-        verified: ["licence_verified", "identity_verified"].includes(
-          listing.verification_level as string
-        ),
+        verified: ["licence_verified", "identity_verified"].includes(listing.verification_level as string),
         verificationLevel: listing.verification_level as string,
         acceptingStatus: listing.accepting_status as string,
         freeConsultation: (listing.free_consultation as boolean) || false,
@@ -282,10 +287,6 @@ export async function GET(request: NextRequest) {
         serviceMode: listing.service_mode as string,
       };
     });
-
-    // Build pagination info
-    const totalItems = count || filteredListings.length;
-    const totalPages = Math.ceil(totalItems / pageSize);
 
     const response: ApiResponse<PaginatedResponse<ListingSearchResult>> = {
       success: true,
@@ -303,13 +304,14 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     };
 
-    // Add performance header
-    const headers = new Headers(rateLimitHeaders(rateLimitResult.remaining, rateLimitResult.reset));
-    headers.set("X-Response-Time", `${Date.now() - startTime}ms`);
+    const headers = new Headers({
+      ...rateLimitHeaders(rateLimitResult.remaining, rateLimitResult.reset),
+      "X-Response-Time": `${Date.now() - startTime}ms`,
+      "Cache-Control": PUBLIC_CACHE_CONTROL,
+    });
 
     return NextResponse.json(response, { headers });
-  } catch (error) {
-    console.error("Listings API error:", error);
+  } catch {
     return NextResponse.json<ApiResponse<null>>(
       {
         success: false,
@@ -320,7 +322,12 @@ export async function GET(request: NextRequest) {
         },
         timestamp: new Date().toISOString(),
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
     );
   }
 }

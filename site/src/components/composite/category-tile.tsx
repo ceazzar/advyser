@@ -1,7 +1,7 @@
-import * as React from "react"
+import { Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { Users } from "lucide-react"
+import * as React from "react"
 
 import { cn } from "@/lib/utils"
 

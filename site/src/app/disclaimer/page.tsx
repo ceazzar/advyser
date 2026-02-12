@@ -1,11 +1,11 @@
 "use client"
 
-import Link from "next/link"
 import { AlertTriangle, ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
-import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 
 export default function DisclaimerPage() {
   return (

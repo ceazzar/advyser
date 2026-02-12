@@ -9,6 +9,7 @@
  */
 
 import type { ActionItems, MeetingSummary } from '@/types/copilot'
+
 import { buildSystemPrompt, PROMPT_VERSION } from './_shared_rules'
 
 // =============================================================================

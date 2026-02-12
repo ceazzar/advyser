@@ -1,5 +1,5 @@
+import { ArrowLeft,Search, UserX } from "lucide-react"
 import Link from "next/link"
-import { UserX, Search, ArrowLeft } from "lucide-react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"

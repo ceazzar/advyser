@@ -1,19 +1,19 @@
 "use client"
 
-import Link from "next/link"
 import {
-  Users,
-  Target,
-  Heart,
-  Shield,
   ArrowRight,
   CheckCircle2,
+  Heart,
+  Shield,
+  Target,
+  Users,
 } from "lucide-react"
+import Link from "next/link"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
+import { Avatar, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarFallback, getInitials } from "@/components/ui/avatar"
 
 const values = [
   {
@@ -62,10 +62,10 @@ const team = [
 ]
 
 const stats = [
-  { value: "10,000+", label: "Advisors Listed" },
-  { value: "50,000+", label: "Consumers Matched" },
-  { value: "4.8/5", label: "Average Rating" },
-  { value: "97%", label: "Satisfaction Rate" },
+  { value: "Public", label: "Marketplace access" },
+  { value: "AU-wide", label: "Advisor discovery" },
+  { value: "Transparent", label: "Comparison experience" },
+  { value: "Independent", label: "Introducer model" },
 ]
 
 export default function AboutPage() {
@@ -96,7 +96,7 @@ export default function AboutPage() {
               Our founders, having worked in both financial services and technology, saw an opportunity to bridge the gap between consumers seeking advice and qualified professionals who could help them.
             </p>
             <p>
-              Since launching in 2023, we&apos;ve helped thousands of Australians connect with the right advisor for their situation—whether they&apos;re planning for retirement, growing their wealth, or navigating a major life change.
+              Our marketplace is built to help Australians connect with advisors who match their needs, whether they&apos;re planning for retirement, growing wealth, or navigating a major life change.
             </p>
             <p>
               We&apos;re proud to be an Australian company, built by Australians, for Australians. Our team is based in Sydney, and we&apos;re committed to supporting our local financial advice industry while making it more accessible to everyone.
@@ -185,7 +185,7 @@ export default function AboutPage() {
             Ready to find your advisor?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of Australians who&apos;ve found the right financial advisor through Advyser.
+            Start your search and compare advisor profiles in one place.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -207,7 +207,7 @@ export default function AboutPage() {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="size-5 text-primary" />
-              <span className="text-sm">All advisors verified</span>
+              <span className="text-sm">Advisor credentials shown clearly</span>
             </div>
           </div>
         </div>

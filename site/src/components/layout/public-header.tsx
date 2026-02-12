@@ -1,9 +1,9 @@
 "use client"
 
-import * as React from "react"
+import { Menu } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu } from "lucide-react"
+import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 const navLinks = [
   { href: "/search", label: "Find Advisors" },
   { href: "/how-it-works", label: "How It Works" },
+  { href: "/resources", label: "Resources" },
   { href: "/for-advisors", label: "For Advisors" },
 ]
 

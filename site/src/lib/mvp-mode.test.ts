@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import { pathHasPrefix } from "./mvp-mode"
 
 describe("pathHasPrefix", () => {

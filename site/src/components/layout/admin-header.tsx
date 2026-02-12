@@ -6,9 +6,9 @@
  * Migration: Replace <AdminHeader /> with <DashboardHeaderSlim portalType="admin" />
  */
 
-import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import * as React from "react"
 
 // Deprecation warning
 if (typeof window !== "undefined") {
@@ -18,24 +18,16 @@ if (typeof window !== "undefined") {
   )
 }
 import {
-  LayoutDashboard,
-  FileCheck,
   Building2,
-  Star,
+  FileCheck,
   FileWarning,
+  LayoutDashboard,
   Menu,
+  Star,
 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +35,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },

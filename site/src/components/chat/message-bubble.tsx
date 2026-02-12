@@ -1,9 +1,10 @@
 "use client"
 
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 import { format } from "date-fns"
+import * as React from "react"
+
+import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 export interface MessageBubbleProps {
   message: {

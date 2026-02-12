@@ -6,9 +6,9 @@
  * Migration: Replace <AdvisorHeader /> with <DashboardHeaderSlim portalType="advisor" />
  */
 
-import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import * as React from "react"
 
 // Deprecation warning
 if (typeof window !== "undefined") {
@@ -18,21 +18,20 @@ if (typeof window !== "undefined") {
   )
 }
 import {
-  LayoutDashboard,
-  Users,
-  MessageSquare,
-  Calendar,
-  UserCheck,
   Bell,
-  Settings,
-  Menu,
+  Calendar,
+  LayoutDashboard,
   LogOut,
+  Menu,
+  MessageSquare,
+  Settings,
+  UserCheck,
+  Users,
 } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,6 +47,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 interface NavItem {
   label: string

@@ -1,10 +1,11 @@
 "use client"
 
+import { ArrowLeft,Cookie } from "lucide-react"
 import Link from "next/link"
-import { Cookie, ArrowLeft } from "lucide-react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
+import { publicBusiness, publicMessaging } from "@/lib/public-business"
 
 export default function CookiesPage() {
   return (
@@ -164,8 +165,8 @@ export default function CookiesPage() {
               If you have any questions about our use of cookies, please contact us:
             </p>
             <ul>
-              <li>Email: <a href="mailto:privacy@advyser.com.au" className="text-primary hover:underline">privacy@advyser.com.au</a></li>
-              <li>Address: Level 10, 123 George Street, Sydney NSW 2000</li>
+              <li>Email: <a href={`mailto:${publicBusiness.privacyEmail}`} className="text-primary hover:underline">{publicBusiness.privacyEmail}</a></li>
+              <li>Address: {publicBusiness.postalAddress || publicMessaging.noPlaceholderLegalCopy}</li>
             </ul>
 
             <p>

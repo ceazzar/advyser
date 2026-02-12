@@ -1,26 +1,28 @@
 "use client"
 
-import Link from "next/link"
 import {
-  HelpCircle,
-  Search,
-  MessageSquare,
-  Phone,
-  Mail,
   ArrowRight,
   ChevronRight,
+  HelpCircle,
+  Mail,
+  MessageSquare,
+  Phone,
+  Search,
 } from "lucide-react"
+import Link from "next/link"
+import * as React from "react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { publicBusiness } from "@/lib/public-business"
 
 const helpCategories = [
   {
@@ -28,7 +30,7 @@ const helpCategories = [
     icon: <Search className="size-5" />,
     items: [
       { title: "How to find an advisor", href: "/how-it-works" },
-      { title: "Creating an account", href: "/signup" },
+      { title: "Getting started with the marketplace", href: "/search" },
       { title: "Understanding advisor profiles", href: "/search" },
     ],
   },
@@ -45,9 +47,9 @@ const helpCategories = [
     title: "For Advisors",
     icon: <HelpCircle className="size-5" />,
     items: [
-      { title: "Claiming your profile", href: "/claim" },
-      { title: "Managing your listing", href: "/for-advisors" },
-      { title: "Responding to leads", href: "/for-advisors" },
+      { title: "Advisor enquiries", href: "/for-advisors" },
+      { title: "Register advisor interest", href: "/contact" },
+      { title: "Marketplace scope", href: "/for-advisors" },
     ],
   },
 ]
@@ -59,7 +61,7 @@ const faqs = [
   },
   {
     question: "How are advisors verified?",
-    answer: "All advisors on Advyser are verified through ASIC's Financial Advisers Register. We check their credentials, professional memberships, and current registration status before they can appear on our platform.",
+    answer: "Advisor profiles include credential information and links so you can independently verify details, including via the ASIC Financial Advisers Register.",
   },
   {
     question: "How do I contact an advisor?",
@@ -69,13 +71,35 @@ const faqs = [
     question: "What if I have a complaint about an advisor?",
     answer: "If you have concerns about an advisor, please contact us immediately. We take all complaints seriously and will investigate. For regulatory matters, you can also contact ASIC or the advisor's professional body directly.",
   },
-  {
-    question: "How do I reset my password?",
-    answer: "Click on 'Log in' and then 'Forgot password'. Enter your email address and we'll send you a link to reset your password. The link expires after 24 hours for security.",
-  },
 ]
 
 export default function HelpPage() {
+  const [searchQuery, setSearchQuery] = React.useState("")
+
+  const filteredCategories = React.useMemo(() => {
+    const term = searchQuery.trim().toLowerCase()
+    if (!term) return helpCategories
+    return helpCategories
+      .map((category) => ({
+        ...category,
+        items: category.items.filter((item) => item.title.toLowerCase().includes(term)),
+      }))
+      .filter(
+        (category) =>
+          category.title.toLowerCase().includes(term) || category.items.length > 0
+      )
+  }, [searchQuery])
+
+  const filteredFaqs = React.useMemo(() => {
+    const term = searchQuery.trim().toLowerCase()
+    if (!term) return faqs
+    return faqs.filter(
+      (faq) =>
+        faq.question.toLowerCase().includes(term) ||
+        faq.answer.toLowerCase().includes(term)
+    )
+  }, [searchQuery])
+
   return (
     <PublicLayout>
       {/* Hero Section */}
@@ -97,6 +121,8 @@ export default function HelpPage() {
             <Input
               type="search"
               placeholder="Search for help..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               className="pl-12 h-14 text-lg rounded-full"
             />
           </div>
@@ -111,7 +137,7 @@ export default function HelpPage() {
           </h2>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {helpCategories.map((category) => (
+            {filteredCategories.map((category) => (
               <Card key={category.title}>
                 <CardHeader>
                   <div className="flex items-center gap-3">
@@ -150,7 +176,7 @@ export default function HelpPage() {
           </h2>
 
           <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
+            {filteredFaqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`faq-${index}`}
@@ -206,9 +232,13 @@ export default function HelpPage() {
                   Mon-Fri 9am-5pm AEST
                 </p>
                 <Button variant="outline" asChild>
-                  <Link href="tel:1300123456">
-                    1300 123 456
-                  </Link>
+                  {publicBusiness.supportPhone ? (
+                    <Link href={`tel:${publicBusiness.supportPhone.replace(/\s+/g, "")}`}>
+                      {publicBusiness.supportPhone}
+                    </Link>
+                  ) : (
+                    <Link href="/contact">Use contact form options</Link>
+                  )}
                 </Button>
               </CardContent>
             </Card>

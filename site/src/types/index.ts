@@ -4,33 +4,33 @@
  */
 
 // User types
-export type { User, Profile, UserRole } from './user'
+export type { Profile, User, UserRole } from './user'
 
 // Advisor types
 export type {
   Advisor,
+  Availability,
+  ClaimRequest,
   Credential,
   CredentialType,
   Service,
-  Availability,
-  VerificationStatus,
   VerificationLevel,
-  ClaimRequest,
+  VerificationStatus,
 } from './advisor'
 
 // Message types
 export type {
-  Message,
   Conversation,
   FileAttachment,
+  Message,
   MessageStatus,
   TypingState,
 } from './message'
 
 // API types
 export type {
-  ApiResponse,
   ApiError,
+  ApiResponse,
   PaginatedResponse,
   PaginationParams,
   SortDirection,
@@ -39,8 +39,8 @@ export type {
 // Search types
 export type {
   SearchFilters,
-  SearchResult,
   SearchResponse,
+  SearchResult,
 } from './search'
 
 // =============================================================================
@@ -52,36 +52,36 @@ export { COPILOT_SCHEMA_VERSION } from './copilot'
 
 // Copilot - Enum types
 export type {
-  MeetingType,
   Channel,
-  Tone,
+  CopilotInputType,
+  MeetingType,
+  OutputType,
+  ParticipantRole,
   Priority,
+  SafetyViolationType,
   Severity,
   TaskStatus,
-  ParticipantRole,
-  OutputType,
-  CopilotInputType,
-  SafetyViolationType,
+  Tone,
 } from './copilot'
 
 // Copilot - Meeting Summary types
 export type {
-  Participant,
-  Topic,
   ClientGoal,
   Constraint,
   Decision,
-  OpenQuestion,
   MeetingSummary,
   MeetingSummaryEnhanced,
+  OpenQuestion,
+  Participant,
+  Topic,
 } from './copilot'
 
 // Copilot - Action Items types
 export type {
+  ActionItemEnhanced,
+  ActionItems,
   AdvisorTask,
   ClientTask,
-  ActionItems,
-  ActionItemEnhanced,
   Dependency,
 } from './copilot'
 
@@ -92,41 +92,41 @@ export type { FollowupDraft } from './copilot'
 export type {
   BriefGoal,
   BriefGoalEnhanced,
-  Preference,
-  KnownFact,
-  UnknownNeeded,
-  RiskNoted,
   ClientBriefUpdate,
   ClientBriefUpdateEnhanced,
+  KnownFact,
+  Preference,
+  RiskNoted,
+  UnknownNeeded,
 } from './copilot'
 
 // Copilot - Compliance types
 export type {
   ComplianceFlag,
-  MissingInfoCheck,
-  WordingSuggestion,
   ComplianceFlags,
   ComplianceFlagsEnhanced,
+  MissingInfoCheck,
+  WordingSuggestion,
 } from './copilot'
 
 // Copilot - Safety types
 export type {
+  SafetyCheckResult,
   SafetyViolation,
   SafetyViolationEnhanced,
-  SafetyCheckResult,
 } from './copilot'
 
 // Copilot - Input types
 export type {
   CopilotInput,
-  MeetingNotesInput,
   ExistingClientBrief,
+  MeetingNotesInput,
 } from './copilot'
 
 // Copilot - Output types
 export type {
-  CopilotOutputContent,
   CopilotOutput,
+  CopilotOutputContent,
 } from './copilot'
 
 // Copilot - Run types
@@ -140,62 +140,62 @@ export type {
 // =============================================================================
 
 export {
-  // Enum schemas
-  MeetingTypeSchema,
-  ChannelSchema,
-  ToneSchema,
-  PrioritySchema,
-  SeveritySchema,
-  TaskStatusSchema,
-  ParticipantRoleSchema,
-  OutputTypeSchema,
-  CopilotInputTypeSchema,
-  SafetyViolationTypeSchema,
-  // Meeting Summary schemas
-  ParticipantSchema,
-  TopicSchema,
-  ClientGoalSchema,
-  ConstraintSchema,
-  DecisionSchema,
-  OpenQuestionSchema,
-  MeetingSummarySchema,
-  MeetingSummaryEnhancedSchema,
+  ActionItemEnhancedSchema,
+  ActionItemsSchema,
   // Action Items schemas
   AdvisorTaskSchema,
-  ClientTaskSchema,
-  ActionItemsSchema,
-  ActionItemEnhancedSchema,
-  DependencySchema,
-  // Follow-up Draft schema
-  FollowupDraftSchema,
+  BriefGoalEnhancedSchema,
   // Client Brief Update schemas
   BriefGoalSchema,
-  BriefGoalEnhancedSchema,
-  PreferenceSchema,
-  KnownFactSchema,
-  UnknownNeededSchema,
-  RiskNotedSchema,
-  ClientBriefUpdateSchema,
+  ChannelSchema,
   ClientBriefUpdateEnhancedSchema,
+  ClientBriefUpdateSchema,
+  ClientGoalSchema,
+  ClientTaskSchema,
   // Compliance schemas
   ComplianceFlagSchema,
-  MissingInfoCheckSchema,
-  WordingSuggestionSchema,
-  ComplianceFlagsSchema,
   ComplianceFlagsEnhancedSchema,
-  // Safety schemas
-  SafetyViolationSchema,
-  SafetyViolationEnhancedSchema,
-  SafetyCheckResultSchema,
+  ComplianceFlagsSchema,
+  ConstraintSchema,
   // Input schemas
   CopilotInputSchema,
-  MeetingNotesInputSchema,
-  ExistingClientBriefSchema,
+  CopilotInputTypeSchema,
   // Output schemas
   CopilotOutputSchema,
+  CopilotRunEnhancedSchema,
   // Run schemas
   CopilotRunSchema,
-  CopilotRunEnhancedSchema,
+  DecisionSchema,
+  DependencySchema,
+  ExistingClientBriefSchema,
+  // Follow-up Draft schema
+  FollowupDraftSchema,
+  KnownFactSchema,
+  MeetingNotesInputSchema,
+  MeetingSummaryEnhancedSchema,
+  MeetingSummarySchema,
+  // Enum schemas
+  MeetingTypeSchema,
+  MissingInfoCheckSchema,
+  OpenQuestionSchema,
+  OutputTypeSchema,
+  ParticipantRoleSchema,
+  // Meeting Summary schemas
+  ParticipantSchema,
+  PreferenceSchema,
+  PrioritySchema,
+  RiskNotedSchema,
+  SafetyCheckResultSchema,
+  SafetyViolationEnhancedSchema,
+  // Safety schemas
+  SafetyViolationSchema,
+  SafetyViolationTypeSchema,
+  SeveritySchema,
+  TaskStatusSchema,
+  ToneSchema,
+  TopicSchema,
+  UnknownNeededSchema,
+  WordingSuggestionSchema,
 } from './copilot'
 
 // =============================================================================
@@ -203,11 +203,11 @@ export {
 // =============================================================================
 
 export {
-  isMeetingSummary,
   isActionItems,
-  isFollowupDraft,
   isClientBriefUpdate,
   isComplianceFlags,
+  isFollowupDraft,
+  isMeetingSummary,
   isSafetyCheckResult,
   TypeGuards,
 } from './copilot'
@@ -217,16 +217,16 @@ export {
 // =============================================================================
 
 export {
-  validateMeetingSummary,
+  safeValidate,
   validateActionItems,
-  validateFollowupDraft,
   validateClientBriefUpdate,
   validateComplianceFlags,
-  validateSafetyCheckResult,
-  validateCopilotRun,
-  validateCopilotOutput,
   validateCopilotInput,
-  safeValidate,
+  validateCopilotOutput,
+  validateCopilotRun,
+  validateFollowupDraft,
+  validateMeetingSummary,
+  validateSafetyCheckResult,
   Validators,
 } from './copilot'
 

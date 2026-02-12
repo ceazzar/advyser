@@ -1,14 +1,14 @@
 "use client"
 
 import {
-  CheckCircle2,
-  XCircle,
   AlertTriangle,
+  CheckCircle2,
   Info,
   Loader2,
   X,
+  XCircle,
 } from "lucide-react"
-import { Toaster as Sonner, toast as sonnerToast, type ToasterProps } from "sonner"
+import { toast as sonnerToast, Toaster as Sonner, type ToasterProps } from "sonner"
 
 import { cn } from "@/lib/utils"
 
@@ -202,4 +202,4 @@ const toast = {
   },
 }
 
-export { Toaster, toast }
+export { toast,Toaster }

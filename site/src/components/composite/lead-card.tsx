@@ -1,9 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { Calendar, Eye, MessageSquare } from "lucide-react"
-
-import { cn } from "@/lib/utils"
+import * as React from "react"
 
 /**
  * Icon Optical Sizing:
@@ -19,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 
 export type LeadStatus = "new" | "contacted" | "converted" | "declined"
 

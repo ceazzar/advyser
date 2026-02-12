@@ -11,21 +11,21 @@
  */
 
 // Input Panel - For entering meeting notes/transcripts
-export { CopilotInputPanel } from "./input-panel"
 export type { CopilotInputPanelProps, MeetingType, OutputOption } from "./input-panel"
+export { CopilotInputPanel } from "./input-panel"
 
 // Output Card - Collapsible card for displaying generated content
-export { CopilotOutputCard } from "./output-card"
 export type { CopilotOutputCardProps, CopilotOutputType } from "./output-card"
+export { CopilotOutputCard } from "./output-card"
 
 // Run History - Sidebar list of previous copilot runs
+export type { CopilotRun,CopilotRunHistoryProps } from "./run-history"
 export { CopilotRunHistory } from "./run-history"
-export type { CopilotRunHistoryProps, CopilotRun } from "./run-history"
 
 // Safety Banner - Warning banner about AI-generated content
+export type { ComplianceStatus,CopilotSafetyBannerProps } from "./safety-banner"
 export { CopilotSafetyBanner } from "./safety-banner"
-export type { CopilotSafetyBannerProps, ComplianceStatus } from "./safety-banner"
 
 // Empty State - Shown when no input yet
-export { CopilotEmptyState } from "./empty-state"
 export type { CopilotEmptyStateProps } from "./empty-state"
+export { CopilotEmptyState } from "./empty-state"

@@ -9,11 +9,12 @@
  */
 
 import type {
-  ClientBriefUpdate,
-  MeetingSummary,
-  ExistingClientBrief,
   BriefGoal,
+  ClientBriefUpdate,
+  ExistingClientBrief,
+  MeetingSummary,
 } from '@/types/copilot'
+
 import { buildSystemPrompt, PROMPT_VERSION } from './_shared_rules'
 
 // =============================================================================

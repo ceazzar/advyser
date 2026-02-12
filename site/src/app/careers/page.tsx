@@ -1,18 +1,18 @@
 "use client"
 
-import Link from "next/link"
 import {
-  Briefcase,
-  MapPin,
-  Clock,
   ArrowRight,
-  Heart,
-  Zap,
-  Users,
-  TrendingUp,
+  Briefcase,
+  Clock,
   Coffee,
+  Heart,
   Laptop,
+  MapPin,
+  TrendingUp,
+  Users,
+  Zap,
 } from "lucide-react"
+import Link from "next/link"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"

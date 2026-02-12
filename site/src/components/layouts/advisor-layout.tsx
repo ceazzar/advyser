@@ -1,34 +1,34 @@
 "use client"
 
-import * as React from "react"
-import { usePathname, useRouter } from "next/navigation"
-import Link from "next/link"
 import {
-  LayoutDashboard,
-  Users,
-  MessageSquare,
   Calendar,
-  UserCheck,
-  PanelLeftClose,
-  PanelLeft,
-  Settings,
-  LogOut,
   Home,
+  LayoutDashboard,
+  LogOut,
+  MessageSquare,
+  PanelLeft,
+  PanelLeftClose,
   Search,
+  Settings,
   User,
+  UserCheck,
+  Users,
 } from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { DashboardHeaderSlim } from "@/components/layout/dashboard-header-slim"
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav"
-import { useAuth } from "@/lib/auth-context"
+import { Button } from "@/components/ui/button"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 
 // localStorage key for sidebar state
 const SIDEBAR_COLLAPSED_KEY = "advyser-sidebar-collapsed"

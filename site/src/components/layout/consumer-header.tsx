@@ -1,13 +1,12 @@
 "use client"
 
-import * as React from "react"
+import { Bell, Calendar, FileText,LayoutDashboard, LogOut, Menu, MessageSquare, Settings, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bell, Menu, LogOut, Settings, User, Calendar, MessageSquare, LayoutDashboard, FileText } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +23,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },

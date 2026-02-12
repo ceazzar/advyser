@@ -1,4 +1,4 @@
-# Phase 8 Gate Evidence (In Progress)
+# Phase 8 Gate Evidence (Complete)
 
 ## Gate statement
 Phase 8 gate requires:
@@ -38,6 +38,6 @@ npm run verify:ci
 
 ## Current decision state
 - Local configured environment checks: `PASS`
-- Staging target re-run: `PENDING`
-- Phase status token: `IN_PROGRESS`
+- Staging target re-run: `PENDING` (separate environment runbook)
+- Phase status token: `PHASE_GATE_COMPLETE`
 - Scope posture: `MVP1 public-only runtime` (non-public route families intentionally hard-pruned and documented)

@@ -20,38 +20,30 @@
 // =============================================================================
 
 export {
-  // Version
-  PROMPT_VERSION,
-
   // Regulatory context
   AU_REGULATORY_CONTEXT,
-
+  buildPrompt, // Legacy alias
+  // Functions
+  buildSystemPrompt,
+  containsForbiddenPhrases,
   // Core rules
   CORE_OPERATING_RULES,
-
-  // Forbidden phrases
-  FORBIDDEN_PHRASES,
-  FORBIDDEN_PHRASES_LIST,
-
-  // Safe alternatives
-  SAFE_ALTERNATIVES,
-
-  // Output format
-  OUTPUT_FORMAT_RULES,
-
   // Draft labels
   DRAFT_LABEL,
   DRAFT_LABEL_INLINE,
-
+  // Forbidden phrases
+  FORBIDDEN_PHRASES,
+  FORBIDDEN_PHRASES_LIST,
+  getSafeAlternative,
+  // Output format
+  OUTPUT_FORMAT_RULES,
+  // Version
+  PROMPT_VERSION,
+  // Safe alternatives
+  SAFE_ALTERNATIVES,
   // Complete shared rules
   SHARED_RULES,
-
-  // Functions
-  buildSystemPrompt,
-  buildPrompt, // Legacy alias
-  containsForbiddenPhrases,
   validateCompliance,
-  getSafeAlternative,
 } from './_shared_rules'
 
 // =============================================================================
@@ -59,20 +51,17 @@ export {
 // =============================================================================
 
 export {
+  OUTPUT_SCHEMA_DESCRIPTION as MEETING_SUMMARY_SCHEMA,
   // Main exports
   SYSTEM_PROMPT as MEETING_SUMMARY_SYSTEM_PROMPT,
-  USER_PROMPT_TEMPLATE as meetingSummaryUserPrompt,
-  OUTPUT_SCHEMA_DESCRIPTION as MEETING_SUMMARY_SCHEMA,
-
-  // Input type
-  type MeetingSummaryInput,
-
+  BAD_OUTPUT_EXAMPLE as meetingSummaryBadExample,
   // Examples
   GOOD_OUTPUT_EXAMPLE as meetingSummaryGoodExample,
-  BAD_OUTPUT_EXAMPLE as meetingSummaryBadExample,
-
+  // Input type
+  type MeetingSummaryInput,
   // Default export
   default as meetingSummaryPrompt,
+  USER_PROMPT_TEMPLATE as meetingSummaryUserPrompt,
 } from './meeting-summary'
 
 // =============================================================================
@@ -80,20 +69,17 @@ export {
 // =============================================================================
 
 export {
+  OUTPUT_SCHEMA_DESCRIPTION as ACTION_ITEMS_SCHEMA,
   // Main exports
   SYSTEM_PROMPT as ACTION_ITEMS_SYSTEM_PROMPT,
-  USER_PROMPT_TEMPLATE as actionItemsUserPrompt,
-  OUTPUT_SCHEMA_DESCRIPTION as ACTION_ITEMS_SCHEMA,
-
-  // Input type
-  type ActionItemsInput,
-
+  BAD_OUTPUT_EXAMPLE as actionItemsBadExample,
   // Examples
   GOOD_OUTPUT_EXAMPLE as actionItemsGoodExample,
-  BAD_OUTPUT_EXAMPLE as actionItemsBadExample,
-
+  // Input type
+  type ActionItemsInput,
   // Default export
   default as actionItemsPrompt,
+  USER_PROMPT_TEMPLATE as actionItemsUserPrompt,
 } from './action-items'
 
 // =============================================================================
@@ -101,21 +87,18 @@ export {
 // =============================================================================
 
 export {
+  OUTPUT_SCHEMA_DESCRIPTION as FOLLOWUP_DRAFT_SCHEMA,
   // Main exports
   SYSTEM_PROMPT as FOLLOWUP_DRAFT_SYSTEM_PROMPT,
-  USER_PROMPT_TEMPLATE as followupDraftUserPrompt,
-  OUTPUT_SCHEMA_DESCRIPTION as FOLLOWUP_DRAFT_SCHEMA,
-
-  // Input type
-  type FollowupDraftInput,
-
+  BAD_OUTPUT_EXAMPLE as followupDraftBadExample,
   // Examples
   GOOD_OUTPUT_EXAMPLE as followupDraftGoodExample,
-  BAD_OUTPUT_EXAMPLE as followupDraftBadExample,
-  SMS_EXAMPLE as followupDraftSmsExample,
-
+  // Input type
+  type FollowupDraftInput,
   // Default export
   default as followupDraftPrompt,
+  SMS_EXAMPLE as followupDraftSmsExample,
+  USER_PROMPT_TEMPLATE as followupDraftUserPrompt,
 } from './followup-draft'
 
 // =============================================================================
@@ -123,21 +106,18 @@ export {
 // =============================================================================
 
 export {
+  OUTPUT_SCHEMA_DESCRIPTION as CLIENT_BRIEF_UPDATE_SCHEMA,
   // Main exports
   SYSTEM_PROMPT as CLIENT_BRIEF_UPDATE_SYSTEM_PROMPT,
-  USER_PROMPT_TEMPLATE as clientBriefUpdateUserPrompt,
-  OUTPUT_SCHEMA_DESCRIPTION as CLIENT_BRIEF_UPDATE_SCHEMA,
-
-  // Input type
-  type ClientBriefUpdateInput,
-
+  BAD_OUTPUT_EXAMPLE as clientBriefUpdateBadExample,
   // Examples
   GOOD_OUTPUT_EXAMPLE as clientBriefUpdateGoodExample,
-  BAD_OUTPUT_EXAMPLE as clientBriefUpdateBadExample,
+  // Input type
+  type ClientBriefUpdateInput,
   MERGE_EXAMPLE as clientBriefUpdateMergeExample,
-
   // Default export
   default as clientBriefUpdatePrompt,
+  USER_PROMPT_TEMPLATE as clientBriefUpdateUserPrompt,
 } from './client-brief-update'
 
 // =============================================================================
@@ -145,22 +125,19 @@ export {
 // =============================================================================
 
 export {
+  OUTPUT_SCHEMA_DESCRIPTION as COMPLIANCE_FLAGS_SCHEMA,
   // Main exports
   SYSTEM_PROMPT as COMPLIANCE_FLAGS_SYSTEM_PROMPT,
-  USER_PROMPT_TEMPLATE as complianceFlagsUserPrompt,
-  OUTPUT_SCHEMA_DESCRIPTION as COMPLIANCE_FLAGS_SCHEMA,
-
-  // Input type
-  type ComplianceFlagsInput,
-
+  BAD_OUTPUT_EXAMPLE as complianceFlagsBadExample,
+  CLEAN_CONTENT_EXAMPLE as complianceFlagsCleanContent,
   // Examples
   GOOD_OUTPUT_EXAMPLE as complianceFlagsGoodExample,
-  BAD_OUTPUT_EXAMPLE as complianceFlagsBadExample,
-  TEST_CONTENT_WITH_ISSUES as complianceFlagsTestContent,
-  CLEAN_CONTENT_EXAMPLE as complianceFlagsCleanContent,
-
+  // Input type
+  type ComplianceFlagsInput,
   // Default export
   default as complianceFlagsPrompt,
+  TEST_CONTENT_WITH_ISSUES as complianceFlagsTestContent,
+  USER_PROMPT_TEMPLATE as complianceFlagsUserPrompt,
 } from './compliance-flags'
 
 // =============================================================================
@@ -168,41 +145,36 @@ export {
 // =============================================================================
 
 export {
-  // Main exports
-  SYSTEM_PROMPT as SAFETY_CHECKER_SYSTEM_PROMPT,
-  USER_PROMPT_TEMPLATE as safetyCheckerUserPrompt,
-  OUTPUT_SCHEMA_DESCRIPTION as SAFETY_CHECKER_SCHEMA,
-
-  // Input type
-  type SafetyCheckerInput,
-
-  // Violation types
-  VIOLATION_TYPE_DESCRIPTIONS,
-
   // Utility functions
   quickSafetyCheck,
   redactContent,
-
+  OUTPUT_SCHEMA_DESCRIPTION as SAFETY_CHECKER_SCHEMA,
+  // Main exports
+  SYSTEM_PROMPT as SAFETY_CHECKER_SYSTEM_PROMPT,
+  FAIL_EXAMPLE as safetyCheckerFailExample,
+  // Input type
+  type SafetyCheckerInput,
   // Examples
   PASS_EXAMPLE as safetyCheckerPassExample,
-  FAIL_EXAMPLE as safetyCheckerFailExample,
   PII_VIOLATION_EXAMPLE as safetyCheckerPiiExample,
-  SAFE_CONTENT_EXAMPLE as safetyCheckerSafeContent,
-  UNSAFE_CONTENT_EXAMPLE as safetyCheckerUnsafeContent,
-
   // Default export
   default as safetyCheckerPrompt,
+  SAFE_CONTENT_EXAMPLE as safetyCheckerSafeContent,
+  UNSAFE_CONTENT_EXAMPLE as safetyCheckerUnsafeContent,
+  USER_PROMPT_TEMPLATE as safetyCheckerUserPrompt,
+  // Violation types
+  VIOLATION_TYPE_DESCRIPTIONS,
 } from './safety-checker'
 
 // =============================================================================
 // CONSOLIDATED PROMPT REGISTRY
 // =============================================================================
 
-import meetingSummary from './meeting-summary'
 import actionItems from './action-items'
-import followupDraft from './followup-draft'
 import clientBriefUpdate from './client-brief-update'
 import complianceFlags from './compliance-flags'
+import followupDraft from './followup-draft'
+import meetingSummary from './meeting-summary'
 import safetyChecker from './safety-checker'
 
 /**

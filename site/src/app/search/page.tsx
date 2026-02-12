@@ -1,25 +1,16 @@
 "use client"
 
-import * as React from "react"
-import { Filter, X, Star, ShieldCheck, Search, LayoutList, Map as MapIcon } from "lucide-react"
+import { Filter, Search,ShieldCheck, Star, X } from "lucide-react"
 import { useRouter } from "next/navigation"
+import * as React from "react"
 
-import { PublicLayout } from "@/components/layouts/public-layout"
-import { HeroSearchBar } from "@/components/composite/hero-search-bar"
 import { AdvisorCard, AdvisorCardProps, ClientDemographic } from "@/components/composite/advisor-card"
-import { ShortlistBar, AdvisorInfo } from "@/components/composite/shortlist-bar"
-import { useShortlist } from "@/lib/shortlist-context"
+import { HeroSearchBar } from "@/components/composite/hero-search-bar"
+import { AdvisorInfo,ShortlistBar } from "@/components/composite/shortlist-bar"
+import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Pagination,
   PaginationContent,
@@ -30,6 +21,13 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Sheet,
   SheetClose,
   SheetContent,
@@ -38,25 +36,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Slider } from "@/components/ui/slider"
+import { useShortlist } from "@/lib/shortlist-context"
 import { cn } from "@/lib/utils"
-
-// View mode type
-type ViewMode = "list" | "map"
-
-// Local storage key for view mode preference
-const VIEW_MODE_STORAGE_KEY = "advyser-search-view-mode"
 
 // Categories for the search bar and filters
 const categories = [
-  { value: "retirement", label: "Retirement Planning" },
-  { value: "investment", label: "Investment Management" },
-  { value: "tax", label: "Tax Planning" },
-  { value: "estate", label: "Estate Planning" },
-  { value: "insurance", label: "Insurance" },
-  { value: "debt", label: "Debt Management" },
-  { value: "wealth", label: "Wealth Management" },
-  { value: "business", label: "Business Planning" },
+  { value: "retirement-planning", label: "Retirement Planning" },
+  { value: "wealth-management", label: "Wealth Management" },
+  { value: "insurance-risk", label: "Insurance & Risk" },
+  { value: "property-investment", label: "Property Investment" },
+  { value: "tax-planning", label: "Tax Planning" },
+  { value: "estate-planning", label: "Estate Planning" },
 ]
 
 // Locations for filters (Australian cities)
@@ -76,14 +67,12 @@ const locations = [
 
 // V.2.2.4: Category to demographic mapping for contextual social proof
 const categoryToDemographics: Record<string, ClientDemographic[]> = {
-  retirement: ["retirees", "pre-retirees"],
-  investment: ["young-professionals", "first-home-buyers", "high-net-worth"],
-  tax: ["business-owners", "self-employed", "high-net-worth"],
-  estate: ["retirees", "high-net-worth", "families"],
-  insurance: ["families", "business-owners"],
-  debt: ["first-home-buyers", "young-professionals"],
-  wealth: ["high-net-worth", "pre-retirees"],
-  business: ["business-owners", "self-employed"],
+  "retirement-planning": ["retirees", "pre-retirees"],
+  "wealth-management": ["high-net-worth", "pre-retirees"],
+  "insurance-risk": ["families", "business-owners"],
+  "property-investment": ["first-home-buyers", "high-net-worth"],
+  "tax-planning": ["business-owners", "self-employed", "high-net-worth"],
+  "estate-planning": ["retirees", "high-net-worth", "families"],
 }
 
 type SearchAdvisor = Omit<AdvisorCardProps, "onViewProfile"> & {
@@ -291,49 +280,6 @@ function calculateFilterCounts(
   return { categories: categoryCounts, locations: locationCounts, ratings: ratingCounts }
 }
 
-// Map View Placeholder Component
-function MapViewPlaceholder() {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/20 bg-muted/30 py-20 px-8">
-      {/* Map illustration placeholder */}
-      <div className="relative mb-6">
-        {/* Stylized map icon with markers */}
-        <div className="relative flex items-center justify-center size-24 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10">
-          <MapIcon className="size-12 text-primary/60" />
-          {/* Decorative map markers */}
-          <div className="absolute -top-1 -right-1 size-4 rounded-full bg-primary/80 border-2 border-white shadow-sm" />
-          <div className="absolute top-4 -left-2 size-3 rounded-full bg-primary/60 border-2 border-white shadow-sm" />
-          <div className="absolute -bottom-1 right-3 size-3.5 rounded-full bg-primary/70 border-2 border-white shadow-sm" />
-        </div>
-      </div>
-
-      {/* Text content */}
-      <h3 className="text-lg font-semibold text-foreground mb-2">
-        Map view coming soon
-      </h3>
-      <p className="text-muted-foreground text-center max-w-sm mb-6">
-        We&apos;re working on interactive maps to help you find local advisors in your area.
-      </p>
-
-      {/* Feature preview list */}
-      <div className="flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1">
-          <span className="size-1.5 rounded-full bg-primary/60" />
-          Location search
-        </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1">
-          <span className="size-1.5 rounded-full bg-primary/60" />
-          Distance filters
-        </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1">
-          <span className="size-1.5 rounded-full bg-primary/60" />
-          Nearby advisors
-        </span>
-      </div>
-    </div>
-  )
-}
-
 // Filter Sidebar Component
 function FiltersSidebar({
   filters,
@@ -428,7 +374,7 @@ function FiltersSidebar({
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-foreground">Location</h4>
         <Select value={filters.location} onValueChange={handleLocationChange}>
-          <SelectTrigger>
+          <SelectTrigger aria-label="Filter by location">
             <SelectValue placeholder="All Locations" />
           </SelectTrigger>
           <SelectContent>
@@ -469,6 +415,7 @@ function FiltersSidebar({
           max={5}
           step={0.5}
           className="w-full"
+          aria-label="Minimum advisor rating"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>Any</span>
@@ -486,19 +433,23 @@ function FiltersSidebar({
                 onClick={() => handleRatingChange([isActive ? 0 : rating])}
                 disabled={isZero && !isActive}
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs transition-colors",
+                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors",
                   isActive
-                    ? "bg-primary text-primary-foreground"
+                    ? "border-primary bg-primary text-primary-foreground"
                     : isZero
-                      ? "bg-muted/50 text-muted-foreground/50 cursor-not-allowed"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "border-border bg-muted/70 text-muted-foreground cursor-not-allowed"
+                      : "border-border bg-muted text-foreground hover:bg-muted/80"
                 )}
               >
                 <Star className="size-3 fill-current" />
                 {rating}+
                 <span className={cn(
                   "text-[10px]",
-                  isActive ? "text-primary-foreground/80" : isZero ? "text-muted-foreground/40" : "text-muted-foreground/70"
+                  isActive
+                    ? "text-primary-foreground/90"
+                    : isZero
+                      ? "text-muted-foreground"
+                      : "text-foreground/80"
                 )}>
                   ({count})
                 </span>
@@ -694,24 +645,6 @@ export default function SearchPage() {
   const [refreshToken, setRefreshToken] = React.useState(0)
   const [currentPage, setCurrentPage] = React.useState(1)
   const [sortBy, setSortBy] = React.useState("relevance")
-  const [viewMode, setViewMode] = React.useState<ViewMode>("list")
-
-  // Load view mode preference from localStorage on mount
-  React.useEffect(() => {
-    const savedViewMode = localStorage.getItem(VIEW_MODE_STORAGE_KEY) as ViewMode | null
-    if (savedViewMode && (savedViewMode === "list" || savedViewMode === "map")) {
-      setViewMode(savedViewMode)
-    }
-  }, [])
-
-  // Save view mode preference to localStorage
-  const handleViewModeChange = (value: string) => {
-    if (value === "list" || value === "map") {
-      setViewMode(value)
-      localStorage.setItem(VIEW_MODE_STORAGE_KEY, value)
-    }
-  }
-
   // V.2.2.3: Shortlist integration
   const { addToShortlist, removeFromShortlist, isInShortlist } = useShortlist()
 
@@ -725,7 +658,7 @@ export default function SearchPage() {
 
         const params = new URLSearchParams({
           page: "1",
-          pageSize: "100",
+          pageSize: "50",
           sort: "rating_desc",
         })
         if (searchKeyword.trim()) {
@@ -935,38 +868,13 @@ export default function SearchPage() {
                       />
                     </div>
 
-                    {/* View Mode Toggle */}
-                    <ToggleGroup
-                      type="single"
-                      value={viewMode}
-                      onValueChange={handleViewModeChange}
-                      variant="outline"
-                      className="border rounded-lg"
-                    >
-                      <ToggleGroupItem
-                        value="list"
-                        aria-label="List view"
-                        className="gap-1.5 px-3"
-                      >
-                        <LayoutList className="size-4" />
-                        <span className="hidden sm:inline text-sm">List</span>
-                      </ToggleGroupItem>
-                      <ToggleGroupItem
-                        value="map"
-                        aria-label="Map view"
-                        className="gap-1.5 px-3"
-                      >
-                        <MapIcon className="size-4" />
-                        <span className="hidden sm:inline text-sm">Map</span>
-                      </ToggleGroupItem>
-                    </ToggleGroup>
                   </div>
 
                   {/* Sort Dropdown */}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Sort by:</span>
                     <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-[160px]">
+                      <SelectTrigger className="w-[160px]" aria-label="Sort search results">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1005,7 +913,7 @@ export default function SearchPage() {
               <div className="mb-6 flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                 <ShieldCheck className="size-5 shrink-0" />
                 <p>
-                  Every advisor on Advyser is verified on the{" "}
+                  Advisor credentials can be checked on the{" "}
                   <a
                     href="https://moneysmart.gov.au/financial-advice/financial-advisers-register"
                     target="_blank"
@@ -1017,13 +925,8 @@ export default function SearchPage() {
                 </p>
               </div>
 
-              {/* View Mode Content */}
-              {viewMode === "map" ? (
-                /* Map View Placeholder */
-                <MapViewPlaceholder />
-              ) : (
-                /* List View - Advisor Grid */
-                <>
+              {/* List View - Advisor Grid */}
+              <>
                   {isLoading ? (
                     <div className="rounded-xl border border-border bg-muted/20 p-8 text-center">
                       <p className="text-muted-foreground">Loading advisor listings...</p>
@@ -1115,7 +1018,7 @@ export default function SearchPage() {
                         <PaginationContent>
                           <PaginationItem>
                             <PaginationPrevious
-                              href="#"
+                              href={`?page=${Math.max(1, currentPage - 1)}`}
                               onClick={(e) => {
                                 e.preventDefault()
                                 if (currentPage > 1) setCurrentPage(currentPage - 1)
@@ -1153,7 +1056,7 @@ export default function SearchPage() {
                             return (
                               <PaginationItem key={page}>
                                 <PaginationLink
-                                  href="#"
+                                  href={`?page=${page}`}
                                   isActive={page === currentPage}
                                   onClick={(e) => {
                                     e.preventDefault()
@@ -1168,7 +1071,7 @@ export default function SearchPage() {
 
                           <PaginationItem>
                             <PaginationNext
-                              href="#"
+                              href={`?page=${Math.min(totalPages, currentPage + 1)}`}
                               onClick={(e) => {
                                 e.preventDefault()
                                 if (currentPage < totalPages) setCurrentPage(currentPage + 1)
@@ -1180,8 +1083,7 @@ export default function SearchPage() {
                       </Pagination>
                     </div>
                   )}
-                </>
-              )}
+              </>
             </div>
           </div>
         </div>

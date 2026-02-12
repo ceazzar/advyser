@@ -2,9 +2,9 @@
 
 import * as React from "react"
 
-import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
+import { cn } from "@/lib/utils"
 
 export interface StickyMobileCTAProps {
   /** Advisor's display name */

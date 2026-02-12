@@ -8,8 +8,9 @@
  * @version 1.0.0
  */
 
-import type { SafetyCheckResult, SafetyViolation, CopilotOutputContent } from '@/types/copilot'
-import { buildSystemPrompt, PROMPT_VERSION, FORBIDDEN_PHRASES } from './_shared_rules'
+import type { CopilotOutputContent,SafetyCheckResult, SafetyViolation } from '@/types/copilot'
+
+import { buildSystemPrompt, FORBIDDEN_PHRASES,PROMPT_VERSION } from './_shared_rules'
 
 // =============================================================================
 // INPUT TYPES

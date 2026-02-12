@@ -1,10 +1,10 @@
 "use client"
 
-import * as React from "react"
 import { formatDistanceToNow } from "date-fns"
+import * as React from "react"
 
+import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 
 export interface MessageCardProps {
   id: string

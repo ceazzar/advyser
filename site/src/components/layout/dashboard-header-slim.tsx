@@ -1,21 +1,21 @@
 "use client"
 
-import * as React from "react"
-import Link from "next/link"
 import {
   Bell,
+  Calendar,
+  FileText,
+  LogOut,
   Plus,
   Search,
   Settings,
-  LogOut,
   User,
-  Calendar,
-  FileText,
 } from "lucide-react"
+import Link from "next/link"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { CommandPalette, useCommandPalette } from "@/components/ui/command-palette"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CommandPalette, useCommandPalette } from "@/components/ui/command-palette"
+import { cn } from "@/lib/utils"
 
 interface DashboardHeaderSlimProps {
   /** Portal type for context */

@@ -1,10 +1,9 @@
 "use client"
 
+import { Calendar, Clock, DollarSign, ExternalLink,MapPin, MessageSquare, Plus, ShieldCheck, Star, X } from "lucide-react"
 import * as React from "react"
-import { X, Plus, Star, MapPin, Clock, DollarSign, ShieldCheck, Calendar, MessageSquare, ExternalLink } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -13,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 /**
  * V.2.2.1: Advisor Comparison Tool

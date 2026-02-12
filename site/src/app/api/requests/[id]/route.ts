@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse } from "@/types/api";
 
@@ -116,8 +117,8 @@ export async function GET(
           ),
           business (
             trading_name,
-            contact_email,
-            contact_phone
+            email,
+            phone
           )
         )
       `
@@ -173,8 +174,8 @@ export async function GET(
       } | null;
       business?: {
         trading_name?: string;
-        contact_email?: string;
-        contact_phone?: string;
+        email?: string;
+        phone?: string;
       } | null;
     } | null;
 
@@ -191,8 +192,8 @@ export async function GET(
         avatar: listing?.advisor_profile?.avatar_url || null,
         businessName: listing?.business?.trading_name || null,
         // Only reveal contact info after advisor responds
-        email: showContactInfo ? listing?.business?.contact_email || null : null,
-        phone: showContactInfo ? listing?.business?.contact_phone || null : null,
+        email: showContactInfo ? listing?.business?.email || null : null,
+        phone: showContactInfo ? listing?.business?.phone || null : null,
       },
       listing: listing
         ? {

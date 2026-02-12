@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { uuidParamSchema } from "@/lib/schemas";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse } from "@/types/api";
 
@@ -130,7 +133,24 @@ export async function GET(
       );
     }
 
+    const parsedId = uuidParamSchema.safeParse({ id });
+    if (!parsedId.success) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: {
+            code: "INVALID_REQUEST",
+            message: "Listing ID must be a valid UUID",
+            statusCode: 400,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
+    }
+
     const supabase = await createClient();
+    const admin = createAdminClient();
 
     // Fetch listing with all related data
     const { data: listing, error } = await supabase
@@ -138,6 +158,7 @@ export async function GET(
       .select(
         `
         id,
+        advisor_profile_id,
         headline,
         bio,
         what_i_help_with,
@@ -152,7 +173,6 @@ export async function GET(
         accepting_status,
         response_time_hours,
         verification_level,
-        last_verified_at,
         rating_avg,
         review_count,
         advisor_profile (
@@ -166,12 +186,12 @@ export async function GET(
           legal_name,
           abn,
           website,
-          contact_email,
-          contact_phone,
+          email,
+          phone,
+          address_line_1,
+          address_line_2,
           primary_location_id,
           location:primary_location_id (
-            address_line_1,
-            address_line_2,
             suburb,
             state,
             postcode
@@ -202,19 +222,6 @@ export async function GET(
             state,
             postcode
           )
-        ),
-        credential (
-          afsl_number,
-          asic_rep_number,
-          verification_status,
-          verified_at
-        ),
-        advisor_qualification (
-          qualification (
-            name,
-            abbreviation,
-            issuing_body
-          )
         )
       `
       )
@@ -223,7 +230,39 @@ export async function GET(
       .is("deleted_at", null)
       .single();
 
-    if (error || !listing) {
+    if (error) {
+      const notFoundCodes = new Set(["PGRST116", "PGRST205"]);
+      if (notFoundCodes.has(error.code || "")) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "NOT_FOUND",
+              message: "Listing not found",
+              statusCode: 404,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 404 }
+        );
+      }
+
+      console.error("Listing detail query error:", error);
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: {
+            code: "DATABASE_ERROR",
+            message: "Failed to fetch listing details",
+            statusCode: 500,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!listing) {
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
@@ -271,11 +310,11 @@ export async function GET(
       legal_name?: string;
       abn?: string;
       website?: string;
-      contact_email?: string;
-      contact_phone?: string;
+      email?: string;
+      phone?: string;
+      address_line_1?: string;
+      address_line_2?: string;
       location?: {
-        address_line_1?: string;
-        address_line_2?: string;
         suburb?: string;
         state?: string;
         postcode?: string;
@@ -300,16 +339,56 @@ export async function GET(
       location?: { suburb?: string; state?: string; postcode?: string } | null;
     }> | null;
 
-    const credentials = listing.credential as unknown as Array<{
-      afsl_number?: string;
-      asic_rep_number?: string;
+    let credentials: Array<{
+      credential_number?: string;
+      credential_type?: string;
       verification_status?: string;
-      verified_at?: string;
-    }> | null;
+      register_url?: string;
+    }> = [];
 
-    const qualifications = listing.advisor_qualification as unknown as Array<{
+    let qualifications: Array<{
       qualification: { name: string; abbreviation: string; issuing_body?: string } | null;
-    }> | null;
+    }> = [];
+
+    if (listing.advisor_profile_id) {
+      const { data: credentialRows, error: credentialError } = await admin
+        .from("credential")
+        .select("credential_number, credential_type, verification_status, register_url")
+        .eq("advisor_profile_id", listing.advisor_profile_id)
+        .eq("verification_status", "verified")
+        .is("deleted_at", null);
+
+      if (credentialError) {
+        console.warn("Credential lookup warning:", credentialError.message);
+      } else {
+        credentials = (credentialRows || []) as typeof credentials;
+      }
+
+      const { data: qualificationRows, error: qualificationError } = await admin
+        .from("advisor_qualification")
+        .select(
+          `
+          qualification (
+            name,
+            abbreviation,
+            issuing_body
+          )
+        `
+        )
+        .eq("advisor_profile_id", listing.advisor_profile_id);
+
+      if (qualificationError) {
+        console.warn("Qualification lookup warning:", qualificationError.message);
+      } else {
+        qualifications = (qualificationRows || []).map((row: { qualification: unknown }) => {
+          const qualification = Array.isArray(row.qualification)
+            ? (row.qualification[0] as { name: string; abbreviation: string; issuing_body?: string } | undefined)
+            : (row.qualification as { name: string; abbreviation: string; issuing_body?: string } | null);
+
+          return { qualification: qualification || null };
+        });
+      }
+    }
 
     // Transform to API response
     const detail: ListingDetail = {
@@ -327,12 +406,12 @@ export async function GET(
       businessName: business?.trading_name || null,
       abn: business?.abn || null,
       website: business?.website || null,
-      email: business?.contact_email || null,
-      phone: business?.contact_phone || null,
+      email: business?.email || null,
+      phone: business?.phone || null,
       address: business?.location
         ? {
-            line1: business.location.address_line_1 || null,
-            line2: business.location.address_line_2 || null,
+            line1: business.address_line_1 || null,
+            line2: business.address_line_2 || null,
             suburb: business.location.suburb || null,
             state: business.location.state || null,
             postcode: business.location.postcode || null,
@@ -351,24 +430,30 @@ export async function GET(
 
       verified: ["licence_verified", "identity_verified"].includes(listing.verification_level),
       verificationLevel: listing.verification_level,
-      lastVerifiedAt: listing.last_verified_at,
+      lastVerifiedAt: null,
 
       rating: listing.rating_avg,
       reviewCount: listing.review_count || 0,
 
       credentials:
-        credentials?.map((c) => ({
-          afslNumber: c.afsl_number || null,
-          asicRepNumber: c.asic_rep_number || null,
+        credentials.map((c) => ({
+          afslNumber:
+            c.credential_type === "afsl" || c.credential_type === "limited_afsl"
+              ? c.credential_number || null
+              : null,
+          asicRepNumber:
+            c.credential_type === "authorised_rep" ||
+            c.credential_type === "relevant_provider" ||
+            c.credential_type === "credit_rep"
+              ? c.credential_number || null
+              : null,
           verificationStatus: c.verification_status || "pending",
-          asicRegisterUrl: c.asic_rep_number
-            ? `https://moneysmart.gov.au/financial-advice/find-an-adviser?adviserId=${c.asic_rep_number}`
-            : null,
+          asicRegisterUrl: c.register_url || null,
         })) || [],
 
       qualifications:
         qualifications
-          ?.filter((q) => q.qualification)
+          .filter((q) => q.qualification)
           .map((q) => ({
             name: q.qualification!.name,
             abbreviation: q.qualification!.abbreviation,
@@ -417,11 +502,18 @@ export async function GET(
         }) || [],
     };
 
-    return NextResponse.json<ApiResponse<ListingDetail>>({
-      success: true,
-      data: detail,
-      timestamp: new Date().toISOString(),
-    });
+    return NextResponse.json<ApiResponse<ListingDetail>>(
+      {
+        success: true,
+        data: detail,
+        timestamp: new Date().toISOString(),
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     console.error("Listing detail API error:", error);
     return NextResponse.json<ApiResponse<null>>(

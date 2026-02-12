@@ -27,7 +27,9 @@ const isProd = process.env.NODE_ENV === 'production'
 
 type LogLevel = 'error' | 'warn' | 'info'
 
-type LogContext = Record<string, unknown>
+type LogContext = Record<string, unknown> & {
+  requestId?: string
+}
 
 interface LogEntry {
   level: LogLevel
@@ -40,10 +42,16 @@ interface LogEntry {
  * Formats a log entry for production (JSON) or development (human-readable)
  */
 function formatLog(level: LogLevel, message: string, context?: LogContext): string | LogEntry {
+  const requestId =
+    context?.requestId ||
+    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : "unknown");
   const entry: LogEntry = {
     level,
     message,
     timestamp: new Date().toISOString(),
+    requestId,
     ...context,
   }
 

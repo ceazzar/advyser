@@ -1,8 +1,5 @@
 "use client"
 
-import * as React from "react"
-import { use } from "react"
-import { useRouter } from "next/navigation"
 import {
   BadgeCheck,
   Calendar,
@@ -12,9 +9,12 @@ import {
   Phone,
   Star,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import * as React from "react"
+import { use } from "react"
 
+import { AdvisorMiniCard,StickyMobileCTA } from "@/components/composite"
 import { PublicLayout } from "@/components/layouts/public-layout"
-import { StickyMobileCTA, AdvisorMiniCard } from "@/components/composite"
 import { Avatar, AvatarFallback, AvatarImage, getInitials } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

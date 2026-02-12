@@ -37,7 +37,9 @@ export function getDefaultRouteForRole(role: UserRole): string {
 }
 
 export function canRoleAccessPath(role: UserRole, pathname: string): boolean {
-  return ROLE_ALLOWED_PREFIXES[role].some((prefix) => pathname.startsWith(prefix))
+  return ROLE_ALLOWED_PREFIXES[role].some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  )
 }
 
 export function getPostLoginRedirect(

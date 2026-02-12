@@ -310,12 +310,12 @@ function EmptyContent({ className, ...props }: React.ComponentProps<"div">) {
 
 export {
   Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
   EmptyContent,
-  EmptyMedia,
+  EmptyDescription,
+  EmptyHeader,
   EmptyIllustration,
+  EmptyMedia,
+  EmptyTitle,
 }
 
 export type { IllustrationPreset }

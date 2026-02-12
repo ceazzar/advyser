@@ -1,10 +1,11 @@
 "use client"
 
+import { ArrowLeft,FileText } from "lucide-react"
 import Link from "next/link"
-import { FileText, ArrowLeft } from "lucide-react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
+import { publicBusiness, publicMessaging } from "@/lib/public-business"
 
 export default function TermsPage() {
   return (
@@ -147,8 +148,8 @@ export default function TermsPage() {
               If you have any questions about these Terms, please contact us:
             </p>
             <ul>
-              <li>Email: <a href="mailto:legal@advyser.com.au" className="text-primary hover:underline">legal@advyser.com.au</a></li>
-              <li>Post: Advyser Pty Ltd, Level 10, 123 George Street, Sydney NSW 2000</li>
+              <li>Email: <a href={`mailto:${publicBusiness.legalEmail}`} className="text-primary hover:underline">{publicBusiness.legalEmail}</a></li>
+              <li>Post: {publicBusiness.postalAddress ? `${publicBusiness.legalName}, ${publicBusiness.postalAddress}` : publicMessaging.noPlaceholderLegalCopy}</li>
             </ul>
           </div>
         </div>

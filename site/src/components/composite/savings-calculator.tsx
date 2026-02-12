@@ -1,10 +1,9 @@
 "use client"
 
+import { Calculator, Sparkles,TrendingUp } from "lucide-react"
 import * as React from "react"
-import { TrendingUp, Calculator, Sparkles } from "lucide-react"
 
-import { cn } from "@/lib/utils"
-
+import { Button } from "@/components/ui/button"
 /**
  * Icon Optical Sizing:
  * - Calculator in header circle: size-5 (20px) - contained in 40px circle
@@ -13,7 +12,7 @@ import { cn } from "@/lib/utils"
  */
 import { Card, CardContent } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export interface SavingsCalculatorProps {
   /** Minimum portfolio/income amount in dollars */

@@ -1,24 +1,24 @@
 "use client"
 
-import * as React from "react"
 import {
+  Check,
   ChevronDown,
   ChevronUp,
   Copy,
-  Check,
+  FileText,
+  ListTodo,
+  Mail,
   Pencil,
   Save,
-  X,
-  ListTodo,
-  FileText,
-  Mail,
-  User,
   Target,
+  User,
+  X,
 } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 export type CopilotOutputType =
   | "summary"

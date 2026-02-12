@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -175,11 +175,11 @@ function AvatarGroupCount({
 
 export {
   Avatar,
-  AvatarImage,
   AvatarFallback,
+  avatarFallbackVariants,
   AvatarGroup,
   AvatarGroupCount,
-  getInitials,
+  AvatarImage,
   avatarVariants,
-  avatarFallbackVariants,
+  getInitials,
 }

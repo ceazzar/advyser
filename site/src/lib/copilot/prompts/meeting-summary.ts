@@ -8,7 +8,8 @@
  * @version 1.0.0
  */
 
-import type { MeetingSummary, MeetingNotesInput } from '@/types/copilot'
+import type { MeetingNotesInput,MeetingSummary } from '@/types/copilot'
+
 import { buildSystemPrompt, PROMPT_VERSION } from './_shared_rules'
 
 // =============================================================================

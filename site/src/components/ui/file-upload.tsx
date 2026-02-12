@@ -1,8 +1,10 @@
 "use client"
 
+import { File, FileText,Image, Upload, X } from "lucide-react"
 import * as React from "react"
-import { Upload, X, File, Image, FileText } from "lucide-react"
+
 import { cn } from "@/lib/utils"
+
 import { Button } from "./button"
 
 // MIME type mapping for server-side validation

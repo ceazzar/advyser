@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+
 import { checkRateLimit, leadRatelimit, rateLimitHeaders } from "@/lib/ratelimit";
+import { publicLeadRequestSchema } from "@/lib/schemas";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
 /**
@@ -230,7 +232,43 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const origin = request.headers.get("origin");
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (origin && siteUrl) {
+      const allowedOrigin = new URL(siteUrl).origin;
+      if (origin !== allowedOrigin) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "FORBIDDEN_ORIGIN",
+              message: "Request origin is not allowed.",
+              statusCode: 403,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const payload = publicLeadRequestSchema.safeParse(await request.json());
+    if (!payload.success) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: {
+            code: "INVALID_REQUEST",
+            message: "Lead request payload is invalid.",
+            details: payload.error.flatten().fieldErrors,
+            statusCode: 400,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       listingId,
       problemSummary,
@@ -244,22 +282,53 @@ export async function POST(request: NextRequest) {
       lastName,
       email,
       phone,
-      privacyConsent,
-    } = body;
+      captchaToken,
+    } = payload.data;
 
-    if (!listingId) {
-      return NextResponse.json<ApiResponse<null>>(
-        {
-          success: false,
-          error: {
-            code: "INVALID_REQUEST",
-            message: "Listing ID is required",
-            statusCode: 400,
+    const normalizedEmail = email.trim().toLowerCase();
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret) {
+      if (!captchaToken) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "CAPTCHA_REQUIRED",
+              message: "Captcha verification is required.",
+              statusCode: 400,
+            },
+            timestamp: new Date().toISOString(),
           },
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
+          { status: 400 }
+        );
+      }
+
+      const verificationBody = new URLSearchParams({
+        secret: turnstileSecret,
+        response: captchaToken,
+      });
+      const captchaResponse = await fetch(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        {
+          method: "POST",
+          body: verificationBody,
+        }
       );
+      const captchaResult = (await captchaResponse.json()) as { success?: boolean };
+      if (!captchaResult.success) {
+        return NextResponse.json<ApiResponse<null>>(
+          {
+            success: false,
+            error: {
+              code: "CAPTCHA_FAILED",
+              message: "Captcha validation failed. Please try again.",
+              statusCode: 400,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const supabase = await createClient();
@@ -273,37 +342,6 @@ export async function POST(request: NextRequest) {
     let rateLimitIdentifier = user?.id || "";
 
     if (!user) {
-      if (!privacyConsent) {
-        return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: {
-              code: "PRIVACY_CONSENT_REQUIRED",
-              message: "Privacy consent is required to submit a request.",
-              statusCode: 400,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
-
-      const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-      if (!normalizedEmail) {
-        return NextResponse.json<ApiResponse<null>>(
-          {
-            success: false,
-            error: {
-              code: "EMAIL_REQUIRED",
-              message: "Email is required for public requests.",
-              statusCode: 400,
-            },
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
-
       const admin = createAdminClient();
       actor = admin;
 
@@ -332,19 +370,47 @@ export async function POST(request: NextRequest) {
         consumerUserId = existingConsumer.id;
       } else {
         const displayName = [firstName, lastName]
-          .filter((value: unknown) => typeof value === "string" && value.trim().length > 0)
+          .filter((value) => typeof value === "string" && value.trim().length > 0)
           .join(" ")
           .trim();
 
+        const generatedPassword = `${crypto.randomUUID()}A1a!`;
+        const { data: createdAuth, error: createAuthError } = await admin.auth.admin.createUser({
+          email: normalizedEmail,
+          password: generatedPassword,
+          email_confirm: true,
+          user_metadata: {
+            first_name: firstName || null,
+            last_name: lastName || null,
+            display_name: displayName || null,
+          },
+        });
+
+        if (createAuthError || !createdAuth.user?.id) {
+          return NextResponse.json<ApiResponse<null>>(
+            {
+              success: false,
+              error: {
+                code: "IDENTITY_PROVISIONING_FAILED",
+                message: "Unable to provision a secure consumer identity for this request.",
+                statusCode: 500,
+              },
+              timestamp: new Date().toISOString(),
+            },
+            { status: 500 }
+          );
+        }
+
         const { data: createdConsumer, error: createConsumerError } = await admin
           .from("users")
-          .insert({
+          .upsert({
+            id: createdAuth.user.id,
             email: normalizedEmail,
             role: "consumer",
-            first_name: typeof firstName === "string" ? firstName.trim() || null : null,
-            last_name: typeof lastName === "string" ? lastName.trim() || null : null,
+            first_name: firstName?.trim() || null,
+            last_name: lastName?.trim() || null,
             display_name: displayName || null,
-            phone: typeof phone === "string" ? phone.trim() || null : null,
+            phone: phone?.trim() || null,
           })
           .select("id")
           .single();
@@ -476,7 +542,7 @@ export async function POST(request: NextRequest) {
         consumer_user_id: consumerUserId,
         business_id: listing.business_id,
         listing_id: listingId,
-        problem_summary: problemSummary,
+        problem_summary: problemSummary.trim(),
         goal_tags: goalTags,
         timeline,
         budget_range: budgetRange,
@@ -489,7 +555,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) {
-      console.error("Lead creation error:", createError);
       return NextResponse.json<ApiResponse<null>>(
         {
           success: false,
@@ -512,8 +577,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Create lead API error:", error);
+  } catch {
     return NextResponse.json<ApiResponse<null>>(
       {
         success: false,

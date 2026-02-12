@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js"
-import pg from "pg"
 import { dirname, resolve } from "path"
+import pg from "pg"
 import { fileURLToPath } from "url"
+
 import {
   getDefaultEnvFiles,
   getMissingKeys,
@@ -36,8 +37,14 @@ const IDS = {
   business: "8af6e6ad-1f95-4639-93c9-c215d17995df",
   advisorBusinessRole: "4f53f8d8-bd81-4dd7-a29f-95f12304f11a",
   lead: "d8f94de7-0807-4fca-9f89-62772a29d8db",
+  clientRecord: "6d44aa0d-eb22-4f24-baba-034abf940d10",
   conversation: "130205f2-4d50-46e6-9f7b-c7412e13ea37",
   listing: "520e1e3d-e7d6-4224-b9a2-3bc6fc7d92af",
+  claimOwnedByConsumer: "8380f80d-6979-4f5d-9c8a-c2cbe4a17c5a",
+  claimOwnedByOutsider: "68751e26-8c9f-41f3-93f9-744f2bb2b4d5",
+  advisorNote: "a02fc8df-8af4-4abf-a17e-6e65cf0a2dc8",
+  advisorNoteRevision: "f557f90f-b4ee-4f05-9494-c2fd37695f8a",
+  consumerSpoofNote: "42d681aa-a683-4a37-b763-0f247f9e5911",
 }
 
 const LOGIN_USERS = [
@@ -161,7 +168,7 @@ async function main() {
     authUsers[user.email] = authUser
   }
 
-  const { tablesChecked } = await (async () => {
+  const { tablesChecked, rlsEnabledAllTables, policyPresenceAllTables } = await (async () => {
     const pgClient = new Client({
       connectionString: toPgClientConnectionString(dbUrl),
       ssl: { rejectUnauthorized: false },
@@ -216,6 +223,82 @@ async function main() {
         ]
       )
 
+      await pgClient.query(
+        `
+        INSERT INTO public.claim_request (
+          id, business_id, requester_user_id, status, submitted_email, verification_method
+        )
+        VALUES
+          ($1, $2, $3, 'pending', 'consumer@user.com', 'email_domain'),
+          ($4, $2, $5, 'pending', 'outsider@user.com', 'email_domain')
+        ON CONFLICT (id) DO UPDATE SET
+          business_id = EXCLUDED.business_id,
+          requester_user_id = EXCLUDED.requester_user_id,
+          status = EXCLUDED.status,
+          submitted_email = EXCLUDED.submitted_email,
+          verification_method = EXCLUDED.verification_method,
+          updated_at = NOW()
+      `,
+        [
+          IDS.claimOwnedByConsumer,
+          IDS.business,
+          authUsers["consumer@user.com"].id,
+          IDS.claimOwnedByOutsider,
+          authUsers["outsider@user.com"].id,
+        ]
+      )
+
+      await pgClient.query(
+        `
+        INSERT INTO public.advisor_note (
+          id, client_record_id, author_user_id, note_type, title, source
+        )
+        VALUES (
+          $1, $2, $3, 'general', 'Advisor-only note', 'manual'
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          client_record_id = EXCLUDED.client_record_id,
+          author_user_id = EXCLUDED.author_user_id,
+          note_type = EXCLUDED.note_type,
+          title = EXCLUDED.title,
+          source = EXCLUDED.source,
+          updated_at = NOW(),
+          deleted_at = NULL
+      `,
+        [IDS.advisorNote, IDS.clientRecord, authUsers["advisor@user.com"].id]
+      )
+
+      await pgClient.query(
+        `
+        INSERT INTO public.advisor_note_revision (
+          id, advisor_note_id, revision_number, content, created_by_user_id, source
+        )
+        VALUES (
+          $1, $2, 1, 'Advisor private note for workspace validation.', $3, 'manual'
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          advisor_note_id = EXCLUDED.advisor_note_id,
+          revision_number = EXCLUDED.revision_number,
+          content = EXCLUDED.content,
+          created_by_user_id = EXCLUDED.created_by_user_id,
+          source = EXCLUDED.source
+      `,
+        [
+          IDS.advisorNoteRevision,
+          IDS.advisorNote,
+          authUsers["advisor@user.com"].id,
+        ]
+      )
+
+      await pgClient.query(
+        `
+        UPDATE public.advisor_note
+        SET current_revision_id = $2, updated_at = NOW()
+        WHERE id = $1
+      `,
+        [IDS.advisorNote, IDS.advisorNoteRevision]
+      )
+
       const rlsSnapshot = await pgClient.query(
         `
         SELECT
@@ -241,18 +324,20 @@ async function main() {
 
       const rlsDisabled = rlsSnapshot.rows.filter((row) => !row.rls_enabled)
       const noPolicy = rlsSnapshot.rows.filter((row) => Number(row.policy_count) === 0)
+      const rlsEnabledAllTables = rlsDisabled.length === 0
+      const policyPresenceAllTables = noPolicy.length === 0
       assert(
-        rlsDisabled.length === 0,
+        rlsEnabledAllTables,
         `RLS disabled tables: ${rlsDisabled.map((r) => r.tablename).join(", ")}`
       )
       assert(
-        noPolicy.length === 0,
+        policyPresenceAllTables,
         `No-policy tables: ${noPolicy.map((r) => r.tablename).join(", ")}`
       )
 
       const tablesChecked = rlsSnapshot.rows.length
       await pgClient.query("COMMIT")
-      return { tablesChecked }
+      return { tablesChecked, rlsEnabledAllTables, policyPresenceAllTables }
     } catch (error) {
       await pgClient.query("ROLLBACK")
       throw error
@@ -272,6 +357,18 @@ async function main() {
   )
 
   const consumerUserId = authUsers["consumer@user.com"].id
+  const verification = {
+    rls_enabled_all_tables: rlsEnabledAllTables,
+    policy_presence_all_tables: policyPresenceAllTables,
+    cross_tenant_read_blocked: false,
+    cross_tenant_write_blocked: false,
+    advisor_business_access_ok: false,
+    admin_access_ok: false,
+    anon_catalog_read_ok: false,
+    claim_access_matrix_ok: false,
+    self_role_escalation_blocked: false,
+    advisor_note_consumer_blocked: false,
+  }
 
   const consumerLead = await consumer
     .from("lead")
@@ -318,19 +415,86 @@ async function main() {
     .select("id")
   assert(!!outsiderSpoofInsert.error, "Outsider could insert lead for another consumer")
 
-  const consumerClaims = await consumer.from("claim_request").select("id").limit(10)
-  assert(!consumerClaims.error, `Consumer claim query failed: ${consumerClaims.error?.message || "unknown"}`)
+  const consumerForeignClaim = await consumer
+    .from("claim_request")
+    .select("id")
+    .eq("id", IDS.claimOwnedByOutsider)
+    .maybeSingle()
   assert(
-    (consumerClaims.data || []).length === 0,
-    "Consumer unexpectedly read claim requests they do not own"
+    !consumerForeignClaim.error,
+    `Consumer foreign claim probe errored: ${consumerForeignClaim.error?.message || "unknown"}`
+  )
+  assert(!consumerForeignClaim.data, "Consumer could read a foreign claim request")
+
+  const outsiderOwnClaim = await outsider
+    .from("claim_request")
+    .select("id")
+    .eq("id", IDS.claimOwnedByOutsider)
+    .maybeSingle()
+  assert(!outsiderOwnClaim.error, `Requester own-claim read failed: ${outsiderOwnClaim.error?.message || "unknown"}`)
+  assert(outsiderOwnClaim.data?.id === IDS.claimOwnedByOutsider, "Requester cannot read own claim request")
+
+  const advisorNoteRead = await advisor
+    .from("advisor_note")
+    .select("id")
+    .eq("id", IDS.advisorNote)
+    .maybeSingle()
+  assert(!advisorNoteRead.error, `Advisor note read failed: ${advisorNoteRead.error?.message || "unknown"}`)
+  assert(advisorNoteRead.data?.id === IDS.advisorNote, "Advisor cannot read advisor note for own business")
+
+  const consumerNoteRead = await consumer
+    .from("advisor_note")
+    .select("id")
+    .eq("id", IDS.advisorNote)
+    .maybeSingle()
+  assert(!consumerNoteRead.error, `Consumer advisor-note probe errored: ${consumerNoteRead.error?.message || "unknown"}`)
+  assert(!consumerNoteRead.data, "Consumer could read advisor internal note")
+
+  const consumerNoteInsert = await consumer
+    .from("advisor_note")
+    .insert({
+      id: IDS.consumerSpoofNote,
+      client_record_id: IDS.clientRecord,
+      author_user_id: consumerUserId,
+      note_type: "general",
+      title: "Consumer spoof note",
+    })
+    .select("id")
+  assert(!!consumerNoteInsert.error, "Consumer could insert advisor internal note")
+
+  const roleEscalationAttempt = await consumer
+    .from("users")
+    .update({ role: "admin" })
+    .eq("id", consumerUserId)
+    .select("id, role")
+    .maybeSingle()
+  assert(!!roleEscalationAttempt.error, "Consumer could self-promote to admin")
+
+  const persistedConsumerRole = await admin
+    .from("users")
+    .select("id, role")
+    .eq("id", consumerUserId)
+    .maybeSingle()
+  assert(
+    !persistedConsumerRole.error,
+    `Service role verification failed for consumer role: ${persistedConsumerRole.error?.message || "unknown"}`
+  )
+  assert(
+    persistedConsumerRole.data?.role === "consumer",
+    `Consumer role mutated unexpectedly: ${persistedConsumerRole.data?.role || "missing"}`
   )
 
   const adminLead = await adminClient.from("lead").select("id").eq("id", IDS.lead).maybeSingle()
   assert(!adminLead.error, `Admin lead read failed: ${adminLead.error?.message || "unknown"}`)
   assert(adminLead.data?.id === IDS.lead, "Admin cannot read lead")
 
-  const adminClaims = await adminClient.from("claim_request").select("id").limit(1)
+  const adminClaims = await adminClient
+    .from("claim_request")
+    .select("id")
+    .eq("id", IDS.claimOwnedByOutsider)
+    .maybeSingle()
   assert(!adminClaims.error, `Admin claim query failed: ${adminClaims.error?.message || "unknown"}`)
+  assert(adminClaims.data?.id === IDS.claimOwnedByOutsider, "Admin cannot read foreign claim request")
 
   const anonListing = await anon
     .from("listing")
@@ -341,17 +505,38 @@ async function main() {
   assert(!anonListing.error, `Anon listing read failed: ${anonListing.error?.message || "unknown"}`)
   assert(anonListing.data?.id === IDS.listing, "Anon cannot read active listing")
 
+  verification.cross_tenant_read_blocked =
+    !outsiderLead.data &&
+    !outsiderConversation.data &&
+    !consumerForeignClaim.data &&
+    !consumerNoteRead.data
+  verification.cross_tenant_write_blocked =
+    !!outsiderSpoofInsert.error &&
+    !!consumerNoteInsert.error &&
+    !!roleEscalationAttempt.error
+  verification.advisor_business_access_ok =
+    advisorLead.data?.id === IDS.lead && advisorNoteRead.data?.id === IDS.advisorNote
+  verification.admin_access_ok =
+    adminLead.data?.id === IDS.lead && adminClaims.data?.id === IDS.claimOwnedByOutsider
+  verification.anon_catalog_read_ok = anonListing.data?.id === IDS.listing
+  verification.claim_access_matrix_ok =
+    !consumerForeignClaim.data &&
+    outsiderOwnClaim.data?.id === IDS.claimOwnedByOutsider &&
+    adminClaims.data?.id === IDS.claimOwnedByOutsider
+  verification.self_role_escalation_blocked =
+    !!roleEscalationAttempt.error && persistedConsumerRole.data?.role === "consumer"
+  verification.advisor_note_consumer_blocked =
+    !consumerNoteRead.data && !!consumerNoteInsert.error
+
+  for (const [check, passed] of Object.entries(verification)) {
+    assert(Boolean(passed), `Verification check failed: ${check}`)
+  }
+
   console.log(`Phase 6 RLS verification passed (${mode}).`)
   console.log(
     JSON.stringify({
       tables_checked: tablesChecked,
-      rls_enabled_all_tables: true,
-      policy_presence_all_tables: true,
-      cross_tenant_read_blocked: true,
-      cross_tenant_write_blocked: true,
-      advisor_business_access_ok: true,
-      admin_access_ok: true,
-      anon_catalog_read_ok: true,
+      ...verification,
     })
   )
 

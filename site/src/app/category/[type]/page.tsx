@@ -1,29 +1,26 @@
 "use client"
 
-import { use, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import {
-  TrendingUp,
+  ArrowRight,
+  Briefcase,
+  ChevronRight,
+  Heart,
+  Home,
   PiggyBank,
   Shield,
-  Home,
-  Briefcase,
-  Heart,
-  ArrowRight,
-  Filter,
-  MapPin,
   Star,
-  BadgeCheck,
-  ChevronRight,
+  TrendingUp,
 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { use, useEffect, useMemo, useState } from "react"
 
-import { PublicLayout } from "@/components/layouts/public-layout"
-import { Button } from "@/components/ui/button"
 import { AdvisorCard } from "@/components/composite/advisor-card"
 import { TrustStrip } from "@/components/composite/trust-strip"
-import { Card, CardContent } from "@/components/ui/card"
+import { PublicLayout } from "@/components/layouts/public-layout"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -389,93 +386,15 @@ export default function CategoryPage({
 
       {/* Trust Strip */}
       <TrustStrip
-        advisorCount={Math.max(1, sortedAdvisors.length) * 70}
-        clientCount={Math.max(1, sortedAdvisors.length) * 1500}
+        advisorCount={sortedAdvisors.length}
+        clientCount={0}
         showSecurityBadges={true}
-        showPartnerLogos={false}
       />
 
       {/* Main Content */}
       <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar Filters */}
-            <aside className="lg:w-72 shrink-0">
-              <Card className="sticky top-24">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-6">
-                    <Filter className="size-5 text-primary" />
-                    <h2 className="font-semibold">Filter Results</h2>
-                  </div>
-
-                  <div className="space-y-6">
-                    {/* Location Filter */}
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Location
-                      </label>
-                      <Select defaultValue="all">
-                        <SelectTrigger>
-                          <MapPin className="size-4 mr-2 text-muted-foreground" />
-                          <SelectValue placeholder="All Locations" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Locations</SelectItem>
-                          <SelectItem value="nsw">New South Wales</SelectItem>
-                          <SelectItem value="vic">Victoria</SelectItem>
-                          <SelectItem value="qld">Queensland</SelectItem>
-                          <SelectItem value="wa">Western Australia</SelectItem>
-                          <SelectItem value="sa">South Australia</SelectItem>
-                          <SelectItem value="tas">Tasmania</SelectItem>
-                          <SelectItem value="act">ACT</SelectItem>
-                          <SelectItem value="nt">Northern Territory</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Rating Filter */}
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Minimum Rating
-                      </label>
-                      <Select defaultValue="all">
-                        <SelectTrigger>
-                          <Star className="size-4 mr-2 text-muted-foreground" />
-                          <SelectValue placeholder="Any Rating" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Any Rating</SelectItem>
-                          <SelectItem value="4.5">4.5+ Stars</SelectItem>
-                          <SelectItem value="4.0">4.0+ Stars</SelectItem>
-                          <SelectItem value="3.5">3.5+ Stars</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Verified Only */}
-                    <div>
-                      <label className="text-sm font-medium text-foreground mb-2 block">
-                        Verification
-                      </label>
-                      <Select defaultValue="all">
-                        <SelectTrigger>
-                          <BadgeCheck className="size-4 mr-2 text-muted-foreground" />
-                          <SelectValue placeholder="All Advisors" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Advisors</SelectItem>
-                          <SelectItem value="verified">Verified Only</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {/* Apply Filters */}
-                    <Button className="w-full">Apply Filters</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </aside>
-
             {/* Advisor List */}
             <div className="flex-1">
               {/* Results Header */}
@@ -535,14 +454,6 @@ export default function CategoryPage({
                   </Card>
                 )}
               </div>
-
-              {/* Load More */}
-              <div className="text-center mt-8">
-                <Button variant="outline" size="lg">
-                  Load More Advisors
-                  <ArrowRight className="ml-2 size-4" />
-                </Button>
-              </div>
             </div>
           </div>
         </div>
@@ -580,8 +491,8 @@ export default function CategoryPage({
             Tell us about your goals and we&apos;ll match you with advisors who specialize in exactly what you need.
           </p>
           <Button size="lg" className="rounded-full px-8" asChild>
-            <Link href="/request-intro">
-              Request an Introduction
+            <Link href={`/search?q=${encodeURIComponent(category.title)}`}>
+              Browse Matching Advisors
               <ArrowRight className="ml-2 size-4" />
             </Link>
           </Button>

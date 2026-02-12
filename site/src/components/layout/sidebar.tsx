@@ -1,10 +1,9 @@
 "use client"
 
-import * as React from "react"
+import { LogOut,Menu, Settings } from "lucide-react"
 import Link from "next/link"
-import { Menu, Settings, LogOut } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -13,6 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 interface SidebarItem {
   label: string
@@ -195,4 +195,4 @@ export function Sidebar({
   )
 }
 
-export type { SidebarProps, SidebarItem }
+export type { SidebarItem,SidebarProps }

@@ -1,10 +1,11 @@
 "use client"
 
+import { ArrowLeft,Shield } from "lucide-react"
 import Link from "next/link"
-import { Shield, ArrowLeft } from "lucide-react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
+import { publicBusiness, publicMessaging } from "@/lib/public-business"
 
 export default function PrivacyPage() {
   return (
@@ -37,7 +38,8 @@ export default function PrivacyPage() {
           <div className="prose prose-gray max-w-none">
             <h2>1. Introduction</h2>
             <p>
-              Advyser Pty Ltd (ABN XX XXX XXX XXX) (&quot;Advyser&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our website and services.
+              {publicBusiness.legalName}
+              {publicBusiness.abn ? ` (ABN ${publicBusiness.abn})` : ""} (&quot;Advyser&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our website and services.
             </p>
             <p>
               We are bound by the Australian Privacy Principles (APPs) contained in the Privacy Act 1988 (Cth) and applicable state and territory privacy legislation.
@@ -131,9 +133,9 @@ export default function PrivacyPage() {
               If you have any questions about this Privacy Policy or our privacy practices, please contact us:
             </p>
             <ul>
-              <li>Email: <a href="mailto:privacy@advyser.com.au" className="text-primary hover:underline">privacy@advyser.com.au</a></li>
-              <li>Post: Privacy Officer, Advyser Pty Ltd, Level 10, 123 George Street, Sydney NSW 2000</li>
-              <li>Phone: 1300 123 456</li>
+              <li>Email: <a href={`mailto:${publicBusiness.privacyEmail}`} className="text-primary hover:underline">{publicBusiness.privacyEmail}</a></li>
+              <li>Post: {publicBusiness.postalAddress ? `Privacy Officer, ${publicBusiness.legalName}, ${publicBusiness.postalAddress}` : publicMessaging.noPlaceholderLegalCopy}</li>
+              {publicBusiness.supportPhone && <li>Phone: {publicBusiness.supportPhone}</li>}
             </ul>
           </div>
         </div>

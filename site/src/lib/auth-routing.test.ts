@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+
 import {
   canRoleAccessPath,
   getDefaultRouteForRole,
@@ -23,6 +24,8 @@ describe("sanitizeRedirectPath", () => {
 describe("role route access matrix", () => {
   it("enforces consumer route prefix", () => {
     expect(canRoleAccessPath("consumer", "/dashboard")).toBe(true)
+    expect(canRoleAccessPath("consumer", "/dashboard/settings")).toBe(true)
+    expect(canRoleAccessPath("consumer", "/dashboardevil")).toBe(false)
     expect(canRoleAccessPath("consumer", "/advisor")).toBe(false)
     expect(canRoleAccessPath("consumer", "/admin")).toBe(false)
   })
@@ -30,6 +33,7 @@ describe("role route access matrix", () => {
   it("enforces advisor route prefix", () => {
     expect(canRoleAccessPath("advisor", "/advisor")).toBe(true)
     expect(canRoleAccessPath("advisor", "/advisor/clients")).toBe(true)
+    expect(canRoleAccessPath("advisor", "/advisory")).toBe(false)
     expect(canRoleAccessPath("advisor", "/dashboard")).toBe(false)
   })
 
@@ -37,6 +41,7 @@ describe("role route access matrix", () => {
     expect(canRoleAccessPath("admin", "/admin")).toBe(true)
     expect(canRoleAccessPath("admin", "/advisor")).toBe(true)
     expect(canRoleAccessPath("admin", "/dashboard")).toBe(true)
+    expect(canRoleAccessPath("admin", "/admin-tools")).toBe(false)
   })
 })
 

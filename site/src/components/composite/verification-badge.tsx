@@ -1,9 +1,7 @@
 "use client"
 
+import { ExternalLink,ShieldCheck } from "lucide-react"
 import * as React from "react"
-import { ShieldCheck, ExternalLink } from "lucide-react"
-
-import { cn } from "@/lib/utils"
 
 /**
  * Icon Optical Sizing:
@@ -15,6 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 export interface VerificationBadgeProps {
   /** ASIC license number to display */

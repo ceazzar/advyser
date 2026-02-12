@@ -1,122 +1,77 @@
-/**
- * Rate Limiting Configuration
- *
- * Uses Upstash Redis for serverless rate limiting.
- *
- * SETUP REQUIRED:
- * 1. Create an Upstash Redis database at https://upstash.com
- * 2. Add to .env.local:
- *    UPSTASH_REDIS_REST_URL=your_url
- *    UPSTASH_REDIS_REST_TOKEN=your_token
- * 3. Install: npm install @upstash/ratelimit @upstash/redis
- */
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
-// Type definitions for when packages aren't installed
 type RatelimitInstance = {
   limit: (identifier: string) => Promise<{ success: boolean; remaining: number; reset: number }>;
 };
 
-// Dynamic imports to handle missing packages gracefully
-let Ratelimit: {
-  new (config: { redis: unknown; limiter: unknown; analytics?: boolean; prefix?: string }): RatelimitInstance;
-  slidingWindow: (requests: number, window: string) => unknown;
-} | null = null;
+function createRedisClient() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-let Redis: { new (config: { url: string; token: string }): unknown } | null = null;
+  if (!url || !token) {
+    return null;
+  }
 
-// Try to load packages if available
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const upstashRatelimit = require("@upstash/ratelimit");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const upstashRedis = require("@upstash/redis");
-  Ratelimit = upstashRatelimit.Ratelimit;
-  Redis = upstashRedis.Redis;
-} catch {
-  // Packages not installed - rate limiting will be disabled
-  console.warn("Upstash packages not installed. Rate limiting disabled.");
+  return new Redis({ url, token });
 }
 
-// Initialize Redis client (fails gracefully if not configured)
-const redis =
-  Redis && process.env.UPSTASH_REDIS_REST_URL
-    ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-      })
-    : null;
+const redis = createRedisClient();
+
+function createLimiter(
+  requests: number,
+  window: `${number} ${"s" | "m" | "h" | "d"}`,
+  prefix: string
+): RatelimitInstance | null {
+  if (!redis) {
+    return null;
+  }
+
+  return new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(requests, window),
+    analytics: true,
+    prefix,
+  });
+}
 
 /**
  * Search rate limit: 60 requests per minute per IP
- * Protects against scraping and abuse
  */
-export const searchRatelimit: RatelimitInstance | null =
-  redis && Ratelimit
-    ? new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(60, "1 m"),
-        analytics: true,
-        prefix: "ratelimit:search",
-      })
-    : null;
+export const searchRatelimit = createLimiter(60, "1 m", "ratelimit:search");
 
 /**
  * Lead creation rate limit: 5 per hour per user
- * Prevents spam requests to advisors
  */
-export const leadRatelimit: RatelimitInstance | null =
-  redis && Ratelimit
-    ? new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(5, "1 h"),
-        analytics: true,
-        prefix: "ratelimit:lead",
-      })
-    : null;
+export const leadRatelimit = createLimiter(5, "1 h", "ratelimit:lead");
 
 /**
  * Message rate limit: 30 per minute per user
- * Prevents message flooding
  */
-export const messageRatelimit: RatelimitInstance | null =
-  redis && Ratelimit
-    ? new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(30, "1 m"),
-        analytics: true,
-        prefix: "ratelimit:message",
-      })
-    : null;
+export const messageRatelimit = createLimiter(30, "1 m", "ratelimit:message");
 
 /**
  * Auth rate limit: 5 attempts per minute per IP
- * Protects against brute force attacks
  */
-export const authRatelimit: RatelimitInstance | null =
-  redis && Ratelimit
-    ? new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(5, "1 m"),
-        analytics: true,
-        prefix: "ratelimit:auth",
-      })
-    : null;
+export const authRatelimit = createLimiter(5, "1 m", "ratelimit:auth");
 
-/**
- * Helper to check rate limit and return appropriate response
- */
 export async function checkRateLimit(
   limiter: RatelimitInstance | null,
   identifier: string
 ): Promise<{ success: boolean; remaining?: number; reset?: number }> {
   if (!limiter) {
-    // In production, fail closed if rate limiter not configured
-    if (process.env.NODE_ENV === "production") {
-      console.error("Rate limiter not configured in production - blocking request");
-      return { success: false, remaining: 0, reset: Date.now() + 60000 };
+    const strictMode = process.env.RATE_LIMIT_STRICT === "true" || process.env.NODE_ENV === "production";
+
+    if (strictMode) {
+      console.error("Rate limiter unavailable in strict mode - blocking request", {
+        identifier,
+      });
+      return { success: false, remaining: 0, reset: Date.now() + 60_000 };
     }
-    // In development, allow requests but log warning
-    console.warn("Rate limiting disabled (Upstash not configured)");
+
+    console.warn("Rate limiter unavailable in non-strict mode - allowing request", {
+      identifier,
+    });
     return { success: true };
   }
 
@@ -129,9 +84,6 @@ export async function checkRateLimit(
   };
 }
 
-/**
- * Rate limit headers for API responses
- */
 export function rateLimitHeaders(remaining?: number, reset?: number): HeadersInit {
   const headers: HeadersInit = {};
 

@@ -1,10 +1,10 @@
 "use client"
 
-import * as React from "react"
 import { AlertTriangle, CheckCircle, Info, X } from "lucide-react"
+import * as React from "react"
 
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export type ComplianceStatus = "compliant" | "review-required" | "warning"
 

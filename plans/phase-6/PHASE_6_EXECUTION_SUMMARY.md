@@ -1,7 +1,7 @@
 # Phase 6 Execution Summary
 
 ## Document control
-- Version: v1.0
+- Version: v1.1
 - Date: 2026-02-11
 - Phase: 6 (Authentication + Tenancy + RLS)
 - Status: `COMPLETE` (`PHASE_GATE_COMPLETE`)
@@ -25,6 +25,7 @@ Both are now verified via:
   - `/Users/ceazar/Code Base/advyser/site/src/lib/auth-routing.ts`
 - Added unit coverage for redirect and role-route logic:
   - `/Users/ceazar/Code Base/advyser/site/src/lib/auth-routing.test.ts`
+- Hardened path checks to segment boundaries (no naive prefix access).
 
 ### Wave 6.B — RBAC implementation
 - Middleware now enforces path-level role authorization (not just authentication):
@@ -37,8 +38,14 @@ Both are now verified via:
   - `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211210000_phase6_auth_tenancy_rls.sql`
 - Added policy correction for listing insert tenancy check:
   - `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211213000_phase6_rls_policy_fix.sql`
+- Added hardening follow-up migration for review blockers:
+  - `/Users/ceazar/Code Base/advyser/site/supabase/migrations/20260211234000_phase6_security_hardening.sql`
 - Added RLS verification command:
   - `/Users/ceazar/Code Base/advyser/site/scripts/verify-phase6-rls.mjs`
+- Verifier expanded with deterministic fixtures and explicit negative security checks:
+  - self role escalation denied
+  - consumer advisor-note access denied
+  - deterministic claim access matrix enforced (consumer denied foreign, requester own allowed, admin foreign allowed)
 
 ### Wave 6.D — Admin access and reproducibility
 - Added deterministic verification pipeline command:
@@ -60,6 +67,9 @@ Both are now verified via:
   - advisor business-member access succeeds for owned business records
   - admin access succeeds for protected operational records
   - anonymous catalog read path works for active listing data
+  - self role mutation from consumer -> admin is blocked
+  - advisor note/revision tables are inaccessible to consumer users
+  - claim access matrix is validated by deterministic IDs
 
 ## Closeout decision
 - Phase 6 gate status: `PASS ✅` (`PHASE_GATE_COMPLETE`)

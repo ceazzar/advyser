@@ -1,5 +1,6 @@
 import { dirname, resolve } from "path"
 import { fileURLToPath } from "url"
+
 import {
   getDefaultEnvFiles,
   getMissingKeys,
@@ -20,6 +21,13 @@ const requiredKeys = [
   "POSTGRES_URL",
   "NEXT_PUBLIC_SITE_URL",
 ]
+
+const strictRateLimit =
+  process.env.RATE_LIMIT_STRICT === "true" || process.env.NODE_ENV === "production"
+
+if (strictRateLimit) {
+  requiredKeys.push("UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN")
+}
 
 const missingKeys = getMissingKeys(requiredKeys)
 

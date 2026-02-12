@@ -1,16 +1,17 @@
-import { describe, it, expect, vi } from 'vitest'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
+import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  FormDescription,
   FormMessage,
 } from '../form'
 import { Input } from '../input'

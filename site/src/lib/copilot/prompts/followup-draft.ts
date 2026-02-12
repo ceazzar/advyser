@@ -8,8 +8,9 @@
  * @version 1.0.0
  */
 
-import type { FollowupDraft, MeetingSummary, ActionItems, Channel, Tone } from '@/types/copilot'
-import { buildSystemPrompt, PROMPT_VERSION, DRAFT_LABEL } from './_shared_rules'
+import type { ActionItems, Channel, FollowupDraft, MeetingSummary, Tone } from '@/types/copilot'
+
+import { buildSystemPrompt, DRAFT_LABEL,PROMPT_VERSION } from './_shared_rules'
 
 // =============================================================================
 // INPUT TYPES

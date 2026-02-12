@@ -1,22 +1,24 @@
 "use client"
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import {
-  TrendingUp,
+  ArrowRight,
+  Briefcase,
+  CheckCircle2,
+  Heart,
+  Home,
   PiggyBank,
   Shield,
-  Home,
-  Briefcase,
-  Heart,
-  ArrowRight,
-  CheckCircle2,
-  Star,
-  Quote,
+  TrendingUp,
 } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
+import { CategoryTile } from "@/components/composite/category-tile"
+import { HeroSearchBar } from "@/components/composite/hero-search-bar"
+import { SavingsCalculator } from "@/components/composite/savings-calculator"
+import { TransparencyBlock } from "@/components/composite/transparency-block"
+import { TrustStrip } from "@/components/composite/trust-strip"
 import { PublicLayout } from "@/components/layouts/public-layout"
-
 /**
  * Icon Optical Sizing Guide:
  * --------------------------
@@ -27,95 +29,52 @@ import { PublicLayout } from "@/components/layouts/public-layout"
  * - Button icons (ArrowRight): size-4 (16px) standard
  */
 import { Button } from "@/components/ui/button"
-import { HeroSearchBar } from "@/components/composite/hero-search-bar"
-import { TrustStrip } from "@/components/composite/trust-strip"
-import { CategoryTile } from "@/components/composite/category-tile"
-import { SavingsCalculator } from "@/components/composite/savings-calculator"
-import { TransparencyBlock } from "@/components/composite/transparency-block"
-import { Card, CardContent } from "@/components/ui/card"
-import { Avatar, AvatarImage, AvatarFallback, getInitials } from "@/components/ui/avatar"
 
-// Mock data for categories
 const categories = [
   {
     icon: <TrendingUp className="size-6" />,
     name: "Retirement Planning",
     description: "Plan for your future with expert guidance on superannuation, pensions, and retirement income strategies.",
-    advisorCount: 428,
+    advisorCount: 0,
     href: "/category/retirement-planning",
   },
   {
     icon: <PiggyBank className="size-6" />,
     name: "Wealth Management",
     description: "Grow and protect your wealth with personalized investment strategies and portfolio management.",
-    advisorCount: 356,
+    advisorCount: 0,
     href: "/category/wealth-management",
   },
   {
     icon: <Shield className="size-6" />,
     name: "Insurance & Risk",
     description: "Protect what matters most with life insurance, income protection, and risk management advice.",
-    advisorCount: 289,
+    advisorCount: 0,
     href: "/category/insurance-risk",
   },
   {
     icon: <Home className="size-6" />,
     name: "Property Investment",
     description: "Navigate property markets with expert advice on purchasing, financing, and building equity.",
-    advisorCount: 234,
+    advisorCount: 0,
     href: "/category/property-investment",
   },
   {
     icon: <Briefcase className="size-6" />,
     name: "Tax Planning",
     description: "Optimize your tax position with strategic planning and compliance support from registered advisors.",
-    advisorCount: 312,
+    advisorCount: 0,
     href: "/category/tax-planning",
   },
   {
     icon: <Heart className="size-6" />,
     name: "Estate Planning",
     description: "Secure your legacy with comprehensive estate planning, wills, and intergenerational wealth transfer.",
-    advisorCount: 178,
+    advisorCount: 0,
     href: "/category/estate-planning",
   },
 ]
 
-// V.1.1.6: Testimonials with specific outcomes (not generic quotes)
-const testimonials = [
-  {
-    id: "1",
-    name: "Sarah Mitchell",
-    role: "Small Business Owner",
-    avatar: null,
-    quote: "My advisor restructured my super strategy and found $4,200/year in tax savings I was missing. Within 6 months, my retirement projection increased by $180,000.",
-    rating: 5,
-    location: "Sydney, NSW",
-    outcome: "$4,200/yr saved",
-  },
-  {
-    id: "2",
-    name: "Michael Chen",
-    role: "IT Professional",
-    avatar: null,
-    quote: "I was paying 1.8% in hidden fund fees. My new advisor moved me to a portfolio that performs better and costs 0.4%. That's an extra $12,000 over the next decade.",
-    rating: 5,
-    location: "Melbourne, VIC",
-    outcome: "$12,000 saved",
-  },
-  {
-    id: "3",
-    name: "Emma Thompson",
-    role: "Healthcare Worker",
-    avatar: null,
-    quote: "I thought I was 15 years from retirement. My advisor showed me how salary sacrifice and debt restructuring could get me there in 10. Life-changing advice.",
-    rating: 5,
-    location: "Brisbane, QLD",
-    outcome: "5 years earlier",
-  },
-]
-
-// V.1.2.6: How it works steps with specifics
 const howItWorksSteps = [
   {
     number: 1,
@@ -125,73 +84,14 @@ const howItWorksSteps = [
   {
     number: 2,
     title: "Review 3 matched advisors",
-    description: "We'll show you up to 3 ASIC-verified advisors who specialise in your exact needs, with ratings and fees upfront.",
+    description: "We surface advisors aligned with your goals, preferences, and location so you can compare with confidence.",
   },
   {
     number: 3,
     title: "Book a free consultation",
-    description: "Choose your advisor and schedule a no-obligation call. 94% of users book within 48 hours.",
+    description: "Choose the advisor that fits best and schedule a no-obligation introduction call.",
   },
 ]
-
-function TestimonialCard({
-  name,
-  role,
-  avatar,
-  quote,
-  rating,
-  location,
-  outcome,
-}: {
-  name: string
-  role: string
-  avatar: string | null
-  quote: string
-  rating: number
-  location: string
-  outcome?: string
-}) {
-  return (
-    <Card className="h-full">
-      <CardContent className="p-6 flex flex-col h-full">
-        {/* V.1.1.6: Outcome Badge */}
-        {outcome && (
-          <div className="inline-flex self-start items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold mb-4">
-            <CheckCircle2 className="size-3.5" />
-            {outcome}
-          </div>
-        )}
-
-        {/* Quote Icon */}
-        <Quote className="size-8 text-primary/20 mb-4" />
-
-        {/* Quote Text */}
-        <p className="text-muted-foreground flex-1 mb-6 leading-relaxed">
-          &quot;{quote}&quot;
-        </p>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1 mb-4">
-          {Array.from({ length: rating }).map((_, i) => (
-            <Star key={i} className="size-4 fill-amber-400 text-amber-400" />
-          ))}
-        </div>
-
-        {/* Author */}
-        <div className="flex items-center gap-3">
-          <Avatar>
-            {avatar && <AvatarImage src={avatar} alt={name} />}
-            <AvatarFallback>{getInitials(name)}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-semibold text-foreground">{name}</p>
-            <p className="text-sm text-muted-foreground">{role}, {location}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 export default function HomePage() {
   const router = useRouter()
@@ -367,40 +267,10 @@ export default function HomePage() {
 
       {/* V.1.1.2: Trust Strip moved below How It Works - earn trust after explaining value */}
       <TrustStrip
-        advisorCount={2500}
-        clientCount={75000}
+        advisorCount={0}
+        clientCount={0}
         showSecurityBadges={true}
-        showPartnerLogos={true}
       />
-
-      {/* Testimonials Section */}
-      <section className="py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              What our clients say
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Thousands of Australians have found their perfect financial advisor through Advyser.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <TestimonialCard
-                key={testimonial.id}
-                name={testimonial.name}
-                role={testimonial.role}
-                avatar={testimonial.avatar}
-                quote={testimonial.quote}
-                rating={testimonial.rating}
-                location={testimonial.location}
-                outcome={testimonial.outcome}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Transparency Block */}
       <TransparencyBlock />
@@ -412,7 +282,7 @@ export default function HomePage() {
             Ready to take control of your financial future?
           </h2>
           <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
-            Join over 75,000 Australians who have found their perfect financial advisor through Advyser. It&apos;s free to search and compare.
+            Discover advisors across Australia and compare options on your terms. It&apos;s free to search and compare.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
