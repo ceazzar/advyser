@@ -102,33 +102,41 @@ describe("PublicHeader", () => {
     })
   })
 
-  describe("CTA button", () => {
-    it('renders "Find an Advisor" CTA button', () => {
+  describe("Auth CTAs", () => {
+    it('renders "Log in" link', () => {
       render(<PublicHeader />)
 
-      const ctaButtons = screen.getAllByRole("link", { name: "Find an Advisor" })
-      expect(ctaButtons.length).toBeGreaterThan(0)
+      const loginLinks = screen.getAllByRole("link", { name: "Log in" })
+      expect(loginLinks.length).toBeGreaterThan(0)
     })
 
-    it("CTA button links to search page", () => {
+    it('renders "Sign up" CTA button', () => {
       render(<PublicHeader />)
 
-      const ctaButtons = screen.getAllByRole("link", { name: "Find an Advisor" })
-      expect(ctaButtons[0]).toHaveAttribute("href", "/search")
+      const signupLinks = screen.getAllByRole("link", { name: "Sign up" })
+      expect(signupLinks.length).toBeGreaterThan(0)
+    })
+
+    it("auth CTAs link to auth routes", () => {
+      render(<PublicHeader />)
+
+      expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute("href", "/login")
+      expect(screen.getAllByRole("link", { name: "Sign up" })[0]).toHaveAttribute("href", "/signup")
     })
   })
 
   describe("Public-only header behavior", () => {
-    it("does not render login/logout or dashboard controls when logged out", () => {
+    it("renders login/signup and does not render dashboard/logout controls when logged out", () => {
       mockUser.mockReturnValue(null)
       render(<PublicHeader />)
 
-      expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument()
+      expect(screen.getAllByRole("link", { name: "Log in" }).length).toBeGreaterThan(0)
+      expect(screen.getAllByRole("link", { name: "Sign up" }).length).toBeGreaterThan(0)
       expect(screen.queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument()
       expect(screen.queryByRole("button", { name: /log out/i })).not.toBeInTheDocument()
     })
 
-    it("does not render login/logout or dashboard controls when authenticated", () => {
+    it("renders login/signup and does not render dashboard/logout controls when authenticated", () => {
       const authStates = [
         { id: "123", email: "test@example.com", role: "consumer", displayName: "Test User" },
         { id: "456", email: "advisor@example.com", role: "advisor", displayName: "Test Advisor" },
@@ -139,7 +147,8 @@ describe("PublicHeader", () => {
         mockUser.mockReturnValue(authState)
         const { unmount } = render(<PublicHeader />)
 
-        expect(screen.queryByRole("link", { name: "Log in" })).not.toBeInTheDocument()
+        expect(screen.getAllByRole("link", { name: "Log in" }).length).toBeGreaterThan(0)
+        expect(screen.getAllByRole("link", { name: "Sign up" }).length).toBeGreaterThan(0)
         expect(screen.queryByRole("link", { name: "Dashboard" })).not.toBeInTheDocument()
         expect(screen.queryByRole("button", { name: /log out/i })).not.toBeInTheDocument()
         unmount()
@@ -196,6 +205,8 @@ describe("PublicHeader", () => {
       await user.click(menuButton)
 
       const dialog = screen.getByRole("dialog")
+      expect(within(dialog).getByRole("link", { name: "Log in" })).toBeInTheDocument()
+      expect(within(dialog).getByRole("link", { name: "Sign up" })).toBeInTheDocument()
       expect(within(dialog).getByRole("link", { name: "Find an Advisor" })).toBeInTheDocument()
     })
   })

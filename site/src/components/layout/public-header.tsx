@@ -81,7 +81,7 @@ export function PublicHeader() {
           </nav>
         </div>
 
-        {/* Right section: Help + CTA */}
+        {/* Right section: Help + Auth CTA */}
         <div className="hidden items-center lg:flex">
           <Link
             href="/help"
@@ -95,10 +95,21 @@ export function PublicHeader() {
             Help
           </Link>
           <Link
-            href="/search"
+            href="/login"
+            className={cn(
+              "ml-1 flex min-h-11 items-center rounded-lg px-3 py-2 text-base transition-colors hover:bg-gray-900/5 focus-visible:underline focus-visible:underline-offset-4 focus-visible:outline-none",
+              isActiveLink("/login")
+                ? "font-bold text-primary"
+                : "font-semibold text-gray-900"
+            )}
+          >
+            Log in
+          </Link>
+          <Link
+            href="/signup"
             className="ml-2 inline-flex h-11 min-h-11 items-center justify-center rounded-full bg-primary px-4 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            Find an Advisor
+            Sign up
           </Link>
         </div>
 
@@ -140,7 +151,17 @@ export function PublicHeader() {
                   Help
                 </Link>
                 <div className="mt-4 flex flex-col gap-3 border-t pt-6">
+                  <Button asChild variant="outline" className="w-full rounded-full">
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      Log in
+                    </Link>
+                  </Button>
                   <Button asChild className="w-full rounded-full">
+                    <Link href="/signup" onClick={() => setIsOpen(false)}>
+                      Sign up
+                    </Link>
+                  </Button>
+                  <Button asChild variant="secondary" className="w-full rounded-full">
                     <Link href="/search" onClick={() => setIsOpen(false)}>
                       Find an Advisor
                     </Link>
