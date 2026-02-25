@@ -7,12 +7,6 @@ const DISABLED_ROUTE_PREFIXES = [
   "/advisor",
   "/admin",
   "/claim",
-  "/login",
-  "/signup",
-  "/verify",
-  "/forgot-password",
-  "/reset-password",
-  "/auth",
   "/components",
   "/design-system",
 ];

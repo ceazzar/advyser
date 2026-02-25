@@ -1,13 +1,26 @@
 import type { UserRole } from "@/types/user"
 
 const ROLE_DEFAULT_ROUTE: Record<UserRole, string> = {
-  consumer: "/dashboard",
+  consumer: "/",
   advisor: "/advisor",
   admin: "/admin",
 }
 
 const ROLE_ALLOWED_PREFIXES: Record<UserRole, string[]> = {
-  consumer: ["/dashboard"],
+  consumer: [
+    "/",
+    "/about",
+    "/advisors",
+    "/contact",
+    "/cookies",
+    "/disclaimer",
+    "/help",
+    "/privacy",
+    "/request-intro",
+    "/resources",
+    "/search",
+    "/terms",
+  ],
   advisor: ["/advisor"],
   admin: ["/admin", "/advisor", "/dashboard"],
 }

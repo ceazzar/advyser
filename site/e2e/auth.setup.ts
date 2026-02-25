@@ -65,9 +65,11 @@ async function performLogin(
   // Click sign in button
   await page.getByRole("button", { name: /sign in/i }).click()
 
-  // Wait for successful login - should redirect to dashboard
-  // The redirect path depends on user role (consumer -> /dashboard, advisor -> /advisor)
-  await page.waitForURL(/\/(dashboard|advisor)/, { timeout: 15000 })
+  // Wait for successful login.
+  // The redirect path depends on user role (consumer -> /, advisor -> /advisor)
+  await page.waitForURL((url) => url.pathname === "/" || url.pathname.startsWith("/advisor"), {
+    timeout: 15000,
+  })
 
   // Verify we're logged in by checking for authenticated UI elements
   // This ensures the session is fully established before saving state
@@ -80,8 +82,8 @@ async function performLogin(
 setup("authenticate as consumer", async ({ page }) => {
   await performLogin(page, TEST_CONSUMER.email, TEST_CONSUMER.password)
 
-  // Verify consumer-specific redirect (consumers go to /dashboard)
-  await expect(page).toHaveURL(/\/dashboard/)
+  // Verify consumer-specific redirect (consumers go to /)
+  await expect(page).toHaveURL(/\/$/)
 
   // Save authentication state
   await page.context().storageState({ path: CONSUMER_AUTH_FILE })

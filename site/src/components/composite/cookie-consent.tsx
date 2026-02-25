@@ -4,21 +4,20 @@ import Link from "next/link";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
-
-const COOKIE_CONSENT_KEY = "advyser-cookie-consent";
+import { readCookieConsent, writeCookieConsent } from "@/lib/cookie-consent";
 
 export function CookieConsentBanner() {
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
-    const accepted = window.localStorage.getItem(COOKIE_CONSENT_KEY);
-    if (!accepted) {
+    const consent = readCookieConsent();
+    if (!consent) {
       setVisible(true);
     }
   }, []);
 
-  const acceptCookies = () => {
-    window.localStorage.setItem(COOKIE_CONSENT_KEY, "accepted");
+  const setConsent = (choice: "accepted" | "essential") => {
+    writeCookieConsent(choice);
     setVisible(false);
   };
 
@@ -30,7 +29,8 @@ export function CookieConsentBanner() {
     <div className="fixed inset-x-0 bottom-0 z-50 border-t bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground">
-          We use cookies to improve performance and measure usage. Read our{" "}
+          We use essential browser storage to keep the platform secure and remember your
+          consent preferences. Optional storage helps us improve the experience. Read our{" "}
           <Link href="/cookies" className="text-primary underline underline-offset-4 hover:text-primary/80">
             Cookie Policy
           </Link>
@@ -40,8 +40,11 @@ export function CookieConsentBanner() {
           <Button variant="outline" size="sm" asChild>
             <Link href="/cookies">Review</Link>
           </Button>
-          <Button size="sm" onClick={acceptCookies}>
-            Accept
+          <Button size="sm" variant="outline" onClick={() => setConsent("essential")}>
+            Essential only
+          </Button>
+          <Button size="sm" onClick={() => setConsent("accepted")}>
+            Accept optional
           </Button>
         </div>
       </div>

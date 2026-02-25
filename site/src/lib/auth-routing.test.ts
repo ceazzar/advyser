@@ -23,9 +23,10 @@ describe("sanitizeRedirectPath", () => {
 
 describe("role route access matrix", () => {
   it("enforces consumer route prefix", () => {
-    expect(canRoleAccessPath("consumer", "/dashboard")).toBe(true)
-    expect(canRoleAccessPath("consumer", "/dashboard/settings")).toBe(true)
-    expect(canRoleAccessPath("consumer", "/dashboardevil")).toBe(false)
+    expect(canRoleAccessPath("consumer", "/")).toBe(true)
+    expect(canRoleAccessPath("consumer", "/advisors/abc")).toBe(true)
+    expect(canRoleAccessPath("consumer", "/request-intro")).toBe(true)
+    expect(canRoleAccessPath("consumer", "/dashboard")).toBe(false)
     expect(canRoleAccessPath("consumer", "/advisor")).toBe(false)
     expect(canRoleAccessPath("consumer", "/admin")).toBe(false)
   })
@@ -51,7 +52,7 @@ describe("getPostLoginRedirect", () => {
   })
 
   it("falls back to default route when requested redirect is not allowed", () => {
-    expect(getPostLoginRedirect("consumer", "/admin")).toBe("/dashboard")
+    expect(getPostLoginRedirect("consumer", "/admin")).toBe("/")
   })
 
   it("falls back to default route when redirect is unsafe", () => {
@@ -59,7 +60,7 @@ describe("getPostLoginRedirect", () => {
   })
 
   it("returns default route by role when missing redirect", () => {
-    expect(getDefaultRouteForRole("consumer")).toBe("/dashboard")
+    expect(getDefaultRouteForRole("consumer")).toBe("/")
     expect(getDefaultRouteForRole("advisor")).toBe("/advisor")
     expect(getDefaultRouteForRole("admin")).toBe("/admin")
   })

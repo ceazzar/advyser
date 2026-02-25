@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { canRoleAccessPath, getDefaultRouteForRole, sanitizeRedirectPath } from "@/lib/auth-routing"
 import { logger } from "@/lib/logger"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createClient } from "@/lib/supabase/server"
@@ -13,6 +14,18 @@ export async function signUp(formData: FormData) {
   const password = formData.get("password") as string
   const fullName = formData.get("fullName") as string
   const accountType = formData.get("accountType") as "consumer" | "advisor"
+  const requestedRedirect = formData.get("redirect") as string | null
+  const safeRequestedRedirect = sanitizeRedirectPath(requestedRedirect)
+  const fallbackRedirect = getDefaultRouteForRole(accountType)
+  const postVerifyRedirect =
+    safeRequestedRedirect && canRoleAccessPath(accountType, safeRequestedRedirect)
+      ? safeRequestedRedirect
+      : fallbackRedirect
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const emailRedirectTo = new URL(
+    `/auth/callback?next=${encodeURIComponent(postVerifyRedirect)}`,
+    siteUrl
+  ).toString()
 
   const [firstName, ...lastParts] = fullName.trim().split(" ")
   const lastName = lastParts.join(" ")
@@ -21,7 +34,7 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      emailRedirectTo,
       data: {
         role: accountType,
         first_name: firstName,

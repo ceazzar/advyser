@@ -1,145 +1,164 @@
-"use client"
-
-import { ArrowLeft,Shield } from "lucide-react"
+import { Shield } from "lucide-react"
+import type { Metadata } from "next"
 import Link from "next/link"
 
-import { PublicLayout } from "@/components/layouts/public-layout"
-import { Button } from "@/components/ui/button"
-import { publicBusiness, publicMessaging } from "@/lib/public-business"
+import { LegalPageShell } from "@/components/composite/legal-page-shell"
+import { policyMeta } from "@/lib/policy-meta"
+import { publicBusiness } from "@/lib/public-business"
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Advyser",
+  description:
+    "How Advyser collects, uses, discloses, and safeguards personal information under Australian privacy requirements.",
+}
+
+const toc = [
+  { id: "plain-english-summary", label: "Plain-English summary" },
+  { id: "data-we-collect", label: "Data we collect" },
+  { id: "how-we-use-data", label: "How we use data" },
+  { id: "sharing-disclosure", label: "Sharing and disclosure" },
+  { id: "retention-security", label: "Retention and security" },
+  { id: "your-rights", label: "Your rights and requests" },
+  { id: "contact", label: "Contact" },
+]
 
 export default function PrivacyPage() {
   return (
-    <PublicLayout>
-      {/* Header */}
-      <section className="bg-white py-16 lg:py-20 border-b">
-        <div className="max-w-4xl mx-auto px-6">
-          <Button variant="ghost" size="sm" className="mb-6" asChild>
-            <Link href="/">
-              <ArrowLeft className="mr-2 size-4" />
-              Back to home
+    <LegalPageShell
+      title="Privacy Policy"
+      summary="This policy explains how Advyser handles personal information in line with Australian Privacy Principles (APPs)."
+      icon={Shield}
+      policy={policyMeta.privacy}
+      toc={toc}
+    >
+      <section id="plain-english-summary">
+        <h2>Plain-English summary</h2>
+        <ul>
+          <li>
+            We collect only the information needed to run accounts, support requests, and adviser
+            matching features.
+          </li>
+          <li>
+            We do not sell personal information. Data is shared only where needed to deliver the
+            service or where required by law.
+          </li>
+          <li>
+            Privacy requests are acknowledged within 5 business days and generally completed within
+            30 calendar days.
+          </li>
+        </ul>
+      </section>
+
+      <section id="data-we-collect">
+        <h2>Data we collect</h2>
+        <p>
+          {publicBusiness.legalName}
+          {publicBusiness.abn ? ` (ABN ${publicBusiness.abn})` : ""} collects information you
+          provide directly and information generated as you use our platform.
+        </p>
+        <h3>Information you provide</h3>
+        <ul>
+          <li>Account details such as name and email when signing up.</li>
+          <li>Request-intro and lead details such as goals, timing, and communication preferences.</li>
+          <li>Support submissions and complaint details provided via our contact pathways.</li>
+        </ul>
+        <h3>Information collected automatically</h3>
+        <ul>
+          <li>Basic technical information such as browser type and IP-derived location signals.</li>
+          <li>Platform interaction data used to improve reliability and usability.</li>
+          <li>
+            Consent preference storage (see the{" "}
+            <Link href="/cookies" className="text-primary hover:underline">
+              Cookie Policy
             </Link>
-          </Button>
-
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex items-center justify-center size-12 rounded-full bg-primary/10 text-primary">
-              <Shield className="size-6" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Privacy Policy</h1>
-              <p className="text-muted-foreground">Last updated: 1 February 2026</p>
-            </div>
-          </div>
-        </div>
+            ).
+          </li>
+        </ul>
       </section>
 
-      {/* Content */}
-      <section className="py-12 lg:py-16">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="prose prose-gray max-w-none">
-            <h2>1. Introduction</h2>
-            <p>
-              {publicBusiness.legalName}
-              {publicBusiness.abn ? ` (ABN ${publicBusiness.abn})` : ""} (&quot;Advyser&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our website and services.
-            </p>
-            <p>
-              We are bound by the Australian Privacy Principles (APPs) contained in the Privacy Act 1988 (Cth) and applicable state and territory privacy legislation.
-            </p>
-
-            <h2>2. Information We Collect</h2>
-            <h3>2.1 Information You Provide</h3>
-            <p>We collect information you provide directly to us, including:</p>
-            <ul>
-              <li>Name, email address, phone number, and postal address</li>
-              <li>Financial information relevant to your advisor search (investment amounts, goals, etc.)</li>
-              <li>Account credentials (username and password)</li>
-              <li>Communications you send to us or through our platform</li>
-              <li>Survey responses and feedback</li>
-            </ul>
-
-            <h3>2.2 Information Collected Automatically</h3>
-            <p>When you use our services, we automatically collect:</p>
-            <ul>
-              <li>Device information (IP address, browser type, operating system)</li>
-              <li>Usage data (pages visited, time spent, clicks)</li>
-              <li>Location data (based on IP address)</li>
-              <li>Cookies and similar tracking technologies</li>
-            </ul>
-
-            <h2>3. How We Use Your Information</h2>
-            <p>We use the information we collect to:</p>
-            <ul>
-              <li>Provide, maintain, and improve our services</li>
-              <li>Match you with suitable financial advisors</li>
-              <li>Process transactions and send related information</li>
-              <li>Send promotional communications (with your consent)</li>
-              <li>Respond to your comments, questions, and requests</li>
-              <li>Monitor and analyse trends, usage, and activities</li>
-              <li>Detect, investigate, and prevent fraudulent transactions</li>
-              <li>Comply with legal obligations</li>
-            </ul>
-
-            <h2>4. Information Sharing</h2>
-            <p>We may share your information with:</p>
-            <ul>
-              <li><strong>Financial Advisors:</strong> When you submit a request, we share relevant information with matched advisors to facilitate introductions</li>
-              <li><strong>Service Providers:</strong> Companies that provide services on our behalf (hosting, analytics, payment processing)</li>
-              <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
-              <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
-            </ul>
-            <p>We do not sell your personal information to third parties.</p>
-
-            <h2>5. Data Security</h2>
-            <p>
-              We implement appropriate technical and organisational measures to protect your personal information against unauthorised access, alteration, disclosure, or destruction. These include encryption, secure servers, and access controls.
-            </p>
-
-            <h2>6. Data Retention</h2>
-            <p>
-              We retain your personal information for as long as necessary to provide our services and fulfil the purposes outlined in this policy, unless a longer retention period is required by law.
-            </p>
-
-            <h2>7. Your Rights</h2>
-            <p>Under Australian privacy law, you have the right to:</p>
-            <ul>
-              <li>Access your personal information</li>
-              <li>Request correction of inaccurate information</li>
-              <li>Request deletion of your information (subject to legal requirements)</li>
-              <li>Opt out of marketing communications</li>
-              <li>Lodge a complaint with the Office of the Australian Information Commissioner (OAIC)</li>
-            </ul>
-
-            <h2>8. Cookies</h2>
-            <p>
-              We use cookies and similar tracking technologies to collect and track information about your use of our services. You can control cookies through your browser settings. For more information, see our <Link href="/cookies" className="text-primary hover:underline">Cookie Policy</Link>.
-            </p>
-
-            <h2>9. Third-Party Links</h2>
-            <p>
-              Our website may contain links to third-party websites. We are not responsible for the privacy practices of these websites. We encourage you to read the privacy policies of any website you visit.
-            </p>
-
-            <h2>10. Children&apos;s Privacy</h2>
-            <p>
-              Our services are not intended for individuals under 18 years of age. We do not knowingly collect personal information from children.
-            </p>
-
-            <h2>11. Changes to This Policy</h2>
-            <p>
-              We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the &quot;Last updated&quot; date.
-            </p>
-
-            <h2>12. Contact Us</h2>
-            <p>
-              If you have any questions about this Privacy Policy or our privacy practices, please contact us:
-            </p>
-            <ul>
-              <li>Email: <a href={`mailto:${publicBusiness.privacyEmail}`} className="text-primary hover:underline">{publicBusiness.privacyEmail}</a></li>
-              <li>Post: {publicBusiness.postalAddress ? `Privacy Officer, ${publicBusiness.legalName}, ${publicBusiness.postalAddress}` : publicMessaging.noPlaceholderLegalCopy}</li>
-              {publicBusiness.supportPhone && <li>Phone: {publicBusiness.supportPhone}</li>}
-            </ul>
-          </div>
-        </div>
+      <section id="how-we-use-data">
+        <h2>How we use data</h2>
+        <p>We use personal information to:</p>
+        <ul>
+          <li>operate core platform features and maintain account security,</li>
+          <li>route requests to relevant advisers when you initiate matching actions,</li>
+          <li>respond to support, legal, and privacy requests, and</li>
+          <li>meet legal and regulatory obligations.</li>
+        </ul>
       </section>
-    </PublicLayout>
+
+      <section id="sharing-disclosure">
+        <h2>Sharing and disclosure</h2>
+        <ul>
+          <li>
+            <strong>With advisers:</strong> only when you use matching/request workflows that
+            require introductions.
+          </li>
+          <li>
+            <strong>With service providers:</strong> trusted vendors who help us host and operate
+            the platform under contractual confidentiality controls.
+          </li>
+          <li>
+            <strong>With regulators or courts:</strong> where required by applicable law.
+          </li>
+        </ul>
+        <p>We do not sell your personal information to third parties.</p>
+      </section>
+
+      <section id="retention-security">
+        <h2>Retention and security</h2>
+        <p>
+          We apply technical and organisational controls to protect data from unauthorised access,
+          loss, or misuse. Access is restricted to authorised personnel and service providers with
+          defined responsibilities.
+        </p>
+        <p>
+          Retention periods depend on the data type, legal obligations, and operational needs. When
+          data is no longer required, we delete or de-identify it where feasible.
+        </p>
+      </section>
+
+      <section id="your-rights">
+        <h2>Your rights and requests</h2>
+        <p>
+          Under Australian privacy law, you can request access to, correction of, or deletion of
+          your personal information (subject to legal limits).
+        </p>
+        <ul>
+          <li>Request acknowledgement target: within 5 business days.</li>
+          <li>Standard response target: within 30 calendar days.</li>
+          <li>
+            If unresolved, you may lodge a complaint with the{" "}
+            <a
+              href="https://www.oaic.gov.au/privacy/privacy-complaints"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Office of the Australian Information Commissioner (OAIC)
+            </a>
+            .
+          </li>
+        </ul>
+      </section>
+
+      <section id="contact">
+        <h2>Contact</h2>
+        <p>For privacy requests or questions:</p>
+        <ul>
+          <li>
+            Email:{" "}
+            <a
+              href={`mailto:${publicBusiness.privacyEmail}`}
+              className="text-primary hover:underline"
+            >
+              {publicBusiness.privacyEmail}
+            </a>
+          </li>
+          {publicBusiness.supportPhone ? <li>Phone: {publicBusiness.supportPhone}</li> : null}
+          {publicBusiness.legalAddress ? <li>Post: {publicBusiness.legalAddress}</li> : null}
+        </ul>
+      </section>
+    </LegalPageShell>
   )
 }

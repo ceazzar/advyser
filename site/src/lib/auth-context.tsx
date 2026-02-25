@@ -167,7 +167,7 @@ export function useRequireAuth(allowedRoles?: UserRole[]) {
       // Redirect to appropriate dashboard based on role
       hasRedirected.current = true
       const dashboardRoutes: Record<UserRole, string> = {
-        consumer: "/dashboard",
+        consumer: "/",
         advisor: "/advisor",
         admin: "/admin",
       }

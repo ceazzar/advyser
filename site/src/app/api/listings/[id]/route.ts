@@ -27,6 +27,7 @@ export interface ListingDetail {
   website: string | null;
   email: string | null;
   phone: string | null;
+  contactUnlocked: boolean;
   address: {
     line1: string | null;
     line2: string | null;
@@ -165,6 +166,10 @@ export async function GET(
 
     const supabase = await createClient();
     const admin = createAdminClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const contactUnlocked = Boolean(user);
 
     // Fetch listing with all related data
     const { data: listing, error } = await supabase
@@ -453,9 +458,10 @@ export async function GET(
 
       businessName: business?.trading_name || null,
       abn: business?.abn || null,
-      website: business?.website || null,
-      email: business?.email || null,
-      phone: business?.phone || null,
+      website: contactUnlocked ? business?.website || null : null,
+      email: contactUnlocked ? business?.email || null : null,
+      phone: contactUnlocked ? business?.phone || null : null,
+      contactUnlocked,
       address: business?.location
         ? {
             line1: business.address_line_1 || null,
@@ -577,7 +583,9 @@ export async function GET(
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": contactUnlocked
+            ? "private, no-store, max-age=0"
+            : "public, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );

@@ -11,6 +11,7 @@ import {
   Shield,
   Star,
 } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 import { use } from "react"
@@ -37,6 +38,7 @@ type ListingDetail = {
   website: string | null
   email: string | null
   phone: string | null
+  contactUnlocked: boolean
   address: {
     suburb: string | null
     state: string | null
@@ -255,8 +257,12 @@ export default function AdvisorProfilePage({
 
   const handleRequestIntro = React.useCallback(() => {
     if (!listing) return
+    if (!listing.contactUnlocked) {
+      router.push(`/signup?redirect=${encodeURIComponent(`/advisors/${listingId}`)}`)
+      return
+    }
     router.push(`/request-intro?listingId=${listing.id}`)
-  }, [listing, router])
+  }, [listing, listingId, router])
 
   if (isLoading) {
     return (
@@ -287,6 +293,7 @@ export default function AdvisorProfilePage({
   }
 
   const location = formatLocation(listing.address)
+  const authRedirect = `/advisors/${listingId}`
   const topCredentials = listing.credentials
     .map((credential) => credential.asicRepNumber || credential.afslNumber)
     .filter(Boolean)
@@ -361,13 +368,19 @@ export default function AdvisorProfilePage({
                   </h3>
                   <Button ref={mainCtaRef} className="w-full" size="lg" onClick={handleRequestIntro}>
                     <Calendar className="size-5 mr-2" />
-                    Request Introduction
+                    {listing.contactUnlocked ? "Request Introduction" : "Create account to contact"}
                   </Button>
-                  <p className="mt-3 text-sm text-muted-foreground text-center">
-                    {listing.responseTimeHours
-                      ? `Usually responds within ${listing.responseTimeHours} hours`
-                      : "Response times vary by advisor"}
-                  </p>
+                  {listing.contactUnlocked ? (
+                    <p className="mt-3 text-sm text-muted-foreground text-center">
+                      {listing.responseTimeHours
+                        ? `Usually responds within ${listing.responseTimeHours} hours`
+                        : "Response times vary by advisor"}
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-sm text-muted-foreground text-center">
+                      Sign up or log in to unlock direct contact details and intro requests.
+                    </p>
+                  )}
 
                   <div className="mt-4 rounded-lg border border-border p-3 space-y-2 text-sm">
                     <div className="flex items-center justify-between">
@@ -392,32 +405,52 @@ export default function AdvisorProfilePage({
 
                   <Separator className="my-6" />
 
-                  <div className="space-y-3 text-sm">
-                    {listing.email && (
-                      <div className="flex items-center gap-3">
-                        <Mail className="size-4 text-primary shrink-0" />
-                        <a href={`mailto:${listing.email}`} className="hover:text-primary">
-                          {listing.email}
-                        </a>
+                  {listing.contactUnlocked ? (
+                    <div className="space-y-3 text-sm">
+                      {listing.email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="size-4 text-primary shrink-0" />
+                          <a href={`mailto:${listing.email}`} className="hover:text-primary">
+                            {listing.email}
+                          </a>
+                        </div>
+                      )}
+                      {listing.phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="size-4 text-primary shrink-0" />
+                          <a href={`tel:${listing.phone}`} className="hover:text-primary">
+                            {listing.phone}
+                          </a>
+                        </div>
+                      )}
+                      {listing.website && (
+                        <div className="flex items-center gap-3">
+                          <ExternalLink className="size-4 text-primary shrink-0" />
+                          <a href={listing.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary truncate">
+                            {listing.website}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-dashed border-border p-4 space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Contact details are hidden until you create a free account.
+                      </p>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Button asChild size="sm">
+                          <Link href={`/signup?redirect=${encodeURIComponent(authRedirect)}`}>
+                            Sign up
+                          </Link>
+                        </Button>
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/login?redirect=${encodeURIComponent(authRedirect)}`}>
+                            Log in
+                          </Link>
+                        </Button>
                       </div>
-                    )}
-                    {listing.phone && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="size-4 text-primary shrink-0" />
-                        <a href={`tel:${listing.phone}`} className="hover:text-primary">
-                          {listing.phone}
-                        </a>
-                      </div>
-                    )}
-                    {listing.website && (
-                      <div className="flex items-center gap-3">
-                        <ExternalLink className="size-4 text-primary shrink-0" />
-                        <a href={listing.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary truncate">
-                          {listing.website}
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -651,7 +684,7 @@ export default function AdvisorProfilePage({
         advisorName={listing.name}
         advisorImage={listing.avatar || undefined}
         onRequestIntro={handleRequestIntro}
-        ctaText="Request Intro"
+        ctaText={listing.contactUnlocked ? "Request Intro" : "Sign up to contact"}
         targetRef={mainCtaRef}
       />
     </PublicLayout>

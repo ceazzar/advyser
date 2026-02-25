@@ -5,6 +5,7 @@ import { DM_Sans } from "next/font/google";
 
 import { CookieConsentBanner } from "@/components/composite/cookie-consent";
 import { SkipLink } from "@/components/ui/skip-link";
+import { AuthProvider } from "@/lib/auth-context";
 import { ShortlistProvider } from "@/lib/shortlist-context";
 
 const dmSans = DM_Sans({
@@ -42,10 +43,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${dmSans.variable} font-sans antialiased`}>
         <SkipLink />
-        <ShortlistProvider>
-          <main id="main-content">{children}</main>
-          <CookieConsentBanner />
-        </ShortlistProvider>
+        <AuthProvider>
+          <ShortlistProvider>
+            <main id="main-content">{children}</main>
+            <CookieConsentBanner />
+          </ShortlistProvider>
+        </AuthProvider>
       </body>
     </html>
   );

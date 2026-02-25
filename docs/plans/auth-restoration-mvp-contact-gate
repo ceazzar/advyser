@@ -1,10 +1,10 @@
 ═══════════════════════════════════════════════════════════════════════════════════════════
-                    ADVYSER - ENGINEERING PLAN
+                    ADVYSER - ENGINEERING PLAN (REVISED)
                     Auth Flow Restoration + Contact Details Gate
 ═══════════════════════════════════════════════════════════════════════════════════════════
 
 Date:    2026-02-25
-Status:  APPROVED - READY TO IMPLEMENT
+Status:  IN PROGRESS - overlap implementation underway
 Branch:  main
 Backup:  codex/non-public-backup-20260211
 
@@ -12,125 +12,96 @@ Backup:  codex/non-public-backup-20260211
 📋 Context
 ───────────
 
-Auth pages (login, signup, verify, forgot-password, auth/callback) were deleted in Phase 8
-as part of a "public-only MVP" prune. They exist in full working condition on the backup
-branch. The intended MVP requires users to sign up before seeing advisor contact details.
-Currently, contact details are fully public and no auth UI exists on the site.
+Auth pages were removed during MVP pruning. The product requirement for this phase is:
+users must sign up/log in before seeing advisor contact details (email/phone/website).
 
-This plan restores the auth flow and wires the contact details paywall.
+Current state:
+- Auth routes are blocked by middleware.
+- Advisor contact details are returned by public API and rendered publicly.
+- Consumer default redirect still points to /dashboard (disabled in MVP mode).
+
+This revised plan restores auth and enforces the contact gate at BOTH UI and API layers.
+
+Implementation progress snapshot:
+- Completed: auth route restoration, middleware unblocking, consumer redirect defaults, callback fallback hardening.
+- Completed: listing-detail API redaction + `contactUnlocked` flag + private cache for authenticated responses.
+- Completed: advisor profile UI contact gate and request-intro pre-auth gate.
+- Completed: authenticated-only checks on `POST /api/leads` and `POST /api/match-requests`.
+- Remaining: optional refactors from React Doctor warnings and full regression pass across entire repo.
 
 
 🎯 User Flow Being Enabled
 ───────────────────────────
 
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  1. User visits site homepage (/)                                                   │
-│  2. Searches for advisor by service type (financial or property/real estate)        │
-│  3. Browses /search results, clicks into /advisors/[slug] profile                  │
-│  4. Sees advisor info - contact details are LOCKED (hard-hide gate)                 │
-│  5. Clicks "Sign Up Free" → /signup?redirect=/advisors/[id]                        │
-│  6. Completes signup → email verification → returns to advisor profile              │
-│  7. Contact details (email, phone, website) now visible                             │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+Primary flow:
+1. User visits /advisors/[slug]
+2. Contact details are hidden behind gate card
+3. User clicks Sign Up or Log In with redirect back to advisor page
+4. User verifies email (if signup)
+5. User is returned to safe destination
+6. Advisor contact details become visible
 
-Alternate path via lead form:
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  1. User submits /request-intro form (name, email, goal, etc.)                     │
-│  2. Success state shows "Complete your profile" CTA with email pre-filled           │
-│  3. → /signup?email={captured_email}&redirect=/                                     │
-│  4. Sets password → verifies email → lands on homepage                              │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+Lead-form progressive flow:
+1. User submits /request-intro form
+2. Success state shows "Complete your profile"
+3. CTA links to /signup with pre-filled email and safe redirect
+4. User verifies email
+5. User lands on redirected page (default /)
 
 
 🔑 Design Decisions
 ────────────────────
 
-┌─────────────────────────────┬───────────────────────────────────────────────────────┐
-│ Decision                    │ Choice + Rationale                                    │
-├─────────────────────────────┼───────────────────────────────────────────────────────┤
-│ Contact gate style          │ Hard hide - replace contact section with locked card. │
-│                             │ Cleaner UX, clear value proposition for sign-up.      │
-├─────────────────────────────┼───────────────────────────────────────────────────────┤
-│ Lead form post-submit       │ Progressive registration - show "Complete your        │
-│                             │ profile" CTA in success state with email pre-filled.  │
-│                             │ Captures lead first, then converts to account.        │
-├─────────────────────────────┼───────────────────────────────────────────────────────┤
-│ Consumer post-login route   │ Changed from /dashboard (disabled) to / (homepage).  │
-│                             │ Redirect param used to return to advisor profile.     │
-├─────────────────────────────┼───────────────────────────────────────────────────────┤
-│ Dashboard pages             │ Still disabled. Not in scope for this plan.           │
-└─────────────────────────────┴───────────────────────────────────────────────────────┘
+- Contact gate enforcement:
+  - UI gate on advisor page (locked card for anonymous users)
+  - API redaction for anonymous requests (no contact fields returned)
+  - Rationale: Prevent trivial bypass via browser network tab or direct API calls
+
+- Consumer default route:
+  - /dashboard -> /
+  - Rationale: /dashboard remains disabled in MVP mode
+
+- Redirect handling:
+  - Preserve role-based safe redirect checks
+  - Signup must propagate redirect into verification callback
+
+- Password reset:
+  - Restore both forgot-password and reset-password pages
+  - Rationale: reset flow already depends on /reset-password callback target
 
 
 ═══════════════════════════════════════════════════════════════════════════════════════════
-                              COMMIT 1 - Auth Infrastructure
-                    (Restore pages + fix middleware + wire AuthProvider)
+                           COMMIT 1 - Auth Infrastructure
 ═══════════════════════════════════════════════════════════════════════════════════════════
 
-📦 1A - Restore 5 Pages from Backup Branch
-────────────────────────────────────────────
+📦 1A - Restore Auth Pages From Backup (6 files)
+──────────────────────────────────────────────────
 
-Command:
-
-  cd "/Users/ceazar/Code Base/advyser"
+Restore from backup branch:
 
   git checkout codex/non-public-backup-20260211 -- \
     site/src/app/login/page.tsx \
     site/src/app/signup/page.tsx \
     site/src/app/verify/page.tsx \
     site/src/app/auth/callback/route.ts \
-    site/src/app/forgot-password/page.tsx
-
-┌──────────────────────────────────┬────────────┬─────────────────────────────────────┐
-│ File                             │ Status     │ Notes                               │
-├──────────────────────────────────┼────────────┼─────────────────────────────────────┤
-│ site/src/app/login/page.tsx      │ Complete   │ Email/pass form, useAuth,           │
-│                                  │            │ getPostLoginRedirect, AuthLayout     │
-├──────────────────────────────────┼────────────┼─────────────────────────────────────┤
-│ site/src/app/signup/page.tsx     │ Complete   │ Consumer/advisor selector, password │
-│                                  │            │ strength, terms checkbox, AuthLayout │
-├──────────────────────────────────┼────────────┼─────────────────────────────────────┤
-│ site/src/app/verify/page.tsx     │ Complete   │ Reads ?email param, resend cooldown │
-├──────────────────────────────────┼────────────┼─────────────────────────────────────┤
-│ site/src/app/auth/callback/      │ Complete   │ Supabase code exchange, safe        │
-│ route.ts                         │            │ redirect validation                 │
-├──────────────────────────────────┼────────────┼─────────────────────────────────────┤
-│ site/src/app/forgot-password/    │ Complete   │ resetPassword() server action       │
-│ page.tsx                         │            │                                     │
-└──────────────────────────────────┴────────────┴─────────────────────────────────────┘
-
-All dependencies exist on main:
-  - @/components/layouts/auth-layout         (confirmed present)
-  - @/lib/auth-actions                       (confirmed present)
-  - @/lib/auth-context                       (confirmed present)
-  - @/lib/supabase/client and server         (confirmed present)
-  - Shadcn UI components (Button, Input...)  (confirmed present)
+    site/src/app/forgot-password/page.tsx \
+    site/src/app/reset-password/page.tsx
 
 
-🔧 1B - Update Middleware
-──────────────────────────
+🔧 1B - Unblock Auth Routes in Middleware
+──────────────────────────────────────────
 
 File: site/src/middleware.ts
 
-Remove these 6 entries from DISABLED_ROUTE_PREFIXES:
+Remove these entries from DISABLED_ROUTE_PREFIXES:
+- "/login"
+- "/signup"
+- "/verify"
+- "/forgot-password"
+- "/reset-password"
+- "/auth"
 
-  Before                          After
-  ──────────────────────────────  ──────────────────────────────
-  "/dashboard",                   "/dashboard",
-  "/advisor",                     "/advisor",
-  "/admin",                       "/admin",
-  "/claim",                       "/claim",
-  "/login",          ← REMOVE     "/components",
-  "/signup",         ← REMOVE     "/design-system",
-  "/verify",         ← REMOVE
-  "/forgot-password",← REMOVE
-  "/reset-password", ← REMOVE
-  "/auth",           ← REMOVE
-  "/components",
-  "/design-system",
-
-Note: /reset-password is not in the backup (no page.tsx) but is harmless to unblock -
-it will 404 gracefully rather than redirect-loop.
+Keep /dashboard, /advisor, /admin, /claim blocked.
 
 
 🔌 1C - Add AuthProvider to Root Layout
@@ -138,242 +109,236 @@ it will 404 gracefully rather than redirect-loop.
 
 File: site/src/app/layout.tsx
 
-Add import (after line 8):
-  import { AuthProvider } from "@/lib/auth-context"
+- Import AuthProvider from @/lib/auth-context
+- Wrap existing app shell so AuthProvider contains ShortlistProvider
 
-Wrap ShortlistProvider:
-  Before:                                After:
-  ────────────────────────────────────   ────────────────────────────────────
-  <ShortlistProvider>                    <AuthProvider>
-    <main ...>{children}</main>            <ShortlistProvider>
-    <CookieConsentBanner />                  <main ...>{children}</main>
-  </ShortlistProvider>                       <CookieConsentBanner />
-                                           </ShortlistProvider>
-                                         </AuthProvider>
-
-AuthProvider is a "use client" component - this is valid inside a Server Component layout.
-Next.js App Router handles the boundary correctly.
+Target structure:
+  <AuthProvider>
+    <ShortlistProvider>
+      <main ...>{children}</main>
+      <CookieConsentBanner />
+    </ShortlistProvider>
+  </AuthProvider>
 
 
-🗺️  1D - Fix Consumer Auth Routing
-─────────────────────────────────────
+🗺️  1D - Fix Auth Routing Defaults + Allowed Paths
+────────────────────────────────────────────────────
 
 File: site/src/lib/auth-routing.ts
 
-Problem 1: Consumer default route is /dashboard which is still disabled.
-Problem 2: Consumer allowed prefixes block redirect back to /advisors/[slug].
+Changes:
+- ROLE_DEFAULT_ROUTE.consumer: "/dashboard" -> "/"
+- ROLE_ALLOWED_PREFIXES.consumer:
+  from ["/dashboard"]
+  to ["/", "/advisors", "/search", "/request-intro", "/resources", "/how-it-works"]
 
-┌────────────────────────────────┬────────────────────────────────────────────────────┐
-│ Property                       │ Change                                             │
-├────────────────────────────────┼────────────────────────────────────────────────────┤
-│ ROLE_DEFAULT_ROUTE.consumer    │ "/dashboard"  →  "/"                               │
-├────────────────────────────────┼────────────────────────────────────────────────────┤
-│ ROLE_ALLOWED_PREFIXES.consumer │ ["/dashboard"]                                     │
-│                                │   →                                                │
-│                                │ ["/", "/advisors", "/search",                      │
-│                                │  "/request-intro", "/resources",                  │
-│                                │  "/how-it-works"]                                  │
-└────────────────────────────────┴────────────────────────────────────────────────────┘
+Also update any hardcoded consumer dashboard redirects:
+- site/src/lib/auth-context.tsx (useRequireAuth role redirect map)
+  - consumer: "/dashboard" -> "/"
 
-Also update auth/callback/route.ts fallback (restored in 1A):
 
-  Before: const rawNext = searchParams.get("next") ?? "/dashboard"
-  After:  const rawNext = searchParams.get("next") ?? "/"
+🔁 1E - Preserve Signup Redirect Through Email Verification
+─────────────────────────────────────────────────────────────
 
-This prevents email verification completing and redirecting to the disabled /dashboard.
+Files:
+- site/src/lib/auth-actions.ts
+- site/src/app/signup/page.tsx
+
+Required behavior:
+- Signup page reads optional `redirect` query param.
+- On submit, include redirect in FormData (e.g. "redirect").
+- Server action signUp sanitizes/validates redirect and appends it to emailRedirectTo:
+    /auth/callback?next=...
+- If redirect missing/invalid, fallback to role default.
+
+Validation rules:
+- Reuse redirect safety logic (sanitize + allowed prefix checks).
+- Never allow external URLs.
+
+
+🛡️  1F - Harden Callback Defaults
+──────────────────────────────────
+
+File: site/src/app/auth/callback/route.ts
+
+Change fallback behavior:
+- default raw next: "/dashboard" -> "/"
+- unsafe fallback path: "/dashboard" -> "/"
 
 
 ═══════════════════════════════════════════════════════════════════════════════════════════
-                         COMMIT 2 - Contact Gate + Progressive Registration
+                      COMMIT 2 - Contact Gate (API + UI)
 ═══════════════════════════════════════════════════════════════════════════════════════════
 
-🔒 2A - Gate Contact Details on Advisor Profile
-──────────────────────────────────────────────────
+🔒 2A - Enforce Contact Redaction in Listing Detail API
+────────────────────────────────────────────────────────
+
+File: site/src/app/api/listings/[id]/route.ts
+
+Problem:
+- API currently returns website/email/phone to anonymous users.
+
+Required changes:
+1. Resolve current auth user from server-side supabase client.
+2. Determine contact visibility:
+   - logged in user -> show contact fields
+   - anonymous -> set contact fields to null
+3. Add response flag for UI clarity:
+   - `contactUnlocked: boolean`
+4. Cache policy:
+   - anonymous redacted response may remain public cacheable
+   - authenticated response must be private/no-store (avoid shared cache leaks)
+
+
+🧩 2B - Gate Contact Section in Advisor Profile UI
+────────────────────────────────────────────────────
 
 File: site/src/app/advisors/[slug]/page.tsx
 
-Step 1 - Add Lock to existing lucide-react import (line 3):
-  import { Activity, BadgeCheck, Calendar, ExternalLink, Lock, Mail, ... } from "lucide-react"
+- Add locked-state UI card for anonymous users.
+- Include Sign Up and Log In buttons with redirect back to current advisor slug.
+- Keep loading placeholder to avoid auth-state flash.
+- Prefer API-provided `contactUnlocked` as source of truth for display.
 
-Step 2 - Add useAuth import:
-  import { useAuth } from "@/lib/auth-context"
-
-Step 3 - Call hook inside AdvisorProfilePage (after mainCtaRef ~line 163):
-  const { user, isLoading: authLoading } = useAuth()
-
-Step 4 - Replace contact section (~lines 393-421) with conditional render:
-
-┌──────────────────────────────────────────────────────────────────────────────────────┐
-│ Logged out user sees:                                                                │
-│                                                                                      │
-│  ┌─────────────────────────────────────────┐                                         │
-│  │  🔒                                     │                                         │
-│  │  Create a free account to see           │                                         │
-│  │  contact details                        │                                         │
-│  │                                         │                                         │
-│  │  [ Sign Up Free ]   (primary button)    │                                         │
-│  │  [ Log In       ]   (outline button)    │                                         │
-│  └─────────────────────────────────────────┘                                         │
-│                                                                                      │
-│  Both buttons route to /signup or /login with ?redirect=/advisors/[id]              │
-└──────────────────────────────────────────────────────────────────────────────────────┘
-
-The authLoading state shows a pulse skeleton to prevent logged-in users seeing the gate
-flash before the session resolves:
-
-  {authLoading ? (
-    <div className="h-20 rounded-lg bg-muted/20 animate-pulse" />
-  ) : user ? (
-    // ... real contact details (email, phone, website links)
-  ) : (
-    // ... locked gate CTA
-  )}
+Gate CTA targets:
+- /signup?redirect=/advisors/[slug]
+- /login?redirect=/advisors/[slug]
 
 
-📝 2B - Progressive Registration on Request-Intro Success
-──────────────────────────────────────────────────────────
+═══════════════════════════════════════════════════════════════════════════════════════════
+                   COMMIT 3 - Progressive Registration CTA
+═══════════════════════════════════════════════════════════════════════════════════════════
+
+📝 3A - Add "Complete your profile" CTA to Request-Intro Success
+─────────────────────────────────────────────────────────────────
 
 File: site/src/app/request-intro/page.tsx
 
-In the success state (~lines 350-357), add "Complete your profile" CTA above the
-existing action buttons. The email is already captured in formData.email (Step 2).
-
-New CTA block to add BEFORE the existing button row:
-
-  <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 mb-8 text-center space-y-3">
-    <p className="font-semibold text-foreground">One more step - secure your account</p>
-    <p className="text-sm text-muted-foreground">
-      Complete your profile to track your request and hear back from advisors.
-    </p>
-    <Button className="w-full sm:w-auto" asChild>
-      <Link href={`/signup?email=${encodeURIComponent(formData.email || "")}&redirect=/`}>
-        Complete your profile
-      </Link>
-    </Button>
-  </div>
-
-Demote existing buttons to variant="outline" and variant="ghost".
+On success state:
+- Add primary CTA block above existing success action buttons.
+- Link to signup with captured email and safe redirect:
+  /signup?email={encodedEmail}&redirect=/
+- Demote existing buttons to secondary/ghost styles.
 
 
-✉️  2C - Email Pre-fill on Signup Page
-───────────────────────────────────────
+✉️  3B - Support Email Pre-fill + Redirect Params on Signup
+─────────────────────────────────────────────────────────────
 
-File: site/src/app/signup/page.tsx (restored in 1A)
+File: site/src/app/signup/page.tsx
 
-The backup signup page does not read ?email URL params. Adding useSearchParams in Next.js
-App Router requires a Suspense boundary. Use the component-split pattern:
-
-  Before:                                After:
-  ──────────────────────────────────     ──────────────────────────────────
-  export default function SignupPage()   function SignupForm() {
-  {                                        const searchParams = useSearchParams()
-    const router = useRouter()             const prefillEmail = searchParams.get("email") || ""
-    // ...all state and form JSX           const [email, setEmail] = React.useState(prefillEmail)
-  }                                        // ...rest of existing code unchanged
-                                         }
-
-                                         export default function SignupPage() {
-                                           return (
-                                             <React.Suspense fallback={<Spinner />}>
-                                               <SignupForm />
-                                             </React.Suspense>
-                                           )
-                                         }
-
-The email state already drives value={email} on the input, so no further changes needed.
+- Use component split with Suspense to read search params.
+- Read:
+  - `email` for prefill
+  - `redirect` for post-verify return
+- Keep state controlled inputs intact.
 
 
 ═══════════════════════════════════════════════════════════════════════════════════════════
-                                 FILES MODIFIED
+                           COMMIT 4 - Tests + Verification
 ═══════════════════════════════════════════════════════════════════════════════════════════
 
-┌──────────────────────────────────────────────────────┬────────────┬───────────────────┐
-│ File                                                 │ Commit     │ Change Type       │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/middleware.ts                               │ Commit 1   │ Edit (remove 6    │
-│                                                      │            │ disabled routes)  │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/layout.tsx                              │ Commit 1   │ Edit (add         │
-│                                                      │            │ AuthProvider)     │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/lib/auth-routing.ts                         │ Commit 1   │ Edit (consumer    │
-│                                                      │            │ route + prefixes) │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/login/page.tsx                          │ Commit 1   │ Restore           │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/signup/page.tsx                         │ Commit 1   │ Restore + email   │
-│                                                      │            │ pre-fill (2C)     │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/verify/page.tsx                         │ Commit 1   │ Restore           │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/auth/callback/route.ts                  │ Commit 1   │ Restore + fix     │
-│                                                      │            │ /dashboard default│
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/forgot-password/page.tsx                │ Commit 1   │ Restore           │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/advisors/[slug]/page.tsx                │ Commit 2   │ Edit (add auth    │
-│                                                      │            │ gate to contacts) │
-├──────────────────────────────────────────────────────┼────────────┼───────────────────┤
-│ site/src/app/request-intro/page.tsx                  │ Commit 2   │ Edit (progressive │
-│                                                      │            │ registration CTA) │
-└──────────────────────────────────────────────────────┴────────────┴───────────────────┘
+✅ 4A - Update Unit Tests for New Consumer Routing
+───────────────────────────────────────────────────
+
+File: site/src/lib/auth-routing.test.ts
+
+Update expectations:
+- consumer default route is "/"
+- consumer allowed paths include /advisors and other public routes
+- disallowed paths remain /admin, /advisor, etc.
+
+
+✅ 4B - Update E2E Auth Setup Redirect Expectations
+────────────────────────────────────────────────────
+
+File: site/e2e/auth.setup.ts
+
+Update consumer login assertion:
+- from /dashboard to /
+- advisor remains /advisor
+
+
+✅ 4C - Add/Update API Contract Test for Contact Redaction
+────────────────────────────────────────────────────────────
+
+Add or extend API test coverage to validate:
+- anonymous GET /api/listings/[id] => email/phone/website are null
+- authenticated GET /api/listings/[id] => contact fields populated when available
+
+
+✅ 4D - Manual Verification Paths
+──────────────────────────────────
+
+Path A - Anonymous advisor profile gate:
+1. Visit /advisors/[slug] logged out
+2. Verify contact fields hidden and lock card visible
+3. Verify API payload does not expose contact fields
+
+Path B - Signup from gate:
+1. Click Sign Up Free from advisor page
+2. Complete signup
+3. Verify callback returns to advisor page (safe redirect)
+4. Confirm contact details visible
+
+Path C - Login from gate:
+1. Click Log In from advisor page
+2. Complete login
+3. Confirm redirect back to advisor page and contact visible
+
+Path D - Forgot/reset password:
+1. Visit /forgot-password
+2. Request reset email
+3. Use callback link to /reset-password
+4. Set new password and return to login
+
+Path E - Progressive registration:
+1. Submit /request-intro
+2. Click "Complete your profile"
+3. Confirm signup email pre-filled and redirect works
+
+
+🧪 Verification Commands
+────────────────────────
+
+  cd site
+  npm run lint
+  npm run test:run
+  npx tsc --noEmit
+  npx playwright test e2e/tests/mvp1-public.spec.ts e2e/tests/mvp1-accessibility.spec.ts
+  ENABLE_AUTH_E2E=true npx playwright test e2e/auth.setup.ts
 
 
 ═══════════════════════════════════════════════════════════════════════════════════════════
-                              VERIFICATION TEST PATHS
+                                FILES MODIFIED (PLAN)
 ═══════════════════════════════════════════════════════════════════════════════════════════
 
-Path A - New user signs up from advisor profile:
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  1. Visit /advisors/[any-slug]                                                      │
-│  2. Contact section shows locked gate (user is null)                               │
-│  3. Click "Sign Up Free" → /signup?redirect=/advisors/[id]                         │
-│  4. Complete signup form → /verify?email=user@example.com                          │
-│  5. Click email link → /auth/callback?code=xxx → redirects to /                    │
-│  6. Visit /advisors/[id] again → email, phone, website now visible                 │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+Commit 1:
+- site/src/middleware.ts
+- site/src/app/layout.tsx
+- site/src/lib/auth-routing.ts
+- site/src/lib/auth-context.tsx
+- site/src/lib/auth-actions.ts
+- site/src/app/login/page.tsx (restore)
+- site/src/app/signup/page.tsx (restore + params support)
+- site/src/app/verify/page.tsx (restore)
+- site/src/app/auth/callback/route.ts (restore + fallback hardening)
+- site/src/app/forgot-password/page.tsx (restore)
+- site/src/app/reset-password/page.tsx (restore)
 
-Path B - Returning user logs in from advisor profile:
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  1. Visit /advisors/[slug] → locked gate                                           │
-│  2. Click "Log In" → /login?redirect=/advisors/[id]                                │
-│  3. Login succeeds → getPostLoginRedirect("consumer", "/advisors/[id]")            │
-│  4. canRoleAccessPath checks ["/", "/advisors", ...] → matches → returns redirect  │
-│  5. Lands back on /advisors/[id] → contact details visible                         │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+Commit 2:
+- site/src/app/api/listings/[id]/route.ts
+- site/src/app/advisors/[slug]/page.tsx
 
-Path C - Progressive registration via lead form:
-┌─────────────────────────────────────────────────────────────────────────────────────┐
-│  1. Submit /request-intro 3-step form (email captured in step 2)                   │
-│  2. Success state shows "Complete your profile" CTA                                │
-│  3. Click CTA → /signup?email=captured@email.com&redirect=/                        │
-│  4. Signup page email field is pre-filled                                           │
-│  5. Set password, submit → /verify?email=captured@email.com                        │
-│  6. Verify email → lands on / (homepage)                                            │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+Commit 3:
+- site/src/app/request-intro/page.tsx
+- site/src/app/signup/page.tsx
 
-TypeScript check after implementation:
-  cd site && npx tsc --noEmit
-
-
-═══════════════════════════════════════════════════════════════════════════════════════════
-                                 OUT OF SCOPE
-═══════════════════════════════════════════════════════════════════════════════════════════
-
-┌────────────────────────────────────────────┬──────────────────────────────────────────┐
-│ Feature                                    │ Reason                                   │
-├────────────────────────────────────────────┼──────────────────────────────────────────┤
-│ Consumer /dashboard pages                  │ Still disabled, future sprint            │
-├────────────────────────────────────────────┼──────────────────────────────────────────┤
-│ Advisor /advisor pages                     │ Still disabled, future sprint            │
-├────────────────────────────────────────────┼──────────────────────────────────────────┤
-│ Social auth (Google/Apple OAuth)           │ UI buttons exist but OAuth not           │
-│                                            │ configured in Supabase                  │
-├────────────────────────────────────────────┼──────────────────────────────────────────┤
-│ /reset-password page                       │ Not in backup, low priority             │
-└────────────────────────────────────────────┴──────────────────────────────────────────┘
+Commit 4:
+- site/src/lib/auth-routing.test.ts
+- site/e2e/auth.setup.ts
+- API test file for listing detail redaction (new or updated)
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────
-End of Document
+End of Revised Document
 ───────────────────────────────────────────────────────────────────────────────────────────

@@ -64,12 +64,26 @@ export async function POST(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json<ApiResponse<null>>(
+        {
+          success: false,
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Please sign up or log in before submitting a request.",
+            statusCode: 401,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        { status: 401 }
+      );
+    }
 
     const identity = await resolvePublicLeadIdentity({
-      userId: user?.id,
+      userId: user.id,
       firstName: payload.data.firstName,
       lastName: payload.data.lastName,
-      email: payload.data.email,
+      email: user.email || payload.data.email,
       phone: payload.data.phone || undefined,
     });
 

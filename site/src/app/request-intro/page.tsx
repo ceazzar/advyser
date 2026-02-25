@@ -10,8 +10,8 @@ import {
   Users,
 } from "lucide-react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 
 import { PublicLayout } from "@/components/layouts/public-layout"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { useAuth } from "@/lib/auth-context"
 
 // Multi-step form state
 interface FormData {
@@ -105,15 +106,29 @@ const missingListingMessage =
   "Please start from matched results or an advisor profile. Please start from an advisor profile so we know who to introduce you to."
 
 export default function RequestIntroPage() {
+  const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, isLoading: isAuthLoading } = useAuth()
   const listingId = searchParams.get("listingId") || ""
-  const listingIds = (searchParams.get("listingIds") || "")
-    .split(",")
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0)
-    .slice(0, 3)
+  const listingIdsParam = searchParams.get("listingIds") || ""
+  const listingIds = useMemo(
+    () =>
+      listingIdsParam
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0)
+        .slice(0, 3),
+    [listingIdsParam]
+  )
   const isGuidedMode = listingIds.length > 0
-  const targetListingIds = isGuidedMode ? listingIds : listingId ? [listingId] : []
+  const targetListingIds = useMemo(
+    () => (isGuidedMode ? listingIds : listingId ? [listingId] : []),
+    [isGuidedMode, listingId, listingIds]
+  )
+  const redirectPath = (() => {
+    const query = searchParams.toString()
+    return query ? `/request-intro?${query}` : "/request-intro"
+  })()
 
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -136,6 +151,23 @@ export default function RequestIntroPage() {
     privacyConsent: false,
     marketingConsent: false,
   })
+
+  useEffect(() => {
+    if (!user) return
+    setFormData((prev) => {
+      if (prev.email || prev.firstName || prev.lastName) {
+        return prev
+      }
+      const fullName = user.displayName.trim()
+      const [firstName, ...lastParts] = fullName.split(/\s+/).filter(Boolean)
+      return {
+        ...prev,
+        firstName: firstName || "",
+        lastName: lastParts.join(" "),
+        email: user.email || "",
+      }
+    })
+  }, [user])
 
   useEffect(() => {
     if (targetListingIds.length === 0) {
@@ -164,7 +196,7 @@ export default function RequestIntroPage() {
 
     void loadSelectedListings()
     return () => controller.abort()
-  }, [targetListingIds.join(",")])
+  }, [targetListingIds])
 
   const updateFormData = (field: keyof FormData, value: FormData[keyof FormData]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -209,6 +241,11 @@ export default function RequestIntroPage() {
   }
 
   const handleSubmit = async () => {
+    if (!user) {
+      router.push(`/signup?redirect=${encodeURIComponent(redirectPath)}`)
+      return
+    }
+
     if (targetListingIds.length === 0) {
       setSubmitError(missingListingMessage)
       return
@@ -290,6 +327,51 @@ export default function RequestIntroPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (isAuthLoading) {
+    return (
+      <PublicLayout>
+        <section className="py-20">
+          <div className="container mx-auto px-4 text-center text-muted-foreground">
+            Checking account status...
+          </div>
+        </section>
+      </PublicLayout>
+    )
+  }
+
+  if (!user) {
+    return (
+      <PublicLayout>
+        <section className="py-20">
+          <div className="container mx-auto px-4 max-w-xl">
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader>
+                <CardTitle>Sign up to request an introduction</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  You need an account before contacting an adviser through Advyser.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button asChild>
+                    <Link href={`/signup?redirect=${encodeURIComponent(redirectPath)}`}>
+                      Create account
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href={`/login?redirect=${encodeURIComponent(redirectPath)}`}>
+                      Log in
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </PublicLayout>
+    )
   }
 
   // Success state
