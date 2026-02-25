@@ -1,10 +1,10 @@
 ┌─────────────────────────────────────────────────────────────────────────────────────────┐
 │                              ADVYSER PAGE INVENTORY                                     │
-│                              59 Pages Total - All Complete ✅                           │
-│                              Last Updated: 2 February 2026                              │
+│                              16 Pages Total - Actually Implemented                      │
+│                              Last Updated: 25 February 2026                             │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 
-PUBLIC PAGES (10)
+PUBLIC PAGES (7)
 ┌────┬─────────────────────────────┬────────────────────────────────┐
 │  # │ Route                       │ Description                    │
 ├────┼─────────────────────────────┼────────────────────────────────┤
@@ -13,96 +13,29 @@ PUBLIC PAGES (10)
 │  3 │ /advisors/[slug]            │ Advisor profile detail         │
 │  4 │ /category/[type]            │ Category landing               │
 │  5 │ /request-intro              │ Request introduction form      │
-│  6 │ /how-it-works               │ How it works explainer         │
-│  7 │ /for-advisors               │ Advisor marketing page         │
-│  8 │ /resources                  │ Resources & guides hub         │
-│  9 │ /components                 │ Component showcase (dev)       │
-│ 10 │ /design-system              │ Design system docs (dev)       │
+│  6 │ /for-advisors               │ Advisor marketing page         │
+│  7 │ /resources                  │ Resources & guides hub         │
 └────┴─────────────────────────────┴────────────────────────────────┘
 
-AUTH PAGES (5)
+ADMIN PORTAL (2)
 ┌────┬─────────────────────────────┬────────────────────────────────┐
 │  # │ Route                       │ Description                    │
 ├────┼─────────────────────────────┼────────────────────────────────┤
-│ 11 │ /login                      │ Login form                     │
-│ 12 │ /signup                     │ Registration form              │
-│ 13 │ /verify                     │ Email verification             │
-│ 14 │ /reset-password             │ Password reset (from email)    │
-│ 15 │ /forgot-password            │ Forgot password entry          │
+│  8 │ /admin                      │ Admin dashboard                │
+│  9 │ /admin/intake               │ Intake management              │
 └────┴─────────────────────────────┴────────────────────────────────┘
 
-CONSUMER DASHBOARD (6)
+SUPPORTING PAGES (8)
 ┌────┬─────────────────────────────┬────────────────────────────────┐
 │  # │ Route                       │ Description                    │
 ├────┼─────────────────────────────┼────────────────────────────────┤
-│ 16 │ /dashboard                  │ Consumer dashboard home        │
-│ 17 │ /dashboard/requests         │ My advisor requests            │
-│ 18 │ /dashboard/requests/[id]    │ Request detail                 │
-│ 19 │ /dashboard/messages         │ Messages inbox                 │
-│ 20 │ /dashboard/messages/[id]    │ Conversation thread            │
-│ 21 │ /dashboard/bookings         │ My bookings                    │
-└────┴─────────────────────────────┴────────────────────────────────┘
-
-ADVISOR PORTAL (17)
-┌────┬─────────────────────────────────────┬────────────────────────────┐
-│  # │ Route                               │ Description                │
-├────┼─────────────────────────────────────┼────────────────────────────┤
-│ 22 │ /advisor                            │ Advisor dashboard home     │
-│ 23 │ /advisor/leads                      │ Leads inbox                │
-│ 24 │ /advisor/leads/[id]                 │ Lead detail                │
-│ 25 │ /advisor/messages                   │ Messages                   │
-│ 26 │ /advisor/bookings                   │ Bookings calendar          │
-│ 27 │ /advisor/clients                    │ Client list                │
-│ 28 │ /advisor/clients/[id]               │ Client overview            │
-│ 29 │ /advisor/clients/[id]/messages      │ Client messages            │
-│ 30 │ /advisor/clients/[id]/documents     │ Client documents           │
-│ 31 │ /advisor/clients/[id]/notes         │ Client notes               │
-│ 32 │ /advisor/clients/[id]/copilot       │ AI Copilot (future)        │
-│ 33 │ /advisor/clients/[id]/tasks         │ Client tasks               │
-│ 34 │ /advisor/profile                    │ Profile editor             │
-│ 35 │ /advisor/team                       │ Team members               │
-│ 36 │ /advisor/settings                   │ Settings                   │
-│ 37 │ /advisor/billing                    │ Billing & subscription     │
-│ 38 │ /advisor/onboarding                 │ Onboarding wizard          │
-└────┴─────────────────────────────────────┴────────────────────────────┘
-
-CLAIM/VERIFICATION (3)
-┌────┬─────────────────────────────┬────────────────────────────────┐
-│  # │ Route                       │ Description                    │
-├────┼─────────────────────────────┼────────────────────────────────┤
-│ 39 │ /claim                      │ Claim entry (search)           │
-│ 40 │ /claim/[id]                 │ Claim form                     │
-│ 41 │ /claim/pending              │ Verification pending           │
-└────┴─────────────────────────────┴────────────────────────────────┘
-
-ADMIN PORTAL (8)
-┌────┬─────────────────────────────┬────────────────────────────────┐
-│  # │ Route                       │ Description                    │
-├────┼─────────────────────────────┼────────────────────────────────┤
-│ 42 │ /admin                      │ Admin dashboard                │
-│ 43 │ /admin/claims               │ Claims queue                   │
-│ 44 │ /admin/claims/[id]          │ Claim review                   │
-│ 45 │ /admin/listings             │ Listings moderation            │
-│ 46 │ /admin/reviews              │ Reviews moderation             │
-│ 47 │ /admin/reports              │ Reports queue                  │
-│ 48 │ /admin/categories           │ Category management            │
-│ 49 │ /admin/analytics            │ Platform analytics             │
-└────┴─────────────────────────────┴────────────────────────────────┘
-
-SUPPORTING PAGES (10)
-┌────┬─────────────────────────────┬────────────────────────────────┐
-│  # │ Route                       │ Description                    │
-├────┼─────────────────────────────┼────────────────────────────────┤
-│ 50 │ /about                      │ About us & team                │
-│ 51 │ /contact                    │ Contact form & info            │
-│ 52 │ /help                       │ Help centre & FAQs             │
-│ 53 │ /privacy                    │ Privacy policy                 │
-│ 54 │ /terms                      │ Terms of service               │
-│ 55 │ /cookies                    │ Cookie policy                  │
-│ 56 │ /disclaimer                 │ Financial disclaimer           │
-│ 57 │ /careers                    │ Job openings                   │
-│ 58 │ /press                      │ Press & media kit              │
-│ 59 │ /advisor-resources          │ Advisor guides & tutorials     │
+│ 10 │ /about                      │ About us & team                │
+│ 11 │ /contact                    │ Contact form & info            │
+│ 12 │ /help                       │ Help centre & FAQs             │
+│ 13 │ /privacy                    │ Privacy policy                 │
+│ 14 │ /terms                      │ Terms of service               │
+│ 15 │ /cookies                    │ Cookie policy                  │
+│ 16 │ /disclaimer                 │ Financial disclaimer           │
 └────┴─────────────────────────────┴────────────────────────────────┘
 
 ───────────────────────────────────────────────────────────────────────────────────────────
@@ -111,16 +44,48 @@ SUMMARY
 ┌────────────────────────┬───────────┐
 │ Section                │ Count     │
 ├────────────────────────┼───────────┤
-│ Public                 │ 10        │
-│ Auth                   │ 5         │
-│ Consumer Dashboard     │ 6         │
-│ Advisor Portal         │ 17        │
-│ Claim/Verification     │ 3         │
-│ Admin Portal           │ 8         │
-│ Supporting             │ 10        │
+│ Public                 │ 7         │
+│ Admin Portal           │ 2         │
+│ Supporting             │ 7         │
 ├────────────────────────┼───────────┤
-│ TOTAL                  │ 59        │
+│ TOTAL                  │ 16        │
 └────────────────────────┴───────────┘
+
+NOT YET BUILT (planned)
+┌────────────────────────────────┬───────────────────────────────────────┐
+│ Section                        │ Planned Routes                        │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Auth (5)                       │ /login, /signup, /verify,             │
+│                                │ /reset-password, /forgot-password     │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Consumer Dashboard (6)         │ /dashboard, /dashboard/requests,      │
+│                                │ /dashboard/requests/[id],             │
+│                                │ /dashboard/messages,                  │
+│                                │ /dashboard/messages/[id],             │
+│                                │ /dashboard/bookings                   │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Advisor Portal (17)            │ /advisor, /advisor/leads,             │
+│                                │ /advisor/leads/[id],                  │
+│                                │ /advisor/messages,                    │
+│                                │ /advisor/bookings,                    │
+│                                │ /advisor/clients,                     │
+│                                │ /advisor/clients/[id],                │
+│                                │ /advisor/clients/[id]/messages,       │
+│                                │ /advisor/clients/[id]/documents,      │
+│                                │ /advisor/clients/[id]/notes,          │
+│                                │ /advisor/clients/[id]/copilot,        │
+│                                │ /advisor/clients/[id]/tasks,          │
+│                                │ /advisor/profile, /advisor/team,      │
+│                                │ /advisor/settings, /advisor/billing,  │
+│                                │ /advisor/onboarding                   │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Claim/Verification (3)         │ /claim, /claim/[id], /claim/pending   │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Admin (remaining 6)            │ /admin/claims, /admin/claims/[id],    │
+│                                │ /admin/listings, /admin/reviews,      │
+│                                │ /admin/reports, /admin/categories,    │
+│                                │ /admin/analytics                      │
+└────────────────────────────────┴───────────────────────────────────────┘
 
 NOTES
 - All pages use mock data for demonstration

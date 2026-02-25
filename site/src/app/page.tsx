@@ -257,7 +257,7 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Button size="lg" className="rounded-full px-8" asChild>
-              <Link href="/quiz">
+              <Link href="/search">
                 Start Guided Match
                 <ArrowRight className="ml-2 size-4" />
               </Link>
@@ -292,7 +292,7 @@ export default function HomePage() {
               className="bg-white text-gray-900 hover:bg-white/90 rounded-full px-8"
               asChild
             >
-              <Link href="/quiz">
+              <Link href="/search">
                 Start Guided Match
               </Link>
             </Button>

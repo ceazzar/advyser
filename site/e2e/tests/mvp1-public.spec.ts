@@ -4,9 +4,6 @@ test("marketplace discovery flow is available", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /find the right financial advisor/i })).toBeVisible();
 
-  await page.goto("/quiz");
-  await expect(page.getByRole("heading", { name: /main financial goal/i })).toBeVisible();
-
   await page.goto("/search");
   await expect(page.getByRole("status")).toContainText(/advisors found/i);
 

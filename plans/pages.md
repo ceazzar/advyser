@@ -10,28 +10,23 @@
   - `/Users/ceazar/Code Base/advyser/plans/phase-8/MVP1_PUBLIC_ONLY_RECOVERY_RUNBOOK.md`
 
 ## Current route surface
-Current production runtime is intentionally `MVP1 public-only` and compiles to 20 app routes.
+Current production runtime is intentionally `MVP1 public-only` and compiles to 13 app routes.
 
 ## Public marketplace + support routes (active)
 1. `/`
 2. `/about`
-3. `/advisor-resources`
-4. `/advisors/[slug]`
-5. `/careers`
-6. `/category/[type]`
-7. `/contact`
-8. `/cookies`
-9. `/disclaimer`
-10. `/for-advisors`
-11. `/help`
-12. `/how-it-works`
-13. `/press`
-14. `/privacy`
-15. `/quiz`
-16. `/request-intro`
-17. `/resources`
-18. `/search`
-19. `/terms`
+3. `/advisors/[slug]`
+4. `/category/[type]`
+5. `/contact`
+6. `/cookies`
+7. `/disclaimer`
+8. `/for-advisors`
+10. `/help`
+11. `/privacy`
+12. `/request-intro`
+13. `/resources`
+14. `/search`
+15. `/terms`
 
 ## System app routes (framework)
 1. `/_not-found`

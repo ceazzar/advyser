@@ -66,13 +66,6 @@ describe("PublicHeader", () => {
       expect(links.length).toBeGreaterThan(0)
     })
 
-    it("renders How It Works link", () => {
-      render(<PublicHeader />)
-
-      const links = screen.getAllByRole("link", { name: "How It Works" })
-      expect(links.length).toBeGreaterThan(0)
-    })
-
     it("renders For Advisors link", () => {
       render(<PublicHeader />)
 
@@ -92,13 +85,6 @@ describe("PublicHeader", () => {
 
       const links = screen.getAllByRole("link", { name: "Find Advisors" })
       expect(links[0]).toHaveAttribute("href", "/search")
-    })
-
-    it("How It Works link has correct href", () => {
-      render(<PublicHeader />)
-
-      const links = screen.getAllByRole("link", { name: "How It Works" })
-      expect(links[0]).toHaveAttribute("href", "/how-it-works")
     })
 
     it("For Advisors link has correct href", () => {
@@ -198,7 +184,6 @@ describe("PublicHeader", () => {
 
       const dialog = screen.getByRole("dialog")
       expect(within(dialog).getByRole("link", { name: "Find Advisors" })).toBeInTheDocument()
-      expect(within(dialog).getByRole("link", { name: "How It Works" })).toBeInTheDocument()
       expect(within(dialog).getByRole("link", { name: "For Advisors" })).toBeInTheDocument()
       expect(within(dialog).getByRole("link", { name: "Help" })).toBeInTheDocument()
     })
@@ -225,13 +210,6 @@ describe("PublicHeader", () => {
       expect(links[0]).toHaveClass("font-semibold")
     })
 
-    it("applies active styling to How It Works when on /how-it-works", () => {
-      mockPathname.mockReturnValue("/how-it-works")
-      render(<PublicHeader />)
-
-      const links = screen.getAllByRole("link", { name: "How It Works" })
-      expect(links[0]).toHaveClass("font-semibold")
-    })
   })
 
   describe("Header structure", () => {

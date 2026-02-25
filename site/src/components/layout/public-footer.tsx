@@ -1,6 +1,6 @@
 "use client"
 
-import { Facebook, Instagram, Linkedin, Mail, Twitter } from "lucide-react"
+import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,6 @@ const footerLinks = {
     links: [
       { label: "Browse Advisors", href: "/search" },
       { label: "For Advisors", href: "/for-advisors" },
-      { label: "Take the Quiz", href: "/quiz" },
       { label: "Request an Intro", href: "/request-intro" },
     ],
   },
@@ -20,7 +19,6 @@ const footerLinks = {
     title: "Resources",
     links: [
       { label: "Resources Library", href: "/resources" },
-      { label: "How It Works", href: "/how-it-works" },
       { label: "Help", href: "/help" },
     ],
   },
@@ -28,9 +26,7 @@ const footerLinks = {
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
-      { label: "Advisor Resources", href: "/advisor-resources" },
       { label: "Contact", href: "/contact" },
-      { label: "Press", href: "/press" },
     ],
   },
   legal: {
@@ -84,17 +80,6 @@ export function PublicFooter() {
               ))}
             </div>
 
-            <div className="mt-7 max-w-xs border-t border-border/50 pt-5 space-y-3">
-              <p className="text-xl font-bold text-foreground leading-tight">
-                Receive the latest news and tips
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/email-updates">
-                  <Mail className="size-4" />
-                  Sign up
-                </Link>
-              </Button>
-            </div>
           </div>
 
           {/* Link Columns */}

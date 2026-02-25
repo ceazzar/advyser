@@ -29,7 +29,7 @@ const helpCategories = [
     title: "Getting Started",
     icon: <Search className="size-5" />,
     items: [
-      { title: "How to find an advisor", href: "/how-it-works" },
+      { title: "How to find an advisor", href: "/search" },
       { title: "Getting started with the marketplace", href: "/search" },
       { title: "Understanding advisor profiles", href: "/search" },
     ],
@@ -40,7 +40,7 @@ const helpCategories = [
     items: [
       { title: "Submitting a request", href: "/request-intro" },
       { title: "Comparing advisors", href: "/search" },
-      { title: "Booking a consultation", href: "/how-it-works" },
+      { title: "Booking a consultation", href: "/request-intro" },
     ],
   },
   {

@@ -140,11 +140,6 @@ export default function ContactPage() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/how-it-works" className="text-primary hover:underline">
-                      How It Works
-                    </Link>
-                  </li>
-                  <li>
                     <Link href="/for-advisors" className="text-primary hover:underline">
                       For Advisors
                     </Link>

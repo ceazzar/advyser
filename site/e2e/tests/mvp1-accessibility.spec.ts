@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const CORE_MVP1_ROUTES = ["/", "/quiz", "/search", "/request-intro", "/advisors/520e1e3d-e7d6-4224-b9a2-3bc6fc7d92af"] as const;
+const CORE_MVP1_ROUTES = ["/", "/search", "/request-intro", "/advisors/520e1e3d-e7d6-4224-b9a2-3bc6fc7d92af"] as const;
 
 for (const route of CORE_MVP1_ROUTES) {
   test(`a11y baseline has no critical/serious violations on ${route}`, async ({ page }) => {
