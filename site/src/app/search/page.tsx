@@ -99,6 +99,7 @@ type Filters = {
 }
 
 const PAGE_SIZE = 12
+const SEARCH_REQUEST_TIMEOUT_MS = 12000
 
 function formatLocation(
   location: { suburb: string | null; state: string | null } | null
@@ -170,6 +171,18 @@ function parseInitialFilters(searchParams: URLSearchParams): Filters {
   }
 }
 
+function areFiltersEqual(a: Filters, b: Filters): boolean {
+  return (
+    a.advisorType === b.advisorType &&
+    a.specialty === b.specialty &&
+    a.state === b.state &&
+    a.minRating === b.minRating &&
+    a.keyword === b.keyword &&
+    a.sort === b.sort &&
+    a.page === b.page
+  )
+}
+
 function buildQuery(filters: Filters): string {
   const params = new URLSearchParams()
   params.set("page", String(filters.page))
@@ -192,8 +205,9 @@ function extractStateFromLocation(locationInput?: string): string | null {
 export default function SearchPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const searchParamsString = searchParams.toString()
   const [filters, setFilters] = React.useState<Filters>(() =>
-    parseInitialFilters(new URLSearchParams(searchParams.toString()))
+    parseInitialFilters(new URLSearchParams(searchParamsString))
   )
   const [advisors, setAdvisors] = React.useState<Omit<AdvisorCardProps, "onViewProfile">[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
@@ -213,8 +227,9 @@ export default function SearchPage() {
   const { addToShortlist, removeFromShortlist, isInShortlist } = useShortlist()
 
   React.useEffect(() => {
-    setFilters(parseInitialFilters(new URLSearchParams(searchParams.toString())))
-  }, [searchParams])
+    const nextFilters = parseInitialFilters(new URLSearchParams(searchParamsString))
+    setFilters((current) => (areFiltersEqual(current, nextFilters) ? current : nextFilters))
+  }, [searchParamsString])
 
   React.useEffect(() => {
     const params = new URLSearchParams()
@@ -226,15 +241,19 @@ export default function SearchPage() {
     if (filters.minRating > 0) params.set("min_rating", String(filters.minRating))
     if (filters.keyword.trim()) params.set("q", filters.keyword.trim())
     const nextQuery = params.toString()
-    const currentQuery = searchParams.toString()
+    const currentQuery = searchParamsString
 
     if (nextQuery === currentQuery) return
     router.replace(nextQuery ? `/search?${nextQuery}` : "/search", { scroll: false })
-  }, [filters, router, searchParams])
+  }, [filters, router, searchParamsString])
 
   React.useEffect(() => {
     const controller = new AbortController()
+    let isDisposed = false
     const query = buildQuery(filters)
+    const timeoutId = setTimeout(() => {
+      controller.abort()
+    }, SEARCH_REQUEST_TIMEOUT_MS)
 
     async function load() {
       try {
@@ -271,20 +290,29 @@ export default function SearchPage() {
           totalItems: listingsPayload.data.pagination.totalItems,
         })
       } catch (error) {
-        if (controller.signal.aborted) return
+        if (isDisposed) return
         setAdvisors([])
-        setLoadError(
-          error instanceof Error ? error.message : "Unable to load advisor listings."
-        )
+        if (error instanceof Error && error.name === "AbortError") {
+          setLoadError("Loading advisors timed out. Check your network/database and try again.")
+        } else {
+          setLoadError(
+            error instanceof Error ? error.message : "Unable to load advisor listings."
+          )
+        }
       } finally {
-        if (!controller.signal.aborted) {
+        clearTimeout(timeoutId)
+        if (!isDisposed) {
           setIsLoading(false)
         }
       }
     }
 
     void load()
-    return () => controller.abort()
+    return () => {
+      isDisposed = true
+      clearTimeout(timeoutId)
+      controller.abort()
+    }
   }, [filters])
 
   const advisorDataMap = React.useMemo(() => {
