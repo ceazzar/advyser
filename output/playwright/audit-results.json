@@ -1,0 +1,68 @@
+{
+  "results": [
+    {
+      "name": "home_page_load",
+      "ok": true,
+      "data": {
+        "status": 200,
+        "url": "http://localhost:3000/",
+        "h1": "Find the right financial advisor for your goals"
+      }
+    },
+    {
+      "name": "login_route_redirected",
+      "ok": true,
+      "data": {
+        "initialStatus": 200,
+        "finalUrl": "http://localhost:3000/",
+        "redirectedToRoot": true
+      }
+    },
+    {
+      "name": "search_page_and_map_toggle",
+      "ok": false,
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /map view/i })\u001b[22m\n"
+    },
+    {
+      "name": "listings_api_available",
+      "ok": true,
+      "data": {
+        "status": 200,
+        "success": true,
+        "firstId": "520e1e3d-e7d6-4224-b9a2-3bc6fc7d92af"
+      }
+    },
+    {
+      "name": "advisor_profile_route_loads",
+      "ok": true,
+      "data": {
+        "status": 200,
+        "url": "http://localhost:3000/advisors/520e1e3d-e7d6-4224-b9a2-3bc6fc7d92af",
+        "ctaVisible": true
+      }
+    },
+    {
+      "name": "request_intro_without_listing_guard",
+      "ok": true,
+      "data": {
+        "warningVisible": true
+      }
+    },
+    {
+      "name": "contact_form_is_simulated",
+      "ok": true,
+      "data": {
+        "fakeSuccessVisible": false
+      }
+    },
+    {
+      "name": "privacy_has_placeholder_abn",
+      "ok": true,
+      "data": {
+        "hasPlaceholder": true
+      }
+    }
+  ],
+  "consoleErrors": [],
+  "errorCount": 0
+}

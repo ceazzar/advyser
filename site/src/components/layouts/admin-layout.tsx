@@ -46,6 +46,7 @@ interface AdminLayoutProps {
 
 const adminNavItems: SidebarItem[] = [
   { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="size-5" /> },
+  { label: "Intake", href: "/admin/intake", icon: <Building2 className="size-5" /> },
   { label: "Claims", href: "/admin/claims", icon: <FileCheck className="size-5" /> },
   { label: "Listings", href: "/admin/listings", icon: <Building2 className="size-5" /> },
   { label: "Reviews", href: "/admin/reviews", icon: <Star className="size-5" /> },

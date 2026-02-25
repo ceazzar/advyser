@@ -2,6 +2,7 @@
 
 import {
   Bell,
+  Building2,
   Calendar,
   FileText,
   LogOut,
@@ -56,6 +57,7 @@ const advisorQuickActions = [
 ]
 
 const adminQuickActions = [
+  { label: "Intake Queue", href: "/admin/intake", icon: Building2 },
   { label: "Review Claim", href: "/admin/claims", icon: FileText },
   { label: "Moderate Listing", href: "/admin/listings", icon: FileText },
 ]

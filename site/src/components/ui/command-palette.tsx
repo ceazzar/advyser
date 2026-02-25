@@ -61,10 +61,11 @@ const advisorNavItems = [
 
 const adminNavItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, shortcut: "⌘1" },
-  { label: "Claims", href: "/admin/claims", icon: FileCheck, shortcut: "⌘2" },
-  { label: "Listings", href: "/admin/listings", icon: Building2, shortcut: "⌘3" },
-  { label: "Reviews", href: "/admin/reviews", icon: Star, shortcut: "⌘4" },
-  { label: "Reports", href: "/admin/reports", icon: FileWarning, shortcut: "⌘5" },
+  { label: "Intake", href: "/admin/intake", icon: Building2, shortcut: "⌘2" },
+  { label: "Claims", href: "/admin/claims", icon: FileCheck, shortcut: "⌘3" },
+  { label: "Listings", href: "/admin/listings", icon: Building2, shortcut: "⌘4" },
+  { label: "Reviews", href: "/admin/reviews", icon: Star, shortcut: "⌘5" },
+  { label: "Reports", href: "/admin/reports", icon: FileWarning, shortcut: "⌘6" },
   { label: "Categories", href: "/admin/categories", icon: FolderTree },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
 ]

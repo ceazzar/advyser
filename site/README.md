@@ -13,7 +13,9 @@ Next.js app for the Advyser advisor marketplace.
 
 1. Copy `.env.example` to `.env.local`.
 2. Fill in real credentials.
-3. Validate env values:
+3. Optional for local admin intake development only:
+   - set `ENABLE_LOCAL_ADMIN=true` in `.env.development.local` to allow `/admin/*` on localhost.
+4. Validate env values:
 
 ```bash
 npm run env:check

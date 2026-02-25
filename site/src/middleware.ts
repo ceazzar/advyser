@@ -1,6 +1,6 @@
 import { type NextRequest,NextResponse } from "next/server";
 
-import { pathHasPrefix } from "@/lib/mvp-mode";
+import { pathHasPrefix, shouldBypassDisabledAdminRoute } from "@/lib/mvp-mode";
 
 const DISABLED_ROUTE_PREFIXES = [
   "/dashboard",
@@ -22,8 +22,19 @@ export async function middleware(request: NextRequest) {
   const requestId = request.headers.get("x-request-id") || crypto.randomUUID();
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-request-id", requestId);
+  const hostHeader =
+    request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const bypassDisabledAdminRoute = shouldBypassDisabledAdminRoute({
+    pathname,
+    hostHeader,
+    nodeEnv: process.env.NODE_ENV,
+    enableLocalAdmin: process.env.ENABLE_LOCAL_ADMIN,
+  });
 
-  if (DISABLED_ROUTE_PREFIXES.some((prefix) => pathHasPrefix(pathname, prefix))) {
+  if (
+    !bypassDisabledAdminRoute &&
+    DISABLED_ROUTE_PREFIXES.some((prefix) => pathHasPrefix(pathname, prefix))
+  ) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/";
     redirectUrl.search = "";

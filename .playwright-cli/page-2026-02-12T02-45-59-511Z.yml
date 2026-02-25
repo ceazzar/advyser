@@ -1,0 +1,280 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#content"
+  - banner [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link [ref=e10] [cursor=pointer]:
+          - /url: https://www.loanmarket.com.au
+        - generic [ref=e12]:
+          - generic [ref=e14]:
+            - navigation "Menu" [ref=e15]:
+              - list [ref=e16]:
+                - listitem [ref=e17]:
+                  - link "Find A Broker" [ref=e18] [cursor=pointer]:
+                    - /url: https://www.loanmarket.com.au/find-a-broker/
+                - listitem [ref=e19]:
+                  - link "Compare Loans" [ref=e20] [cursor=pointer]:
+                    - /url: https://www.loanmarket.com.au/compare-loans/
+                - listitem [ref=e21]:
+                  - link "Calculators and Tools" [ref=e22] [cursor=pointer]:
+                    - /url: https://www.loanmarket.com.au/calculators/
+                    - text: Calculators and Tools
+                    - generic [ref=e23]:
+                      - generic: 
+                - listitem [ref=e24]:
+                  - link "Information" [ref=e25] [cursor=pointer]:
+                    - /url: https://www.loanmarket.com.au/refinancing/
+                    - text: Information
+                    - generic [ref=e26]:
+                      - generic: 
+                - listitem [ref=e27]:
+                  - link "News" [ref=e28] [cursor=pointer]:
+                    - /url: https://www.loanmarket.com.au/news/
+                - listitem [ref=e29]:
+                  - link "Contact Us" [ref=e30] [cursor=pointer]:
+                    - /url: https://www.loanmarket.com.au/contact-us/
+                - listitem [ref=e31]:
+                  - link "Login" [ref=e32] [cursor=pointer]:
+                    - /url: https://my.loanmarket.com.au/?&_ga=2.250633862.1475749098.1694067126-2122261064.1673465898#/login
+            - text:    
+          - link "Enquire Now" [ref=e36] [cursor=pointer]:
+            - /url: http://my.loanmarket.com.au/
+            - generic [ref=e38]: Enquire Now
+  - generic [ref=e39]:
+    - generic [ref=e43]:
+      - generic [ref=e49]:
+        - heading "Find a" [level=1] [ref=e54]
+        - heading "Broker" [level=1] [ref=e59]
+      - paragraph [ref=e66]: With over 600 mortgage brokers throughout Australia, we’ve likely got someone just around the corner that’s ready to help you. If not, Loan Market brokers can meet you remotely. Online, offline, anytime.
+    - generic [ref=e68]:
+      - generic [ref=e78]:
+        - heading "Need help with your loan? Ask an expert" [level=3] [ref=e85]
+        - form "Need Help" [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91] [cursor=pointer]: First Name *
+              - textbox "First Name *" [ref=e92]:
+                - /placeholder: First Name
+            - generic [ref=e93]:
+              - generic [ref=e94] [cursor=pointer]: Last Name
+              - textbox "Last Name" [ref=e95]
+            - generic [ref=e96]:
+              - generic [ref=e97] [cursor=pointer]: Email *
+              - textbox "Email * Email" [ref=e98]:
+                - /placeholder: Email
+            - generic [ref=e99]:
+              - generic [ref=e100] [cursor=pointer]: Phone Number *
+              - textbox "Phone Number *" [ref=e101]:
+                - /placeholder: Phone Number
+            - generic [ref=e102]:
+              - generic [ref=e103] [cursor=pointer]: State *
+              - generic [ref=e104]:
+                - generic:
+                  - generic: 
+                - combobox "State *" [ref=e105]:
+                  - option "-- Select State --" [selected]
+                  - option "Australian Capital Territory"
+                  - option "New South Wales"
+                  - option "Northern Territory"
+                  - option "Queensland"
+                  - option "South Australia"
+                  - option "Tasmania"
+                  - option "Victoria"
+                  - option "Western Australia"
+            - generic [ref=e106]:
+              - generic [ref=e107] [cursor=pointer]: Post Code *
+              - spinbutton "Post Code *" [ref=e108]
+            - generic [ref=e109]:
+              - text: By submitting this form, I accept Loan Market's
+              - link "Terms" [ref=e110] [cursor=pointer]:
+                - /url: /terms-and-conditions
+              - text: and
+              - link "Privacy Policy" [ref=e111] [cursor=pointer]:
+                - /url: /privacy-policy
+            - iframe [ref=e117]:
+              - generic [ref=f10e2]:
+                - generic [ref=f10e3]:
+                  - checkbox "I'm not a robot" [ref=f10e7]
+                  - generic [ref=f10e11]: I'm not a robot
+                - generic [ref=f10e12]:
+                  - generic [ref=f10e15]: reCAPTCHA
+                  - generic [ref=f10e16]:
+                    - link "Privacy" [ref=f10e17] [cursor=pointer]:
+                      - /url: https://www.google.com/intl/en/policies/privacy/
+                    - text: "-"
+                    - link "Terms" [ref=f10e18] [cursor=pointer]:
+                      - /url: https://www.google.com/intl/en/policies/terms/
+            - button "Submit" [ref=e119] [cursor=pointer]:
+              - generic [ref=e121]: Submit
+        - paragraph [ref=e124]: Want to speak with someone now?
+        - paragraph [ref=e127]:
+          - link "Call 13 56 26" [ref=e128] [cursor=pointer]:
+            - /url: tel:13 56 26
+      - generic [ref=e134]:
+        - heading "Search for your broker" [level=3] [ref=e137]
+        - paragraph [ref=e140]: Search for your broker’s name
+        - generic [ref=e142]:
+          - search [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]: Search
+              - searchbox "Search Brokers" [ref=e146]
+              - button "Search" [ref=e147] [cursor=pointer]:
+                - generic [ref=e148]: 
+                - generic [ref=e149]: Search
+          - generic [ref=e150]: Or
+          - search [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]:
+                - generic [ref=e154]: Search by Location
+                - generic [ref=e156]: 
+              - generic [ref=e157]:
+                - generic [ref=e158]: Search
+                - searchbox "Search Locations" [ref=e159]
+                - button "Search" [disabled] [ref=e160]:
+                  - generic [ref=e161]: 
+                  - generic [ref=e162]: Search
+  - contentinfo [ref=e167]:
+    - generic [ref=e171]:
+      - heading "How can we help?" [level=4] [ref=e178]
+      - generic [ref=e180]:
+        - navigation "Menu" [ref=e185]:
+          - list [ref=e186]:
+            - listitem [ref=e187]:
+              - link "Buying Your First Home" [ref=e188] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/buying-first-home/
+            - listitem [ref=e189]:
+              - link "Refinance Your Home Loan" [ref=e190] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/refinancing/
+            - listitem [ref=e191]:
+              - link "Investing in Property" [ref=e192] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/investing/
+            - listitem [ref=e193]:
+              - link "Buying Your Next Home" [ref=e194] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/buying-next-home/
+            - listitem [ref=e195]:
+              - link "Personal and Car Loans" [ref=e196] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/personal-car-loans/
+            - listitem [ref=e197]:
+              - link "SMSF Loans" [ref=e198] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/smsf-loans/
+            - listitem [ref=e199]:
+              - link "Commercial Loans" [ref=e200] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/commercial-loans/
+            - listitem [ref=e201]:
+              - link "Construction and Renovation Loans" [ref=e202] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/construction-and-renovation-loans/
+            - listitem [ref=e203]:
+              - link "Compare Utilities" [ref=e204] [cursor=pointer]:
+                - /url: https://homenow.loanmarket.com.au/
+            - listitem [ref=e205]:
+              - link "Insurance" [ref=e206] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/concierge/
+            - listitem [ref=e207]:
+              - link "Working with a broker" [ref=e208] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/working-with-a-broker/
+        - navigation "Menu" [ref=e213]:
+          - list [ref=e214]:
+            - listitem [ref=e215]:
+              - link "Find A Broker" [ref=e216] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/find-a-broker/
+            - listitem [ref=e217]:
+              - link "Compare Loans" [ref=e218] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/compare-loans/
+            - listitem [ref=e219]:
+              - link "Calculators" [ref=e220] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/calculators/
+            - listitem [ref=e221]:
+              - link "News" [ref=e222] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/news/
+            - listitem [ref=e223]:
+              - link "Careers" [ref=e224] [cursor=pointer]:
+                - /url: /careers
+            - listitem [ref=e225]:
+              - link "Contact Us" [ref=e226] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/contact-us/
+            - listitem [ref=e227]:
+              - link "Mortgage Brokers in Newcastle, NSW" [ref=e228] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/news/newcastle-nsw-mortgage-brokers/
+            - listitem [ref=e229]:
+              - link "Mortgage Brokers in Brisbane, QLD" [ref=e230] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/news/brisbane-qld-mortgage-brokers/
+        - navigation "Menu" [ref=e235]:
+          - list [ref=e236]:
+            - listitem [ref=e237]:
+              - link "Franchise Privacy Policy" [ref=e238] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/franchise-privacy-policy/
+            - listitem [ref=e239]:
+              - link "Terms and Conditions" [ref=e240] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/terms-and-conditions/
+            - listitem [ref=e241]:
+              - link "Feedback and Complaints" [ref=e242] [cursor=pointer]:
+                - /url: https://www.loanmarket.com.au/feedback-and-complaints/
+            - listitem [ref=e243]:
+              - link "Aggregator Reporting" [ref=e244] [cursor=pointer]:
+                - /url: https://4840021.fs1.hubspotusercontent-na1.net/hubfs/4840021/LMG/Aggregator%20Reporting/LMG%20CIF%20Report.pdf
+        - generic [ref=e246]:
+          - generic [ref=e249]:
+            - link "@loanmarket_australia" [ref=e251] [cursor=pointer]:
+              - /url: https://www.instagram.com/loanmarket_australia/
+              - generic [ref=e252]: 
+            - paragraph [ref=e254]:
+              - link "@loanmarket_australia" [ref=e255] [cursor=pointer]:
+                - /url: https://www.instagram.com/loanmarket_australia/
+          - generic [ref=e258]:
+            - link "@LoanMarketAustralia" [ref=e260] [cursor=pointer]:
+              - /url: https://www.facebook.com/loanmarketaustralia
+              - generic [ref=e261]: 
+            - paragraph [ref=e263]:
+              - link "@LoanMarketAustralia" [ref=e264] [cursor=pointer]:
+                - /url: https://www.facebook.com/loanmarketaustralia
+          - generic [ref=e267]:
+            - link "@loanmarket" [ref=e269] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/loanmarket-au/
+              - generic [ref=e270]: 
+            - paragraph [ref=e272]:
+              - link "@loanmarket" [ref=e273] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/loanmarket-au/
+          - generic [ref=e276]:
+            - link "@LoanMarketAustralia" [ref=e278] [cursor=pointer]:
+              - /url: https://www.youtube.com/user/LoanMarketAustralia
+              - generic [ref=e279]: 
+            - paragraph [ref=e281]:
+              - link "@LoanMarketAustralia" [ref=e282] [cursor=pointer]:
+                - /url: https://www.youtube.com/user/LoanMarketAustralia
+    - generic [ref=e286]:
+      - heading "Connect with us" [level=4] [ref=e293]
+      - generic [ref=e295]:
+        - generic [ref=e297]:
+          - heading "Call 13 LOAN (13 56 26)" [level=5] [ref=e300]:
+            - link "Call 13 LOAN (13 56 26)" [ref=e301] [cursor=pointer]:
+              - /url: tel:13%2056%2026
+          - paragraph [ref=e304]: Our Customer Care team is available weekdays, 8:30 AM to 5:30 PM (AEDT).
+        - generic [ref=e306]:
+          - heading "Find a broker" [level=5] [ref=e309]:
+            - link "Find a broker" [ref=e310] [cursor=pointer]:
+              - /url: /find-a-broker/
+          - paragraph [ref=e313]: With over 700 mortgage brokers throughout Australia, we’ve likely got someone just around the corner from you.
+        - generic [ref=e315]:
+          - heading "Work for Loan Market" [level=5] [ref=e318]:
+            - link "Work for Loan Market" [ref=e319] [cursor=pointer]:
+              - /url: https://www.loanmarket.com.au/careers/
+          - paragraph [ref=e322]: Looking for a career change? We’re committed to working with you to achieve your goals.
+        - generic [ref=e324]:
+          - heading "Send us a message" [level=5] [ref=e327]:
+            - link "Send us a message" [ref=e328] [cursor=pointer]:
+              - /url: mailto:customercare@loanmarket.com.au
+          - paragraph [ref=e331]:
+            - text: Send an email to
+            - link "customercare@loanmarket.com.au" [ref=e334] [cursor=pointer]:
+              - /url: mailto:customercare@loanmarket.com.au
+            - text: to get in touch.
+    - text:       
+    - generic [ref=e338]:
+      - generic [ref=e340]:
+        - paragraph [ref=e345]: ©2025 Loan Market
+        - paragraph [ref=e350]: ABN 89 105 230 019 | Australian Credit Licence 390222
+      - generic [ref=e356]:
+        - paragraph [ref=e357]: The information provided on this site is on the understanding that it is for illustrative and discussion purposes only. Whilst all care and attention is taken in its preparation any party seeking to rely on its content or otherwise should make their own enquiries and research to ensure its relevance to your specific personal and business requirements and circumstances. Terms, conditions, fees and charges may apply. Normal lending criteria apply. Rates subject to change. Approved applicants only.
+        - paragraph [ref=e358]: "*Your broker may charge a fee to cover additional time required by their team. Any fees will be discussed with you in advance so you can make an informed decision before proceeding with your application."
+  - generic [ref=e359]: desktop
