@@ -8,5 +8,6 @@ test("marketplace discovery flow is available", async ({ page }) => {
   await expect(page.getByRole("status")).toContainText(/advisors found/i);
 
   await page.goto("/request-intro");
-  await expect(page.getByText(/matched results or an advisor profile/i).first()).toBeVisible();
+  await expect(page.getByText(/sign up to request an introduction/i).first()).toBeVisible();
+  await expect(page.getByText(/you need an account before contacting an adviser/i)).toBeVisible();
 });
