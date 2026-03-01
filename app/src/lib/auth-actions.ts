@@ -88,8 +88,8 @@ export async function signUp(formData: FormData) {
   const [firstName, ...lastParts] = fullName.trim().split(" ")
   const lastName = lastParts.join(" ")
 
-  let data: { user: { id: string } | null } | null = null
-  let error: { message: string } | null = null
+  let signupData: { user: { id: string } | null } | null = null
+  let signupError: { message: string } | null = null
   try {
     const signupResult = await runWithTransientRetry(() =>
       supabase.auth.signUp({
@@ -106,8 +106,8 @@ export async function signUp(formData: FormData) {
         },
       })
     )
-    data = signupResult.data as typeof data
-    error = signupResult.error as typeof error
+    signupData = signupResult.data as { user: { id: string } | null } | null
+    signupError = signupResult.error as { message: string } | null
   } catch (signupException) {
     logger.error("Signup request failed before response", {
       error: getErrorMessage(signupException),
@@ -115,14 +115,14 @@ export async function signUp(formData: FormData) {
     return { success: false, error: AUTH_SERVICE_UNAVAILABLE_MESSAGE }
   }
 
-  if (error) return { success: false, error: normalizeAuthErrorMessage(error.message) }
-  if (!data?.user?.id) return { success: false, error: "Unable to create account right now." }
+  if (signupError) return { success: false, error: normalizeAuthErrorMessage(signupError.message) }
+  if (!signupData?.user?.id) return { success: false, error: "Unable to create account right now." }
 
   // Insert into public.users with admin client (bypasses RLS)
   // If this fails, the DB trigger on auth.users will create the row as a safety net
   const admin = createAdminClient()
   const { error: dbError } = await admin.from("users").insert({
-    id: data.user.id,
+    id: signupData.user.id,
     email,
     role: accountType,
     first_name: firstName,
@@ -143,7 +143,6 @@ export async function signIn(formData: FormData) {
   const email = normalizeEmail((formData.get("email") as string) || "")
   const password = (formData.get("password") as string) || ""
   if (!isLikelyEmail(email)) return { success: false, error: AUTH_INVALID_EMAIL_MESSAGE }
-  let error: { message: string } | null = null
 
   try {
     const signInResult = await runWithTransientRetry(() =>
@@ -152,15 +151,13 @@ export async function signIn(formData: FormData) {
         password,
       })
     )
-    error = signInResult.error as typeof error
+    if (signInResult.error) return { success: false, error: normalizeAuthErrorMessage(signInResult.error.message) }
   } catch (signInException) {
     logger.error("Sign in request failed before response", {
       error: getErrorMessage(signInException),
     })
     return { success: false, error: AUTH_SERVICE_UNAVAILABLE_MESSAGE }
   }
-
-  if (error) return { success: false, error: normalizeAuthErrorMessage(error.message) }
 
   revalidatePath("/", "layout")
   return { success: true }
@@ -177,7 +174,6 @@ export async function resetPassword(formData: FormData) {
   const supabase = await createClient()
   const email = normalizeEmail((formData.get("email") as string) || "")
   if (!isLikelyEmail(email)) return { success: false, error: AUTH_INVALID_EMAIL_MESSAGE }
-  let error: { message: string } | null = null
 
   try {
     const resetResult = await runWithTransientRetry(() =>
@@ -186,37 +182,31 @@ export async function resetPassword(formData: FormData) {
         { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password` }
       )
     )
-    error = resetResult.error as typeof error
+    if (resetResult.error) return { success: false, error: normalizeAuthErrorMessage(resetResult.error.message) }
   } catch (resetException) {
     logger.error("Password reset request failed before response", {
       error: getErrorMessage(resetException),
     })
     return { success: false, error: AUTH_SERVICE_UNAVAILABLE_MESSAGE }
   }
-
-  if (error) return { success: false, error: normalizeAuthErrorMessage(error.message) }
   return { success: true }
 }
 
 export async function updatePassword(formData: FormData) {
   const supabase = await createClient()
-  let error: { message: string } | null = null
-
   try {
     const updateResult = await runWithTransientRetry(() =>
       supabase.auth.updateUser({
         password: formData.get("password") as string,
       })
     )
-    error = updateResult.error as typeof error
+    if (updateResult.error) return { success: false, error: normalizeAuthErrorMessage(updateResult.error.message) }
   } catch (updateException) {
     logger.error("Password update request failed before response", {
       error: getErrorMessage(updateException),
     })
     return { success: false, error: AUTH_SERVICE_UNAVAILABLE_MESSAGE }
   }
-
-  if (error) return { success: false, error: normalizeAuthErrorMessage(error.message) }
 
   revalidatePath("/", "layout")
   redirect("/login?reset=true")

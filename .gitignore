@@ -17,3 +17,5 @@ app/node_modules/
 app/.next/
 app/output/
 app/.env*.local
+.vercel
+.env*.local
