@@ -3,11 +3,11 @@ name: Site CI
 on:
   push:
     paths:
-      - "site/**"
+      - "app/**"
       - ".github/workflows/site-ci.yml"
   pull_request:
     paths:
-      - "site/**"
+      - "app/**"
       - ".github/workflows/site-ci.yml"
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: site
+        working-directory: app
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: site/package-lock.json
+          cache-dependency-path: app/package-lock.json
 
       - name: Install dependencies
         run: npm ci

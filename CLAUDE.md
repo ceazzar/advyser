@@ -40,9 +40,9 @@ Then coordinate execution, starting parallel tasks together.
 **Stack:** Next.js 16 + TypeScript + Shadcn UI + Tailwind 4 + PostgreSQL
 
 **Key Paths:**
-- `site/src/app/` - Pages and layouts (App Router)
-- `site/src/components/ui/` - Shadcn components
-- `site/src/lib/` - Utilities and design tokens
+- `app/src/app/` - Pages and layouts (App Router)
+- `app/src/components/ui/` - Shadcn components
+- `app/src/lib/` - Utilities and design tokens
 - `database/schema.sql` - PostgreSQL schema
 - `plans/BUILD_PLAN.md` - Development roadmap
 
@@ -64,10 +64,10 @@ Then coordinate execution, starting parallel tasks together.
 
 ```bash
 # Development
-cd site && npm run dev
+cd app && npm run dev
 
 # Type checking
-cd site && npx tsc --noEmit
+cd app && npx tsc --noEmit
 ```
 
 ---
@@ -185,7 +185,7 @@ Mobile (< 1024px):
 ├────────────┼───────────────────────────────────┼─────────────────────────────────────────────┤
 │ 2026-02-01 │ Added documentation format rules  │ Enforce ASCII box tables for visual docs    │
 ├────────────┼───────────────────────────────────┼─────────────────────────────────────────────┤
-│ 2026-02-02 │ Migrated frontend/ → site/        │ Cleaned up orphaned dirs, updated all refs  │
+│ 2026-02-02 │ Migrated frontend/ → site/ → app/  │ Cleaned up orphaned dirs, updated all refs  │
 ├────────────┼───────────────────────────────────┼─────────────────────────────────────────────┤
 │ 2026-02-02 │ Fixed design system docs          │ Updated Primary color to Gray (was Teal)    │
 └────────────┴───────────────────────────────────┴─────────────────────────────────────────────┘

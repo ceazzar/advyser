@@ -1,15 +1,19 @@
-# Development artifacts
-.playwright-mcp/
-.DS_Store
-*.DS_Store
-.temp
+# Ignore everything by default
+*
 
+# Allow app folder (the Next.js codebase)
+!app/
+!app/**
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
+# Allow essential repo config
+!.gitignore
+!.github/
+!.github/**
+!CLAUDE.md
 
-# OS
-Thumbs.db
+# Still ignore these inside app/
+app/.DS_Store
+app/node_modules/
+app/.next/
+app/output/
+app/.env*.local
